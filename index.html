@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Getting Secure It デモ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#dfe6f1;--surface:#ffffff;--ink:#1d2042;--muted:#555b7e;--line:#1d2042;--soft:#cdd6e8;
+  --gold:#a86e00;--danger:#c42f3c;--safe:#23793a;--accent:#3552c4;--on-accent:#ffffff;
+  --win-bg:#10123a;--win-ink:#ffffff;--win-line:#ffffff;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1030;--surface:#191d47;--ink:#eef0ff;--muted:#a6abd4;--line:#8d93cc;--soft:#2a2f63;
+    --gold:#f2c14e;--danger:#ff6d7a;--safe:#6fd38a;--accent:#97adff;--on-accent:#10123a;
+    --win-bg:#000000;--win-ink:#ffffff;--win-line:#ffffff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1030;--surface:#191d47;--ink:#eef0ff;--muted:#a6abd4;--line:#8d93cc;--soft:#2a2f63;
+  --gold:#f2c14e;--danger:#ff6d7a;--safe:#6fd38a;--accent:#97adff;--on-accent:#10123a;
+  --win-bg:#000000;--win-ink:#ffffff;--win-line:#ffffff;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"DotGothic16","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;font-size:16px;line-height:1.7;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:3px solid var(--line);padding:8px 14px;display:flex;align-items:center;gap:10px}
+.chap{font-size:12px;color:var(--muted);line-height:1.3}
+.dayl{font-size:18px;line-height:1.4}
+main{max-width:720px;margin:0 auto;padding:16px 14px 110px}
+body.talking main{padding-bottom:250px}
+h2{font-size:20px;font-weight:400;margin:4px 0 4px}
+h3{font-weight:400}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.box{background:var(--surface);border:3px solid var(--line);padding:14px;margin:12px 0 14px}
+.btn{font:inherit;color:var(--ink);background:var(--surface);border:3px solid var(--line);box-shadow:3px 3px 0 var(--line);padding:8px 14px;cursor:pointer;min-height:44px}
+.btn:active:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.link{font:inherit;font-size:13px;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:8px 0}
+:focus-visible{outline:3px dashed var(--accent);outline-offset:3px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:3px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs button{font:inherit;font-size:13px;line-height:1.3;background:none;border:0;color:var(--muted);padding:10px 4px;min-height:56px;position:relative;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);background:var(--soft)}
+.tabs .dot{position:absolute;top:7px;right:calc(50% - 32px);width:10px;height:10px;background:var(--danger)}
+.win{position:fixed;left:10px;right:10px;bottom:calc(68px + env(safe-area-inset-bottom,0px));z-index:7;max-width:680px;margin:0 auto;text-align:left;font:inherit;font-size:16px;line-height:1.8;background:var(--win-bg);color:var(--win-ink);border:4px solid var(--win-line);outline:4px solid var(--win-bg);padding:10px 16px 24px;min-height:112px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:0 12px;align-items:start;width:auto}
+.win[hidden]{display:none}
+.wface{display:block;width:48px;min-height:48px;padding-top:4px}
+.wface:empty{width:0;min-height:0}
+.who{display:block;font-size:13px;opacity:.75}
+.more{position:absolute;right:14px;bottom:4px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.addr{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:3px solid var(--line);background:var(--surface);padding:6px 10px;font-size:14px;margin:8px 0 14px}
+.warn{color:var(--danger)}
+.secure{color:var(--safe)}
+.spr{display:block;image-rendering:pixelated}
+.voice{display:grid;grid-template-columns:48px 1fr;gap:10px;padding:12px 0;border-bottom:2px dashed var(--soft)}
+.voice:last-child{border-bottom:0}
+.voice .vn{font-size:13px;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;border:2px solid var(--muted);padding:0 6px;margin-left:6px}
+.netsvg{width:100%;height:auto;display:block;background:var(--surface);border:3px solid var(--line)}
+.lbl{font-size:12px;fill:var(--ink);font-family:inherit}
+.pl{font-size:10px;fill:var(--ink);font-family:inherit}
+.warnT{fill:var(--danger)}
+.log{background:var(--win-bg);color:#c9cff5;border:3px solid var(--line);padding:10px 12px;font-size:14px;line-height:1.7;min-height:150px;margin:12px 0;overflow-wrap:anywhere}
+.log .bad{color:#ff8a94}
+.log .ok{color:#7ee59a}
+.log .info{color:#c9cff5}
+.loghead{font-size:13px;color:var(--muted);margin-top:14px;display:flex;align-items:center;gap:8px}
+.sec{border:3px solid var(--line);background:var(--surface);margin:12px 0 14px}
+.sec h3{margin:0;padding:8px 12px;background:var(--soft);font-size:16px;border-bottom:3px solid var(--line)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border-bottom:2px dashed var(--soft);flex-wrap:wrap}
+.row:last-child{border-bottom:0}
+.row .desc{flex:1 1 180px}
+.row .note{display:block;font-size:12px;color:var(--muted)}
+.sw{font:inherit;min-width:72px;min-height:40px;border:3px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.sw[aria-pressed="true"]{background:var(--safe);color:var(--surface)}
+.sw:disabled{opacity:.45;cursor:not-allowed}
+select{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:4px 8px;min-height:44px}
+select:disabled{opacity:.45}
+.chk{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:2px dashed var(--soft);cursor:pointer}
+.chk:last-child{border-bottom:0}
+.chk input{width:20px;height:20px;accent-color:var(--accent)}
+.chk .note{font-size:12px;color:var(--muted);margin-left:auto}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(5,6,20,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
+.modal[hidden]{display:none}
+.sheet{max-width:620px;width:100%;max-height:100%;overflow:auto;background:var(--surface);border:4px solid var(--line);padding:18px}
+.sheet h2{font-size:22px}
+.sheet ul{padding-left:1.2em;margin:8px 0 14px}
+.sheet li{margin-bottom:6px}
+.real{border-left:4px solid var(--accent);padding:4px 0 4px 12px;margin:0 0 16px}
+.acts{display:flex;gap:10px;flex-wrap:wrap}
+.tabs .cnt{position:absolute;top:4px;right:calc(50% - 40px);min-width:20px;height:20px;padding:0 4px;background:var(--danger);color:#fff;font-size:12px;line-height:20px;text-align:center;font-style:normal}
+.voice.new{border-left:4px solid var(--danger);padding-left:10px}
+.newtag{border-color:var(--danger);color:var(--danger)}
+.toast{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:15;max-width:520px;margin:0 auto;display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:3px solid var(--line);box-shadow:4px 4px 0 var(--line);padding:10px 12px;cursor:pointer;width:auto;transition:transform .3s steps(4),opacity .3s steps(4)}
+.toast[hidden]{display:none}
+.toast.out{transform:translateY(-140%);opacity:0}
+.toast .tt{display:block;font-size:12px;color:var(--danger)}
+.toast .tb{font-size:14px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+input[type="text"]{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:4px 8px;min-height:44px}
+input[type="text"]:disabled{opacity:.6}
+.domrow{display:flex;gap:8px;align-items:center;padding:10px 12px;flex-wrap:wrap}
+.domrow input{flex:1 1 140px;min-width:0}
+.res{padding:0 12px 12px;margin:0}
+.msg-err{color:var(--danger)}
+.msg-ok{color:var(--safe)}
+.title-screen{position:fixed;inset:0;z-index:30;background:var(--win-bg);color:var(--win-ink);display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));overflow:auto}
+.title-screen[hidden]{display:none}
+.tbox{text-align:center;max-width:420px;width:100%}
+.tlogo{display:flex;justify-content:center}
+.tname{font-weight:400;font-size:clamp(32px,10vw,54px);line-height:1.15;margin:18px 0 6px}
+.tsub{opacity:.75;margin:0 0 28px}
+.menu{border:4px solid var(--win-line);outline:4px solid var(--win-bg);padding:12px 8px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.menu button{font:inherit;font-size:18px;line-height:1.5;color:var(--win-ink);background:none;border:0;text-align:left;padding:8px 10px 8px 34px;position:relative;cursor:pointer;min-height:44px}
+.menu button::before{content:"▶";position:absolute;left:10px;top:8px;opacity:0}
+.menu button:hover::before,.menu button:focus::before{opacity:1}
+.menu button:focus{outline:none}
+.menu button:focus-visible{outline:2px dashed var(--win-ink);outline-offset:-2px}
+.sinfo{display:block;font-size:13px;opacity:.7}
+.tq{margin:4px 10px 8px}
+.tver{opacity:.5;font-size:12px;margin-top:20px}
+.site{text-align:center;padding:40px 14px}
+/* 管理タブ：1段目＝会社、2段目＝ピクセルクラウド内の小メニュー */
+.svcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px;margin:12px 0 0}
+.svc{font:inherit;text-align:left;background:var(--surface);color:var(--muted);border:3px solid var(--line);border-bottom:0;padding:6px 10px;cursor:pointer;min-height:48px;line-height:1.3;display:flex;gap:8px;align-items:center}
+.svc small{display:block;font-size:11px}
+.svc .spr{opacity:.6}
+.svc[aria-selected="true"]{color:var(--ink);box-shadow:inset 0 6px 0 var(--svc)}
+.svc[aria-selected="true"] .spr{opacity:1}
+.svc-registrar{--svc:var(--gold)}
+.svc-cloud{--svc:var(--accent)}
+.svc-ca{--svc:var(--safe)}
+.svcframe{border:3px solid var(--line);border-top:8px solid var(--svc);background:var(--bg);padding:0 10px 2px;margin-bottom:14px}
+.svchead{padding:10px 2px 0;font-size:18px;line-height:1.4;display:flex;gap:10px;align-items:center}
+.svchead small{display:block;font-size:12px;color:var(--muted)}
+.subs{display:flex;gap:6px;flex-wrap:wrap;padding:10px 0 4px;border-bottom:2px dashed var(--soft);margin-bottom:4px}
+.sub{font:inherit;font-size:13px;line-height:1.3;background:var(--surface);color:var(--muted);border:2px solid var(--line);padding:4px 10px;min-height:36px;cursor:pointer}
+.sub[aria-selected="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.capanel{margin:10px 12px;padding:12px;border:3px dashed var(--line);background:var(--bg)}
+.capanel p{margin:0 0 8px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:14px}
+.kv b{font-weight:400;overflow-wrap:anywhere}
+.drow{display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,1.4fr) 40px;gap:8px;padding:8px 12px;border-bottom:2px dashed var(--soft);font-size:14px;overflow-wrap:anywhere;align-items:center}
+.dhead{font-size:12px;color:var(--muted)}
+.url{display:flex;justify-content:center;align-items:center;gap:10px;font-size:clamp(20px,6vw,30px);line-height:1.3;overflow-wrap:anywhere}
+.state{margin:12px 0 0;color:var(--muted);font-size:14px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.more{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <span id="shopIcon"></span>
+  <div><div class="chap" id="chapLabel"></div><div class="dayl" id="dayLabel"></div></div>
+</header>
+
+<main>
+  <section id="p-shop" class="panel" role="tabpanel"></section>
+  <section id="p-voice" class="panel" role="tabpanel" hidden></section>
+  <section id="p-net" class="panel" role="tabpanel" hidden></section>
+  <section id="p-console" class="panel" role="tabpanel" hidden></section>
+</main>
+
+<button id="win" class="win" hidden><span class="wface" id="winFace"></span><span><span class="who" id="winWho"></span><span id="winText"></span></span><span class="more" aria-hidden="true">▼</span></button>
+
+<button id="toast" class="toast out" hidden aria-live="polite"><span id="toastIcon"></span><span><span class="tt" id="toastTitle"></span><span class="tb" id="toastText"></span></span></button>
+
+<nav class="tabs" role="tablist" aria-label="画面の切り替え">
+  <button role="tab" data-tab="shop">サイト</button>
+  <button role="tab" data-tab="voice">お客さんの声</button>
+  <button role="tab" data-tab="net">通信</button>
+  <button role="tab" data-tab="console">管理</button>
+</nav>
+
+<div id="title" class="title-screen" hidden></div>
+
+<div id="modal" class="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="sheet"></div></div>
+
+<script src="sprites.js"></script>
+<script src="days.js"></script>
+<script>
+(function(){
+const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- ピクセルスプライト（sprites.js） ---------- */
+const SPR=window.GSI_SPRITES,PAL=SPR.palette,CAST=SPR.cast,IC=SPR.icons;
+function rects(rows){let r='';rows.forEach((row,y)=>{[...row].forEach((ch,x)=>{if(ch!=='.'&&PAL[ch])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[ch]}"/>`;});});return r;}
+function spr(rows,px,label){const w=rows[0].length,h=rows.length;return `<svg class="spr" viewBox="0 0 ${w} ${h}" width="${w*px}" height="${h*px}" shape-rendering="crispEdges" ${label?`role="img" aria-label="${label}"`:'aria-hidden="true"'}>${rects(rows)}</svg>`;}
+function sprG(rows,x,y,px,id){return `<g ${id?`id="${id}"`:''} transform="translate(${x},${y}) scale(${px})" shape-rendering="crispEdges">${rects(rows)}</g>`;}
+/* 待機2コマ目：体を1ドット下げる（名鑑と同じ） */
+function frameRows(rows,f){return f?['.'.repeat(16)].concat(rows.slice(0,13),rows.slice(14,16)):rows;}
+const castSpr=(id,px,label)=>spr(CAST[id].rows,px,label===undefined?CAST[id].name:label);
+const CUST_ID={'たなか':'tanaka','すずき':'suzuki','やまだ':'yamada','法人のお客さま':'houjin'};
+function voiceIcon(v){return v.mail?spr(IC.mail,4,'メール'):castSpr(CUST_ID[v.who]||'tanaka',3,v.who);}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- ステージ定義（days.js） ---------- */
+const GD=window.GSI_DAYS,SHIRO=GD.SHIRO,YOU=GD.YOU,DAYS=GD.days,CAS=GD.cas,LAST_DAY=GD.lastDay;
+const chapterOf=d=>(GD.chapters.find(c=>d>=c.from&&d<=c.to)||GD.chapters[0]).n;
+
+/* ---------- 状態 ---------- */
+const KEY='gsi-demo-v2';
+const SERVER_IP='203.0.113.24';
+const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
+const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+  dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
+  cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300'}});
+let S=fresh();
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg)S=Object.assign(fresh(),s);}catch(e){}
+delete S.trust;delete S.victims;
+if(!S.sub)S.sub='server';
+if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
+if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+let busy=false,certBusy=false,dnsBusy=false;
+const dm=s=>String(s).replace(/pixeldo\.example/g,S.domain||'pixeldo.example');
+const $=id=>document.getElementById(id);
+
+/* ---------- メッセージウィンドウ ---------- */
+const win=$('win'),winWho=$('winWho'),winText=$('winText'),winFace=$('winFace');
+let Q=[],showing=false,typing=null,full='';
+function say(list,done){Q.push(...list);if(done)Q.push({fn:done});if(!showing)nextMsg();}
+function nextMsg(){
+  const m=Q.shift();
+  if(!m){showing=false;win.hidden=true;document.body.classList.remove('talking');return;}
+  if(m.fn){showing=true;m.fn();nextMsg();return;}
+  showing=true;win.hidden=false;document.body.classList.add('talking');
+  winWho.textContent=m.who||'';full=m.t;
+  winFace.innerHTML=m.who===SHIRO?castSpr('shiro',3,''):m.who===YOU?castSpr('tencho',3,''):'';
+  if(RM){winText.textContent=full;return;}
+  let i=0;winText.textContent='';clearInterval(typing);
+  typing=setInterval(()=>{i++;winText.textContent=full.slice(0,i);if(i>=full.length){clearInterval(typing);typing=null;}},28);
+}
+win.addEventListener('click',()=>{if(typing){clearInterval(typing);typing=null;winText.textContent=full;}else nextMsg();});
+
+/* ---------- 描画 ---------- */
+function render(){
+  const fid=document.activeElement&&document.activeElement.id;
+  renderHeader();renderTabs();renderShop();renderVoices();if(!busy)renderNet();renderConsole();
+  if(fid&&$(fid)&&$(fid)!==document.activeElement)$(fid).focus();
+}
+function renderHeader(){
+  $('shopIcon').innerHTML=spr(IC.shop,2.5);
+  $('chapLabel').textContent=chapterOf(S.day);
+  $('dayLabel').textContent=S.day===0?((S.phase==='intro'||S.phase==='setup')?'0日目　オープン準備':'0日目　オープン'):DAYS[S.day].title;
+}
+function renderTabs(){
+  document.querySelectorAll('.tabs button').forEach(b=>{
+    const t=b.dataset.tab,sel=t===S.tab;
+    b.setAttribute('aria-selected',sel);
+    b.querySelectorAll('.dot,.cnt').forEach(x=>x.remove());
+    if(t==='voice'){const n=S.voices.filter(v=>v.unread).length;if(n&&!sel){const d=document.createElement('i');d.className='cnt';d.textContent=n;d.setAttribute('aria-label','新着'+n+'件');b.appendChild(d);}}
+    else if(S.badge[t]&&!sel){const d=document.createElement('i');d.className='dot';d.setAttribute('aria-label','新着');b.appendChild(d);}
+  });
+  ['shop','voice','net','console'].forEach(t=>{$('p-'+t).hidden=t!==S.tab;});
+}
+function renderShop(){
+  const live=S.domain&&S.dnsOk&&S.phase!=='setup'&&S.phase!=='intro';
+  const sec=S.cfg.https&&S.cfg.redirect;
+  let h=`<h2>サイト</h2><p class="muted small">よろず屋ピクセル堂のネットショップ</p>
+  <div class="site box">${S.domain?`<div class="url">${sec?spr(IC.lock,3,'暗号化されています'):''}<span>${sec?'https':'http'}://${esc(S.domain)}</span></div>`:'<div class="url muted">ドメイン未取得</div>'}
+  <p class="state">${live?'公開中':'未公開'}</p></div>`;
+  if(S.phase==='setup')h+=`<div class="box"><p>お店はまだきみのパソコンの中にあるだけ。「管理」タブでドメインを取得して、リリースしよう。</p><button class="btn primary" data-act="goConsole">管理タブを開く</button></div>`;
+  h+=`<p style="margin-top:18px"><button class="link" data-act="toTitle">タイトルへ戻る</button></p>`;
+  $('p-shop').innerHTML=h;
+}
+function renderVoices(){
+  let h=`<h2>お客さんの声</h2><p class="muted small">問い合わせやSNSの投稿が届きます</p>`;
+  if(!S.voices.length)h+=`<div class="box"><p class="muted">まだ声は届いていません。</p></div>`;
+  else h+=`<div class="box">${S.voices.map(v=>`<div class="voice${v.unread?' new':''}">${voiceIcon(v)}<div><div class="vn">${esc(v.who)}${v.unread?'<span class="tag newtag">新着</span>':''}<span class="tag">${v.mail?'メール':'投稿'}</span><span class="tag">${v.day}日目</span></div><div>${esc(v.t)}</div></div></div>`).join('')}</div>`;
+  $('p-voice').innerHTML=h;
+}
+const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
+function renderNet(){
+  const c=S.cfg,atk=attackerOf();
+  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、${esc(atk.name)}、ショップのサーバーの通信図">
+    <rect x="6" y="24" width="206" height="198" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="12" y="18" class="lbl">カフェのWi-Fi</text>
+    ${sprG(CAST.tanaka.rows,20,36,3.5)}
+    <text x="48" y="104" text-anchor="middle" class="lbl">お客さん</text>
+    <line x1="72" y1="78" x2="284" y2="78" stroke="var(--line)" stroke-width="3"/>
+    <line id="tap" x1="140" y1="84" x2="140" y2="140" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 4"/>
+    ${sprG(frameRows(atk.rows,tick),112,140,3.5,'atk')}
+    <text x="140" y="212" text-anchor="middle" class="lbl">${esc(atk.name)}</text>
+    ${sprG(IC.srv,290,34,4)}
+    <text x="310" y="96" text-anchor="middle" class="lbl">ショップ</text>
+    ${c.https?sprG(IC.lock,298,6,3):'<text x="310" y="22" text-anchor="middle" class="lbl warnT">HTTP</text>'}
+    <g id="pkt" transform="translate(80,72)" opacity="0"><rect width="16" height="12" fill="var(--danger)"/><text id="pktL" x="8" y="-5" text-anchor="middle" class="pl"></text></g>
+  </svg>`;
+  const lines=S.last&&S.last.lines.length?S.last.lines.map(l=>`<div class="${l.k}">› ${esc(l.t)}</div>`).join(''):'<div class="info">まだ何も記録されていません</div>';
+  let hint='';
+  if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')hint='リリースすると、ここに通信のようすが表示されます。';
+  else if(S.phase==='incident')hint='このタブを開くと、攻撃のようすが再生されます。';
+  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint||'お客さんとお店の間を流れるデータと、'+esc(atk.name)+'に見えているもの'}</p>${svg}
+    <div class="loghead">${castSpr(atk.id||'tochou',2,'')}<span>${esc(atk.name)}の画面</span></div><div class="log" id="log" aria-live="polite">${lines}</div>
+    ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify">攻撃をもう一度試す</button>':''}`;
+}
+Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
+let tick=0;
+if(!RM)setInterval(()=>{tick^=1;const g=$('atk');if(g&&S.tab==='net')g.innerHTML=rects(frameRows(attackerOf().rows,tick));},520);
+
+let caBusy=false,relBusy=false,clip='';
+const nr={type:'A',name:'',val:''};
+function genToken(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<8;i++){s+=a[Math.floor(Math.random()*a.length)];if(i===3)s+='-';}return s;}
+function normName(n){n=String(n||'').trim().toLowerCase().replace(/\.$/,'');const d=(S.domain||'').toLowerCase();if(d&&n.endsWith('.'+d))n=n.slice(0,-(d.length+1));if(n===d||n==='')n='@';return n;}
+function aRec(){return (S.dns||[]).filter(r=>r.type==='A'&&r.name==='@');}
+const isLive=()=>S.phase!=='intro'&&S.phase!=='setup';
+function sw(id,on,dis){return `<button class="sw" id="${id}" data-act="${id}" aria-pressed="${on}" ${dis?'disabled':''}>${on?'オン':'オフ'}</button>`;}
+const intro=t=>`<p class="small" style="padding:10px 12px 0;margin:0">${t}</p>`;
+
+/* --- ドメイン会社（ネームヤ） --- */
+function registrarHTML(){
+  const ds=S.ds||{};let h='';
+  if(!S.domain){
+    h+=`<div class="sec"><h3>ドメインを探す</h3>${intro('ドメインは、お店のネット上の住所です。英小文字・数字・ハイフンで決めましょう。')}
+      <div class="domrow"><label for="domName" class="sr">ドメイン名</label><input type="text" id="domName" value="${esc(ds.name||'pixeldo')}" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="30">
+      <select id="domTld" aria-label="ドメインの末尾">${Object.keys(TLDS).map(t=>`<option ${(ds.tld||'.com')===t?'selected':''}>${t}</option>`).join('')}</select>
+      <button class="btn" id="domSearch" data-act="domSearch">空きを確認</button></div>`;
+    if(ds.status==='invalid')h+=`<p class="res msg-err small">${ds.msg}</p>`;
+    else if(ds.status==='taken')h+=`<p class="res msg-err small">${esc(ds.full)} はすでに使われています。別の名前や末尾を試しましょう。</p>`;
+    else if(ds.status==='ok')h+=`<div class="res"><p class="msg-ok" style="margin:0">${esc(ds.full)} は取得できます（${TLDS[ds.tld]}）</p>
+      <label class="chk" style="padding:8px 0;border:0"><input type="checkbox" id="whois" data-whois ${S.whois?'checked':''}><span>WHOIS情報公開代行を使う</span></label>
+      <p class="small muted">使わないと、ドメインの持ち主として氏名・住所・電話番号が誰でも調べられる状態になります。</p>
+      <button class="btn primary" id="domBuy" data-act="domBuy">このドメインを取得</button></div>`;
+    return h+'</div>';
+  }
+  const recs=S.dns||[],live=isLive();
+  h+=`<div class="sec"><h3>契約中のドメイン</h3><div class="row"><div class="desc">${esc(S.domain)}<span class="note">${S.whois?'WHOIS公開代行あり':'WHOIS公開代行なし'}</span></div></div></div>
+    <div class="sec"><h3>DNS設定</h3>${intro(esc(S.domain)+' へ来た人を、どこへ案内するかを登録します。')}
+    <div class="drow dhead" style="margin-top:8px"><span>タイプ</span><span>名前</span><span>値</span><span></span></div>
+    ${recs.length?recs.map((r,i)=>{const lock=live&&r.type==='A'&&r.name==='@'&&r.value===SERVER_IP;return `<div class="drow"><span>${esc(r.type)}</span><span>${esc(r.name)}</span><span>${esc(r.value)}</span>${lock?'<span class="small muted">公開中</span>':`<button class="link" data-act="dnsDel" data-i="${i}">削除</button>`}</div>`;}).join(''):'<p class="small muted" style="padding:8px 12px;margin:0">レコードはまだありません</p>'}
+    <div class="domrow"><select id="nrType" aria-label="タイプ">${['A','TXT','CNAME'].map(t=>`<option ${nr.type===t?'selected':''}>${t}</option>`).join('')}</select>
+      <input type="text" id="nrName" placeholder="名前（ドメインそのものは @）" aria-label="名前" value="${esc(nr.name)}" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <input type="text" id="nrVal" placeholder="値" aria-label="値" value="${esc(nr.val)}" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="btn" data-act="dnsAdd">追加</button></div>
+    ${clip?'<p class="res"><button class="link" data-act="paste">コピーした値を「値」に貼り付け</button></p>':''}
+    ${S.dnsAddMsg?`<p class="res small msg-err">${S.dnsAddMsg}</p>`:''}</div>`;
+  return h;
+}
+
+/* --- 認証局 --- */
+function caHTML(){
+  const c=S.cfg,ca=CAS[c.ca],D=esc(S.domain);
+  let h=`<div class="sec"><h3>証明書の申請</h3>`;
+  if(!c.keyMade)return h+intro('申請には CSR（証明書の申請書）が必要です。先にサーバー側で秘密鍵とCSRを作ってください。')+'<div class="row"><span></span><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">ピクセルクラウドの「証明書」を開く</button></div></div>';
+  if(!c.token)return h+`<div class="row"><div class="desc">server.csr を提出する<span class="note">対象：${D}。秘密鍵はサーバーに置いたまま、CSRだけを送ります</span></div><button class="btn primary" data-act="apply">提出する</button></div></div>`;
+  if(!c.issued)return h+`<div class="capanel"><p class="small muted" style="margin:0">ドメインの所有確認</p>
+      <p>${D} の持ち主であることを確認します。このドメインのDNSに次のレコードを追加してから、確認を依頼してください。</p>
+      <div class="kv"><span>タイプ</span><b>TXT</b><span>名前</span><b>_acme-challenge</b><span>値</span><b>${c.token}</b></div>
+      <div class="acts" style="margin-top:10px"><button class="btn" data-act="copyToken">値をコピー</button><button class="btn primary" data-act="dcv" ${caBusy?'disabled':''}>確認を依頼する</button></div>
+      ${S.dcvMsg?`<p class="small ${caBusy?'muted':'msg-err'}" style="margin:10px 0 0">${S.dcvMsg}</p>`:''}</div></div>`;
+  return h+`<div class="row"><div class="desc">${D}<span class="note">発行済み・有効期間 ${ca.v}・中間CA：${ca.ica}</span></div><span class="msg-ok small">発行済み</span></div>
+    <div class="row"><div class="desc">ダウンロードできるファイル<span class="note">server.crt（サーバー証明書）／chain.crt（中間証明書）／fullchain.crt（両方をまとめたもの）</span></div></div>
+    <div class="row"><div class="desc">設置はサーバー側で行います</div><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">ピクセルクラウドの「証明書」を開く</button></div></div>`;
+}
+
+/* --- サーバー（ピクセルクラウド） --- */
+function cloudServerHTML(){
+  const live=isLive();
+  let h=`<div class="sec"><h3>サーバー</h3><div class="row"><div class="desc">shop-server-01<span class="note">IPアドレス ${SERVER_IP}</span></div><span class="small ${live?'msg-ok':'muted'}">${live?'公開中':'準備中'}</span></div>`;
+  if(!live)h+=`<div class="row"><div class="desc">サイトを公開する<span class="note">${S.domain?'ドメインがこのサーバーを指していれば公開できます':'先にドメインを取得してください'}</span></div><button class="btn primary" data-act="publish" ${S.domain&&!relBusy?'':'disabled'}>リリースする</button></div>
+    ${S.relMsg?`<p class="res small ${relBusy?'muted':'msg-err'}">${S.relMsg}</p>`:''}`;
+  h+='</div>';
+  if(live&&S.day<1)h+='<div class="box"><p class="muted">今のところ設定することはありません。</p></div>';
+  return h;
+}
+function certCloudHTML(){
+  const c=S.cfg,D=esc(S.domain);
+  let h=`<div class="sec"><h3>SSL/TLS証明書</h3>`;
+  if(!c.ca){
+    h+=intro('HTTPSには、お店が本物であることを示す証明書が必要です。証明書をどこで用意するか選びましょう。');
+    h+=Object.entries(CAS).map(([k,v])=>`<div class="row"><div class="desc">${v.n}<span class="note">${v.p}・有効期間 ${v.v}<br>${v.d}</span></div><button class="btn" data-act="ca" data-ca="${k}">これにする</button></div>`).join('');
+    return h+'</div>';
+  }
+  const ca=CAS[c.ca],self=c.ca==='self';
+  h+=`<div class="row"><div class="desc">発行元<span class="note">${ca.n}（${ca.p}・有効期間 ${ca.v}）</span></div><button class="link" data-act="certRedo">選び直す</button></div>`;
+  if(!c.keyMade)return h+`<div class="row"><div class="desc">1. 秘密鍵とCSRを作る<span class="note">秘密鍵はこのサーバーの中だけに保管します。CSRは「この名前の証明書がほしい」という申請書です</span></div><button class="btn" data-act="keygen">作成する</button></div></div>`;
+  h+=`<div class="row"><div class="desc">1. 秘密鍵とCSR<span class="note">server.key（サーバー内に保管）／server.csr（対象：${D}）</span></div><span class="msg-ok small">作成済み</span></div>`;
+  if(self){
+    if(!c.issued)return h+`<div class="row"><div class="desc">2. 自分の秘密鍵で署名する<span class="note">CSRに自分で署名して、証明書を作ります</span></div><button class="btn" data-act="selfsign">署名する</button></div></div>`;
+    h+=`<div class="row"><div class="desc">2. 署名<span class="note">自分で署名しました</span></div><span class="msg-ok small">完了</span></div>`;
+  }else{
+    if(!c.issued)return h+`<div class="row"><div class="desc">2. 認証局に発行してもらう<span class="note">${c.token?'申請済み。認証局の指示に従って、ドメインの所有を確認してもらいましょう':'server.csr を'+ca.n+'に提出します'}</span></div><button class="btn" data-act="svc" data-s="ca">${ca.n}を開く</button></div></div>`;
+    h+=`<div class="row"><div class="desc">2. 認証局で発行<span class="note">${ca.n}から証明書を受け取りました</span></div><span class="msg-ok small">完了</span></div>`;
+  }
+  h+=`<div class="capanel"><p class="small muted" style="margin:0 0 6px">証明書の中身</p><div class="kv"><span>対象</span><b>${D}</b><span>発行者</span><b>${self?D+'（自分）':ca.n+'（中間CA：'+ca.ica+'）'}</b><span>有効期間</span><b>${self?'10年（自分で決めた）':ca.v}</b></div></div>`;
+  if(!c.installed)return h+`<div class="row" style="border-bottom:0"><div class="desc">3. サーバーに設置する<span class="note">どのファイルを設置しますか？</span></div></div>
+      <label class="chk"><input type="radio" name="inst" value="cert"><span>server.crt</span><span class="note">サーバー証明書だけ</span></label>
+      ${self?'':'<label class="chk"><input type="radio" name="inst" value="fullchain"><span>fullchain.crt</span><span class="note">サーバー証明書＋中間証明書</span></label>'}
+      <div class="row"><span class="small msg-err">${S.instMsg||''}</span><button class="btn" data-act="install">設置する</button></div></div>`;
+  h+=`<div class="row"><div class="desc">3. 設置<span class="note">${c.installed==='fullchain'?'fullchain.crt':'server.crt'} を秘密鍵といっしょに設置済み</span></div><button class="link" data-act="reinstall">設置し直す</button></div>`;
+  if(!self)h+=`<div class="row"><div class="desc">自動更新<span class="note">期限が切れる前に、申請から設置までを自動でやり直します</span></div>${sw('autorenew',!!c.autoRenew,false)}</div>`;
+  if(c.installed)h+=`<div class="row"><div class="desc">HTTPSの有効化は「通信設定」で行います</div><button class="btn" data-act="sub" data-sub="net">通信設定を開く</button></div>`;
+  return h+'</div>';
+}
+function cloudNetHTML(){
+  const c=S.cfg,d=S.day;
+  let h=`<div class="sec"><h3>HTTPS</h3>
+    <div class="row"><div class="desc">HTTPSで公開する<span class="note">${c.cert?'設置した証明書を使って通信を暗号化します':'先に「証明書」で証明書をサーバーに設置してください'}</span></div>${sw('https',c.https,!c.cert)}</div>
+    <div class="row"><div class="desc">http:// を https:// に転送する<span class="note">http:// で来たお客さんを自動で https:// へ</span></div>${sw('redirect',c.redirect,!c.https)}</div></div>`;
+  if(d>=2){
+    const ci=[['aes','AES-GCM','現在の標準'],['chacha','ChaCha20-Poly1305','スマホで速い'],['des3','3DES','1990年代の方式'],['rc4','RC4','1987年の方式']];
+    h+=`<div class="sec"><h3>TLS設定</h3>
+      <div class="row"><label class="desc" for="tlsMin">受け付ける最低バージョン</label>
+      <select id="tlsMin" data-act="tlsMin">${['1.0','1.1','1.2','1.3'].map(v=>`<option value="${v}" ${c.tlsMin===v?'selected':''}>TLS ${v}</option>`).join('')}</select></div>
+      <div class="row" style="padding-bottom:0"><div class="desc">使える暗号の方式</div></div>
+      ${ci.map(([k,n,note])=>`<label class="chk"><input type="checkbox" id="ci-${k}" data-ci="${k}" ${c.ciph[k]?'checked':''}><span>${n}</span><span class="note">${note}</span></label>`).join('')}</div>`;
+  }
+  if(d>=3){
+    h+=`<div class="sec"><h3>セキュリティヘッダー</h3>
+      <div class="row"><div class="desc">HSTS（HTTPSだけで開くよう記憶させる）<span class="note">${c.https&&c.redirect?'Strict-Transport-Security ヘッダーを返します':'HTTPSと転送を先に有効にしてください'}</span></div>${sw('hsts',c.hsts,!(c.https&&c.redirect))}</div>
+      <div class="row"><label class="desc" for="hstsAge">記憶させる期間（max-age）</label>
+      <select id="hstsAge" data-act="hstsAge" ${c.hsts?'':'disabled'}>${[['300','5分'],['86400','1日'],['31536000','1年']].map(([v,n])=>`<option value="${v}" ${c.hstsAge===v?'selected':''}>${n}</option>`).join('')}</select></div></div>`;
+  }
+  return h;
+}
+function verifyBox(){
+  const hint=S.phase==='incident'?'まず「通信」タブで、何が起きているか確かめよう。':S.phase==='fix'?'設定を変えたら、攻撃を試して防げるか確かめよう。':'この日の攻撃は防げています。';
+  return `<div class="box"><button class="btn primary" id="verifyBtn" data-act="verify" ${S.phase==='fix'?'':'disabled'}>攻撃をもう一度試す</button><p class="muted small" style="margin:10px 0 0">${hint}</p></div>`;
+}
+function cloudHTML(){
+  const live=isLive(),subs=[['server','サーバー']];
+  if(live&&S.day>=1)subs.push(['cert','証明書'],['net','通信設定']);
+  if(!subs.some(s=>s[0]===S.sub))S.sub='server';
+  let h=`<div class="subs" role="tablist" aria-label="ピクセルクラウドのメニュー">${subs.map(s=>`<button role="tab" class="sub" data-act="sub" data-sub="${s[0]}" aria-selected="${s[0]===S.sub}">${s[1]}</button>`).join('')}</div>`;
+  h+=S.sub==='cert'?certCloudHTML():S.sub==='net'?cloudNetHTML():cloudServerHTML();
+  if(live&&S.day>=1)h+=verifyBox();
+  return h;
+}
+
+function renderConsole(){
+  const c=S.cfg;
+  const tabs=[['registrar','ネームヤ','ドメイン会社'],['cloud','ピクセルクラウド','サーバー']];
+  if(c.ca&&c.ca!=='self')tabs.push(['ca',CAS[c.ca].n,'認証局']);
+  if(!tabs.some(t=>t[0]===S.svc))S.svc='cloud';
+  const cur=tabs.find(t=>t[0]===S.svc);
+  let h=`<h2>管理</h2><p class="muted small">お店に関わるサービスの管理画面です。サービスごとに役割が分かれています</p>
+    <div class="svcs" role="tablist" aria-label="サービス">${tabs.map(t=>`<button role="tab" id="svc-${t[0]}" class="svc svc-${t[0]}" data-act="svc" data-s="${t[0]}" aria-selected="${t[0]===S.svc}">${spr(IC['logo_'+t[0]],2)}<span>${t[1]}<small>${t[2]}</small></span></button>`).join('')}</div>
+    <div class="svcframe svc-${S.svc}"><div class="svchead">${spr(IC['logo_'+S.svc],4)}<span>${cur[1]}<small>${cur[2]}の管理画面</small></span></div>`;
+  h+=(S.svc==='registrar'?registrarHTML():S.svc==='ca'?caHTML():cloudHTML())+'</div>';
+  $('p-console').innerHTML=h;
+}
+
+/* ---------- 攻撃の再生 ---------- */
+function animatePacket(line,r,cb){
+  const g=$('pkt');
+  if(!g||RM){setTimeout(cb,RM?150:0);return;}
+  const col=line.k==='ok'?'var(--safe)':line.k==='bad'?'var(--danger)':'var(--accent)';
+  g.querySelector('rect').setAttribute('fill',col);
+  $('pktL').textContent=line.k==='ok'?'#%&@!?':line.k==='bad'?(r.pkt||''):'';
+  g.setAttribute('opacity','1');
+  const tap=$('tap'),t0=performance.now(),dur=1000;
+  function step(t){
+    const p=Math.min(1,(t-t0)/dur),x=80+p*188;
+    g.setAttribute('transform',`translate(${x},72)`);
+    tap.setAttribute('stroke-width',Math.abs(x+8-140)<22?'5':'2');
+    if(p<1)requestAnimationFrame(step);else{g.setAttribute('opacity','0');tap.setAttribute('stroke-width','2');cb();}
+  }
+  requestAnimationFrame(step);
+}
+function runAttack(r,done){
+  S.last={ok:r.ok,lines:[]};renderNet();busy=true;
+  const log=$('log');log.innerHTML='';
+  let i=0;
+  (function go(){
+    if(i>=r.lines.length){busy=false;save();render();done();return;}
+    const src=r.lines[i++],line={k:src.k,t:dm(src.t)};
+    animatePacket(line,r,()=>{S.last.lines.push(line);const div=document.createElement('div');div.className=line.k;div.textContent='› '+line.t;log.appendChild(div);setTimeout(go,RM?0:150);});
+  })();
+}
+
+/* ---------- 進行 ---------- */
+function setTab(t){
+  if(S.tab==='voice'&&t!=='voice')S.voices.forEach(v=>{v.unread=false;});
+  if(t==='voice')hideToast();
+  S.tab=t;S.badge[t]=false;save();render();
+  if(t==='net'&&S.phase==='incident'&&!busy)firstAttack();
+}
+function startIntro(){
+  say([
+    {who:YOU,t:'ついに自作のネットショップ「よろず屋ピクセル堂」ができたぞ！'},
+    {who:SHIRO,t:'おめでとう。ホワイトハッカーのシロだよ。困ったら相談して'},
+    {who:SHIRO,t:'でも、まだきみのパソコンの中にあるだけだね。ネットに公開するには、まずドメイン（お店の住所）が必要だよ'},
+    {who:SHIRO,t:'「管理」タブのドメイン会社「ネームヤ」で取ってみよう'}
+  ],()=>{S.phase='setup';S.badge.console=true;save();render();});
+}
+function startDay(n){
+  S.day=n;S.phase='incident';S.last=null;
+  const d=DAYS[n];
+  if(d.sub){S.svc='cloud';S.sub=d.sub;}
+  save();render();
+  say(d.start,()=>{
+    d.voices.forEach((v,i)=>setTimeout(()=>{
+      S.voices.unshift(Object.assign({day:n,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);
+    },RM?0:i*700));
+    setTimeout(()=>{S.badge.net=S.tab!=='net';save();render();
+      say([{who:SHIRO,t:'お客さんの声は「お客さんの声」タブに届いてる。原因は「通信」タブで見てみよう'}]);
+    },RM?0:d.voices.length*700+200);
+  });
+}
+function firstAttack(){
+  const d=DAYS[S.day];
+  runAttack(d.check(S.cfg),()=>{
+    S.phase='fix';S.badge.console=true;save();render();say(d.alert);
+  });
+}
+function verify(){
+  if(busy||S.phase!=='fix')return;
+  S.tab='net';S.badge.net=false;render();
+  const d=DAYS[S.day],r=d.check(S.cfg);
+  runAttack(r,()=>{
+    if(r.ok){S.phase='clear';save();render();say(d.success(S.cfg),showLearn);}
+    else{
+      save();render();
+      (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*700));
+      say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
+    }
+  });
+}
+function showModal(html){$('sheet').innerHTML=html;$('modal').hidden=false;const b=$('sheet').querySelector('button');if(b)b.focus();}
+function hideModal(){$('modal').hidden=true;}
+const toast=$('toast');let toastT=null;
+function showToast(v){
+  $('toastIcon').innerHTML=voiceIcon(v);
+  $('toastTitle').textContent='新着　'+v.who+'（'+(v.mail?'メール':'投稿')+'）';
+  $('toastText').textContent=v.t;
+  clearTimeout(toastT);toast.hidden=false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.remove('out')));
+  toastT=setTimeout(hideToast,4000);
+}
+function hideToast(){clearTimeout(toastT);toast.classList.add('out');toastT=setTimeout(()=>{toast.hidden=true;},RM?0:300);}
+toast.addEventListener('click',()=>setTab('voice'));
+function showLearn(){
+  const d=DAYS[S.day],l=d.learn;
+  showModal(`<p class="muted small">${S.day}日目 クリア</p><h2 id="mTitle">${l.title}</h2>
+    <ul>${l.points.map(p=>`<li>${p}</li>`).join('')}</ul>
+    <p class="real small">${l.real}</p>
+    <div class="acts"><button class="btn primary" data-act="nextDay">${S.day<LAST_DAY?(S.day+1)+'日目へ進む':'まとめを見る'}</button></div>`);
+}
+function showEnd(){
+  S.phase='end';save();render();
+  showModal(`<h2 id="mTitle">第1章 通信編はここまで</h2>
+    <p>お客さんとお店の間の通信は、HTTPS・TLS 1.2以上・HSTSで守られるようになりました。</p>
+    <p class="muted small">第2章 アプリ編で待っている攻撃</p>
+    <ul><li>4日目　商品検索のSQLインジェクション</li><li>5日目　パスワードの平文保存が発覚</li><li>6日目　1円で買われる（価格改ざん）</li><li>7日目　レビュー欄のXSS</li><li>8日目　セッション乗っ取り</li></ul>
+    <div class="acts"><button class="btn primary" data-act="toTitle">タイトルへ戻る</button><button class="btn" data-act="close">閉じる</button></div>`);
+}
+function reset(){
+  try{localStorage.removeItem(KEY);}catch(e){}
+  S=fresh();Q=[];showing=false;win.hidden=true;document.body.classList.remove('talking');busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.name='';nr.val='';
+  hideToast();hideModal();render();startIntro();
+}
+
+/* ---------- 操作 ---------- */
+document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b)setTab(b.dataset.tab);});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||b.tagName==='SELECT')return;
+  const a=b.dataset.act,c=S.cfg;
+  if(a==='start'){startDay(1);}
+  else if(a==='cart'){S.cart++;save();render();}
+  else if(a==='reset'){reset();}
+  else if(a==='close'){hideModal();}
+  else if(a==='verify'){verify();}
+  else if(a==='nextDay'){hideModal();if(S.day<LAST_DAY)startDay(S.day+1);else showEnd();}
+  else if(a==='ca'){c.ca=b.dataset.ca;save();render();if(c.ca!=='self')say([{who:SHIRO,t:CAS[c.ca].n+'の画面が、上のメニューに増えたよ。まずはこのサーバーで秘密鍵とCSRを作ろう'}]);}
+  else if(a==='certRedo'||a==='reinstall'){
+    if(a==='certRedo')Object.assign(c,{ca:null,keyMade:false,token:null,issued:false});
+    Object.assign(c,{installed:null,cert:false,https:false,redirect:false,hsts:false});S.dcvMsg='';S.instMsg='';save();render();}
+  else if(a==='keygen'){c.keyMade=true;save();render();say([{who:SHIRO,t:'秘密鍵は、お店だけが持つ「本物の証」。絶対に外へ出さないでね'}]);}
+  else if(a==='selfsign'){c.issued=true;save();render();}
+  else if(a==='apply'){c.token=genToken();S.dcvMsg='';save();render();say([{who:SHIRO,t:'認証局は「本当にこのドメインの持ち主？」を確かめてから証明書を出すんだ'},{who:SHIRO,t:'指定された目印をDNSに置いて、持ち主だと証明しよう'}]);}
+  else if(a==='copyToken'){clip=c.token;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
+  else if(a==='paste'){nr.val=clip;render();}
+  else if(a==='dnsAdd'){
+    const name=normName(nr.name),val=nr.val.trim();
+    if(!nr.name.trim()||!val){S.dnsAddMsg='名前と値を入力してください（ドメインそのものは「@」）';render();return;}
+    S.dns=S.dns||[];S.dns.push({type:nr.type,name,value:val});nr.name='';nr.val='';S.dnsAddMsg='';save();render();}
+  else if(a==='dnsDel'){const i=+b.dataset.i;if(i>0&&S.dns&&S.dns[i]){S.dns.splice(i,1);save();render();}}
+  else if(a==='dcv'){
+    if(caBusy)return;caBusy=true;S.dcvMsg='確認しています……';render();
+    setTimeout(()=>{
+      caBusy=false;const tk=c.token,recs=S.dns||[],has=r=>String(r.value).trim().toUpperCase()===tk;
+      if(recs.some(r=>r.type==='TXT'&&r.name==='_acme-challenge'&&has(r))){c.issued=true;S.dcvMsg='';save();render();say([{who:SHIRO,t:'持ち主だと認められて、証明書が発行された！ 次はサーバーに設置しよう'}]);return;}
+      S.dcvMsg=recs.some(r=>r.type!=='TXT'&&has(r))?'確認用のレコードが見つかりません。タイプが違うようです。確認用の文字列は TXT レコードで登録します'
+        :recs.some(r=>r.type==='TXT'&&has(r))?'確認用のレコードが見つかりません。名前が違うようです。「_acme-challenge」で登録しましょう'
+        :recs.some(r=>r.type==='TXT'&&r.name==='_acme-challenge')?'_acme-challenge のTXTレコードはありますが、値が一致しません'
+        :'DNSに確認用のTXTレコードが見つかりません。ドメインを取ったサービスのDNS設定で追加しましょう';
+      save();render();
+    },RM?200:1400);
+  }
+  else if(a==='install'){
+    const r=document.querySelector('input[name="inst"]:checked');
+    if(!r){S.instMsg='設置するファイルを選んでください';render();return;}
+    c.installed=r.value;c.cert=true;S.instMsg='';save();render();say([{who:SHIRO,t:'設置できた。「通信設定」でHTTPSを有効にできるよ'}]);}
+  else if(a==='autorenew'){c.autoRenew=!c.autoRenew;save();render();}
+  else if(a==='https'){c.https=!c.https;if(!c.https){c.redirect=false;c.hsts=false;}save();render();}
+  else if(a==='redirect'){c.redirect=!c.redirect;if(!c.redirect)c.hsts=false;save();render();}
+  else if(a==='hsts'){c.hsts=!c.hsts;save();render();}
+  else if(a==='goConsole'){S.svc='registrar';setTab('console');}
+  else if(a==='toTitle'){if(busy)return;showTitle(false);}
+  else if(a==='domSearch'){
+    const name=$('domName').value.trim().toLowerCase(),tld=$('domTld').value,full=name+tld;
+    let status='ok',msg='';
+    if(name.length<3||name.length>30||!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(name)){status='invalid';msg='英小文字・数字・ハイフンの3〜30文字で、先頭と末尾はハイフン以外にしてください';}
+    else if(TAKEN.includes(name)||full==='pixeldo.com')status='taken';
+    S.ds={name,tld,full,status,msg};save();render();
+  }
+  else if(a==='domBuy'){if(!S.ds||S.ds.status!=='ok')return;S.domain=S.ds.full;S.ds=null;save();render();
+    say([{who:SHIRO,t:S.domain+'、いい住所だね！'},{who:SHIRO,t:'次は、このドメインをサーバーにつなごう。サーバーのIPアドレスは「ピクセルクラウド」で確認できるよ'},{who:SHIRO,t:'つなぐ設定（DNS）は、ドメインを取ったこの「ネームヤ」でやるんだ'}]);}
+  else if(a==='publish'){
+    if(S.phase!=='setup'||!S.domain||relBusy)return;
+    relBusy=true;S.relMsg='ドメインの向き先を確認しています……';render();
+    setTimeout(()=>{
+      relBusy=false;const as=aRec();
+      if(!as.length)S.relMsg=esc(S.domain)+' に A レコード（名前 @）がありません。ドメインを取ったサービスのDNS設定で、このサーバーのIPアドレスを登録しましょう';
+      else if(!as.some(r=>r.value===SERVER_IP))S.relMsg=esc(S.domain)+' は '+esc(as[0].value)+' を指していて、このサーバー（'+SERVER_IP+'）につながりません';
+      else{S.relMsg='';S.dnsOk=true;S.phase='day0';save();render();
+        say([{who:SHIRO,t:'リリースおめでとう！ これで誰でも '+S.domain+' からお店に来られる'},{who:SHIRO,t:'……ところで、そのお店、ちゃんと守れてる？'},{who:YOU,t:'守る？ 何から？'},{who:SHIRO,t:'まあ、すぐにわかるよ'}],()=>startDay(1));return;}
+      save();render();
+    },RM?200:1400);
+  }
+  else if(a==='svc'){S.svc=b.dataset.s;if(b.dataset.sub)S.sub=b.dataset.sub;save();render();window.scrollTo(0,0);}
+  else if(a==='sub'){S.sub=b.dataset.sub;save();render();}
+});
+document.addEventListener('change',e=>{
+  const t=e.target,c=S.cfg;
+  if(t.dataset.act==='tlsMin')c.tlsMin=t.value;
+  else if(t.dataset.act==='hstsAge')c.hstsAge=t.value;
+  else if(t.dataset.ci)c.ciph[t.dataset.ci]=t.checked;
+  else if('whois' in t.dataset)S.whois=t.checked;
+  else if(t.id==='nrType'){nr.type=t.value;return;}
+  else if(t.id==='domTld')S.ds=Object.assign({},S.ds,{name:$('domName').value,tld:t.value,status:null});
+  else return;
+  save();render();
+});
+
+document.addEventListener('input',e=>{
+  if(e.target.id==='nrName')nr.name=e.target.value;
+  else if(e.target.id==='nrVal')nr.val=e.target.value;
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'||e.isComposing)return;
+  if(e.target.id==='domName'){e.preventDefault();$('domSearch').click();}
+});
+
+/* ---------- 再開 ---------- */
+function resume(){
+  if(S.phase==='intro')startIntro();
+  else if(S.phase==='clear')showLearn();
+  else if(S.phase==='end')showEnd();
+  else if(S.phase==='day0')startDay(1);
+  else if(S.phase==='setup')say([{who:SHIRO,t:'続きから再開するよ。「管理」タブでリリースの準備をしよう'}]);
+  else if(S.phase==='incident'||S.phase==='fix')say([{who:SHIRO,t:'続きから再開するよ'}]);
+}
+
+/* ---------- タイトル画面 ---------- */
+const title=$('title');
+function hasSave(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');return !!(s&&s.phase&&s.phase!=='intro');}catch(e){return false;}}
+function showTitle(confirm){
+  Q=[];showing=false;clearInterval(typing);typing=null;win.hidden=true;document.body.classList.remove('talking');hideModal();hideToast();
+  const sv=hasSave();
+  const info=(S.phase==='end'?'第1章クリア':(S.day+'日目'))+(S.domain?'　'+esc(S.domain):'');
+  let menu;
+  if(confirm)menu=`<p class="tq">いまの記録は消えます。はじめからにしますか？</p><button role="menuitem" data-t="yes">はい</button><button role="menuitem" data-t="no">いいえ</button>`;
+  else if(sv)menu=`<button role="menuitem" data-t="cont">つづきから<span class="sinfo">${info}</span></button><button role="menuitem" data-t="new">はじめから</button>`;
+  else menu=`<button role="menuitem" data-t="new">はじめる</button>`;
+  title.innerHTML=`<div class="tbox"><div class="tlogo">${spr(IC.shop,7)}</div><h1 class="tname">Getting Secure It</h1><p class="tsub">ネットショップを、1日ずつ守っていこう</p>
+    <div class="menu" role="menu" aria-label="メニュー">${menu}</div><p class="tver">デモ版（第1章 通信編：0〜3日目）</p></div>`;
+  title.hidden=false;
+  const f=title.querySelector('button');if(f)f.focus();
+}
+title.addEventListener('click',e=>{
+  const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;
+  if(t==='cont'){title.hidden=true;render();resume();}
+  else if(t==='new'){if(hasSave())showTitle(true);else{title.hidden=true;reset();}}
+  else if(t==='yes'){title.hidden=true;reset();}
+  else if(t==='no')showTitle(false);
+});
+title.addEventListener('keydown',e=>{
+  if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
+  const bs=[...title.querySelectorAll('.menu button')],i=bs.indexOf(document.activeElement);
+  if(!bs.length)return;e.preventDefault();
+  bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length].focus();
+});
+
+/* ---------- 開始 ---------- */
+render();
+showTitle(false);
+})();
+</script>
+</body>
+</html>
