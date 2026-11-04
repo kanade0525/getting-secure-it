@@ -36,6 +36,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Collect site files
         run: |
           mkdir -p _site
