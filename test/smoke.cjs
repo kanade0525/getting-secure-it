@@ -1,0 +1,86 @@
+// 通しテスト（0〜3日目）。Playwright と Google Chrome が必要。
+// 実行例: NODE_PATH=<playwrightのあるnode_modules> node test/smoke.cjs "$PWD" /tmp/shots   （第1引数は公開URLでも可）
+const { chromium } = require('playwright');
+const path = require('path');
+const DIR = process.argv[2];
+const OUT = process.argv[3];
+const URL = /^https?:/.test(DIR) ? DIR : 'file://' + path.join(DIR, 'index.html');
+const log = (...a) => console.log('[smoke]', ...a);
+(async () => {
+  const browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  const errors = [];
+  page.on('pageerror', e => errors.push(String(e)));
+  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  await page.goto(URL);
+  const shot = n => page.screenshot({ path: path.join(OUT, n + '.png'), fullPage: false });
+  const state = () => page.evaluate(() => JSON.parse(localStorage.getItem('gsi-demo-v2') || 'null'));
+  const dismiss = async () => { for (let i = 0; i < 40; i++) { const v = await page.locator('#win').isVisible(); if (!v) return; await page.click('#win'); await page.waitForTimeout(30); } throw new Error('dialogue never ended'); };
+  const tab = async t => { await page.click(`.tabs button[data-tab="${t}"]`); await page.waitForTimeout(50); };
+  const svc = async (s, sub) => { await page.click(`#svc-${s}`); await page.waitForTimeout(30); if (sub) { await page.click(`.sub[data-sub="${sub}"]`); await page.waitForTimeout(30); } };
+  const header = async () => (await page.locator('#chapLabel').innerText()) + ' / ' + (await page.locator('#dayLabel').innerText());
+  const waitPhase = async (p) => { for (let i = 0; i < 100; i++) { const s = await state(); if (s && s.phase === p) return; await page.waitForTimeout(100); } throw new Error('phase not reached: ' + p + ' (now ' + (await state()).phase + ')'); };
+
+  await shot('00-title');
+  await page.click('.menu button[data-t="new"]');
+  await dismiss();
+  log('setup header:', await header());
+  // day0: domain
+  await tab('console'); await svc('registrar');
+  await page.fill('#domName', 'pixeldo'); await page.selectOption('#domTld', '.shop'); await page.waitForTimeout(50); await page.click('#domSearch'); await page.waitForTimeout(50);
+  await page.click('#domBuy'); await dismiss();
+  await page.selectOption('#nrType', 'A'); await page.fill('#nrName', '@'); await page.fill('#nrVal', '198.51.100.7'); await page.click('[data-act="dnsAdd"]');
+  await page.click('[data-act="dnsDel"][data-i="0"]'); await page.waitForTimeout(30); log('dns after delete:', (await state()).dns.length);
+  await page.selectOption('#nrType', 'A'); await page.fill('#nrName', '@'); await page.fill('#nrVal', '203.0.113.24'); await page.click('[data-act="dnsAdd"]');
+  await shot('01-registrar');
+  await svc('cloud'); await shot('02-cloud-server');
+  await page.click('[data-act="publish"]'); await page.waitForTimeout(500); await dismiss();
+  await waitPhase('incident');
+  log('day1 header:', await header());
+  await page.waitForTimeout(400); await dismiss();
+  await tab('net'); await page.waitForTimeout(1500); await dismiss();
+  await waitPhase('fix');
+  log('day1 attacker label:', await page.locator('.loghead span').innerText(), '/ button:', await page.locator('#verifyNet').innerText());
+  await shot('03-net-day1');
+  // day1 fix
+  await tab('console'); await svc('cloud'); await shot('04-console-cloud-cert');
+  log('subs:', await page.locator('.subs').innerText());
+  await page.click('[data-act="ca"][data-ca="free"]'); await dismiss();
+  await page.click('[data-act="keygen"]'); await dismiss();
+  await page.click('[data-act="svc"][data-s="ca"]'); await page.click('[data-act="apply"]'); await dismiss();
+  const token = (await state()).cfg.token; log('token', token);
+  await svc('registrar');
+  await page.selectOption('#nrType', 'TXT'); await page.fill('#nrName', '_acme-challenge'); await page.fill('#nrVal', token); await page.click('[data-act="dnsAdd"]');
+  await svc('ca'); await page.click('[data-act="dcv"]'); await page.waitForTimeout(500); await dismiss();
+  await page.click('[data-act="svc"][data-s="cloud"][data-sub="cert"]'); await page.waitForTimeout(50);
+  log('cloud sub after CA link:', (await state()).sub);
+  await page.check('input[name="inst"][value="fullchain"]'); await page.click('[data-act="install"]'); await dismiss();
+  await page.click('[data-act="sub"][data-sub="net"]'); await page.waitForTimeout(30);
+  await page.click('#https'); await page.click('#redirect'); await shot('05-cloud-net');
+  await page.click('#verifyBtn'); await page.waitForTimeout(2000); await dismiss();
+  await waitPhase('clear'); await shot('06-learn-day1');
+  await page.click('[data-act="nextDay"]'); await waitPhase('incident'); await page.waitForTimeout(300); await dismiss();
+  log('day2 header:', await header());
+  await tab('net'); await page.waitForTimeout(1500); await dismiss(); await waitPhase('fix');
+  log('day2 attacker label:', await page.locator('.loghead span').innerText());
+  await shot('07-net-day2');
+  await tab('console'); await svc('cloud', 'net');
+  await page.selectOption('#tlsMin', '1.2'); await page.uncheck('#ci-rc4'); await page.uncheck('#ci-des3');
+  await page.click('#verifyBtn'); await page.waitForTimeout(2000); await dismiss(); await waitPhase('clear');
+  await page.click('[data-act="nextDay"]'); await waitPhase('incident'); await page.waitForTimeout(300); await dismiss();
+  log('day3 header:', await header());
+  await tab('net'); await page.waitForTimeout(1500); await dismiss(); await waitPhase('fix');
+  log('day3 attacker label:', await page.locator('.loghead span').innerText());
+  // trap: hsts 5分
+  await tab('console'); await svc('cloud', 'net'); await page.click('#hsts');
+  await page.click('#verifyBtn'); await page.waitForTimeout(2000);
+  log('trap voices:', (await state()).voices.length); await dismiss();
+  await tab('console'); await page.selectOption('#hstsAge', '31536000');
+  await page.click('#verifyBtn'); await page.waitForTimeout(2000); await dismiss(); await waitPhase('clear');
+  await page.click('[data-act="nextDay"]'); await waitPhase('end'); await shot('08-end');
+  await page.click('#sheet [data-act="toTitle"]'); await shot('09-title-cont');
+  log('title info:', await page.locator('.sinfo').innerText());
+  log('errors:', errors.length ? errors : 'none');
+  await browser.close();
+  if (errors.length) process.exit(1);
+})().catch(e => { console.error('[smoke] FAIL', e); process.exit(1); });

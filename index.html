@@ -290,7 +290,7 @@ function renderVoices(){
 const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
 function renderNet(){
   const c=S.cfg,atk=attackerOf();
-  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、${esc(atk.name)}、ショップのサーバーの通信図">
+  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、攻撃者、ショップのサーバーの通信図">
     <rect x="6" y="24" width="206" height="198" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
     <text x="12" y="18" class="lbl">カフェのWi-Fi</text>
     ${sprG(CAST.tanaka.rows,20,36,3.5)}
@@ -298,7 +298,7 @@ function renderNet(){
     <line x1="72" y1="78" x2="284" y2="78" stroke="var(--line)" stroke-width="3"/>
     <line id="tap" x1="140" y1="84" x2="140" y2="140" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 4"/>
     ${sprG(frameRows(atk.rows,tick),112,140,3.5,'atk')}
-    <text x="140" y="212" text-anchor="middle" class="lbl">${esc(atk.name)}</text>
+    <text x="140" y="212" text-anchor="middle" class="lbl">攻撃者</text>
     ${sprG(IC.srv,290,34,4)}
     <text x="310" y="96" text-anchor="middle" class="lbl">ショップ</text>
     ${c.https?sprG(IC.lock,298,6,3):'<text x="310" y="22" text-anchor="middle" class="lbl warnT">HTTP</text>'}
@@ -308,9 +308,9 @@ function renderNet(){
   let hint='';
   if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')hint='リリースすると、ここに通信のようすが表示されます。';
   else if(S.phase==='incident')hint='このタブを開くと、攻撃のようすが再生されます。';
-  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint||'お客さんとお店の間を流れるデータと、'+esc(atk.name)+'に見えているもの'}</p>${svg}
-    <div class="loghead">${castSpr(atk.id||'tochou',2,'')}<span>${esc(atk.name)}の画面</span></div><div class="log" id="log" aria-live="polite">${lines}</div>
-    ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify">攻撃をもう一度試す</button>':''}`;
+  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint||'お客さんとお店の間を流れるデータと、攻撃者に見えているもの'}</p>${svg}
+    <div class="loghead">${castSpr(atk.id||'tochou',2,'')}<span>攻撃者の画面</span></div><div class="log" id="log" aria-live="polite">${lines}</div>
+    ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify">防げたか確かめる</button>':''}`;
 }
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
 let tick=0;
@@ -432,8 +432,8 @@ function cloudNetHTML(){
   return h;
 }
 function verifyBox(){
-  const hint=S.phase==='incident'?'まず「通信」タブで、何が起きているか確かめよう。':S.phase==='fix'?'設定を変えたら、攻撃を試して防げるか確かめよう。':'この日の攻撃は防げています。';
-  return `<div class="box"><button class="btn primary" id="verifyBtn" data-act="verify" ${S.phase==='fix'?'':'disabled'}>攻撃をもう一度試す</button><p class="muted small" style="margin:10px 0 0">${hint}</p></div>`;
+  const hint=S.phase==='incident'?'まず「通信」タブで、何が起きているか確かめよう。':S.phase==='fix'?'設定を変えたら、防げたか確かめよう。':'この日の攻撃は防げています。';
+  return `<div class="box"><button class="btn primary" id="verifyBtn" data-act="verify" ${S.phase==='fix'?'':'disabled'}>防げたか確かめる</button><p class="muted small" style="margin:10px 0 0">${hint}</p></div>`;
 }
 function cloudHTML(){
   const live=isLive(),subs=[['server','サーバー']];
@@ -592,7 +592,7 @@ document.addEventListener('click',e=>{
     const name=normName(nr.name),val=nr.val.trim();
     if(!nr.name.trim()||!val){S.dnsAddMsg='名前と値を入力してください（ドメインそのものは「@」）';render();return;}
     S.dns=S.dns||[];S.dns.push({type:nr.type,name,value:val});nr.name='';nr.val='';S.dnsAddMsg='';save();render();}
-  else if(a==='dnsDel'){const i=+b.dataset.i;if(i>0&&S.dns&&S.dns[i]){S.dns.splice(i,1);save();render();}}
+  else if(a==='dnsDel'){const i=+b.dataset.i;if(i>=0&&S.dns&&S.dns[i]){S.dns.splice(i,1);save();render();}}
   else if(a==='dcv'){
     if(caBusy)return;caBusy=true;S.dcvMsg='確認しています……';render();
     setTimeout(()=>{
