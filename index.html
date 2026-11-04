@@ -122,10 +122,14 @@ input[type="text"]:disabled{opacity:.6}
 .msg-ok{color:var(--safe)}
 .title-screen{position:fixed;inset:0;z-index:30;background:var(--win-bg);color:var(--win-ink);display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));overflow:auto}
 .title-screen[hidden]{display:none}
-.tbox{text-align:center;max-width:420px;width:100%}
-.tlogo{display:flex;justify-content:center}
-.tname{font-weight:400;font-size:clamp(32px,10vw,54px);line-height:1.15;margin:18px 0 6px}
-.tsub{opacity:.75;margin:0 0 28px}
+.tbox{text-align:center;max-width:560px;width:100%}
+.tname{font-weight:400;font-size:clamp(34px,11vw,60px);line-height:1.05;margin:4px 0 14px;color:#ffe08a;letter-spacing:.02em;text-shadow:2px 2px 0 #c2373f,4px 4px 0 #1a1426,6px 6px 0 rgba(0,0,0,.35)}
+.tname small{display:block;font-size:.42em;color:#c3c7d6;text-shadow:2px 2px 0 #1a1426;letter-spacing:.3em;margin-bottom:6px}
+.scene{position:relative;margin:0 auto 14px;overflow:hidden;border:3px solid var(--win-line);outline:3px solid var(--win-bg);background:#26223a}
+.scene img{display:block;width:100%;height:100%;image-rendering:pixelated}
+.ch{position:absolute;display:block;line-height:0}
+.ch.lurk{filter:brightness(.3)}
+.tsub{opacity:.75;margin:0 0 18px}
 .menu{border:4px solid var(--win-line);outline:4px solid var(--win-bg);padding:12px 8px;text-align:left;display:flex;flex-direction:column;gap:2px}
 .menu button{font:inherit;font-size:18px;line-height:1.5;color:var(--win-ink);background:none;border:0;text-align:left;padding:8px 10px 8px 34px;position:relative;cursor:pointer;min-height:44px}
 .menu button::before{content:"▶";position:absolute;left:10px;top:8px;opacity:0}
@@ -314,7 +318,8 @@ function renderNet(){
 }
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
 let tick=0;
-if(!RM)setInterval(()=>{tick^=1;const g=$('atk');if(g&&S.tab==='net')g.innerHTML=rects(frameRows(attackerOf().rows,tick));},520);
+if(!RM)setInterval(()=>{tick^=1;const g=$('atk');if(g&&S.tab==='net')g.innerHTML=rects(frameRows(attackerOf().rows,tick));
+  if(!$('title').hidden)document.querySelectorAll('.ch[data-cast]').forEach(el=>{el.innerHTML=spr(frameRows(CAST[el.dataset.cast].rows,tick),+el.dataset.s,'');});},520);
 
 let caBusy=false,relBusy=false,clip='';
 const nr={type:'A',name:'',val:''};
@@ -672,8 +677,12 @@ function resume(){
 
 /* ---------- タイトル画面 ---------- */
 const title=$('title');
+const TITLE_CAST=[['tencho',83,54],['shiro',122,58],['tanaka',6,58],['suzuki',150,60],['tochou',169,57,'lurk']];
+let titleConfirm=false;
+window.addEventListener('resize',()=>{if(!title.hidden)showTitle(titleConfirm);});
 function hasSave(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');return !!(s&&s.phase&&s.phase!=='intro');}catch(e){return false;}}
 function showTitle(confirm){
+  titleConfirm=confirm;
   Q=[];showing=false;clearInterval(typing);typing=null;win.hidden=true;document.body.classList.remove('talking');hideModal();hideToast();
   const sv=hasSave();
   const info=(S.phase==='end'?'第1章クリア':(S.day+'日目'))+(S.domain?'　'+esc(S.domain):'');
@@ -681,7 +690,10 @@ function showTitle(confirm){
   if(confirm)menu=`<p class="tq">いまの記録は消えます。はじめからにしますか？</p><button role="menuitem" data-t="yes">はい</button><button role="menuitem" data-t="no">いいえ</button>`;
   else if(sv)menu=`<button role="menuitem" data-t="cont">つづきから<span class="sinfo">${info}</span></button><button role="menuitem" data-t="new">はじめから</button>`;
   else menu=`<button role="menuitem" data-t="new">はじめる</button>`;
-  title.innerHTML=`<div class="tbox"><div class="tlogo">${spr(IC.shop,7)}</div><h1 class="tname">Getting Secure It</h1><p class="tsub">ネットショップを、1日ずつ守っていこう</p>
+  const sc=Math.max(1,Math.min(3,Math.floor((window.innerWidth-26)/180)));
+  const chars=TITLE_CAST.map(([id,x,y,cls])=>`<span class="ch${cls?' '+cls:''}" data-cast="${id}" data-s="${sc}" style="left:${x*sc}px;top:${y*sc}px">${spr(frameRows(CAST[id].rows,tick),sc,'')}</span>`).join('');
+  title.innerHTML=`<div class="tbox"><h1 class="tname"><small>よろず屋ピクセル堂を守れ</small>Getting<br>Secure It</h1>
+    <div class="scene" style="width:${180*sc}px;height:${110*sc}px" aria-label="夜の商店街に立つよろず屋ピクセル堂" role="img"><img src="title.png" alt="" width="${180*sc}" height="${110*sc}">${chars}</div><p class="tsub">ネットショップを、1日ずつ守っていこう</p>
     <div class="menu" role="menu" aria-label="メニュー">${menu}</div><p class="tver">デモ版（第1章 通信編：0〜3日目）</p></div>`;
   title.hidden=false;
   const f=title.querySelector('button');if(f)f.focus();
