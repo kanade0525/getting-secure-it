@@ -238,3 +238,32 @@ sprite("demon16", { w:16, h:16 }, `
 sprite("demon16b", { base:"demon16", swap:{ D:"P", P:"p" } })
 
 sheet("chars16", ["shiro16","demon16","demon16b"], { pad: 1 })
+
+// ---------- 通信図のノード（16×16）：ルーター / インターネットの雲 ----------
+// ルーター：黒枠の機器＋アンテナ2本＋緑/橙のランプ
+sprite("router16", { w:16, h:16 }, `
+  ................
+  ....K......K....
+  ....K......K....
+  ....K......K....
+  ..KKKKKKKKKKKK..
+  ..KnnnnnnnnnnK..
+  ..KnLLLLLLLLnK..
+  ..KngLLLLLLynK..
+  ..KnLLLLLLLLnK..
+  ..KnLLLLLLLLnK..
+  ..KnLLLLLLLLnK..
+  ..KKKKKKKKKKKK..
+  ...K........K...
+  ...K........K...
+  ................
+  ................`)
+
+// インターネット：青い雲（白いハイライト）
+sprite("cloud16", { w:16, h:16, outline:"K" },
+  ellipse(8, 10, 7, 3, "b"),
+  circ(5, 8, 3, "b"), circ(10, 7, 4, "b"), circ(13, 9, 2, "b"),
+  hline(2, 12, 12, "B"),
+  px(5, 6, "W"), px(6, 6, "W"), px(5, 7, "W"))
+
+sheet("netnodes", ["router16","cloud16"], { pad: 1 })

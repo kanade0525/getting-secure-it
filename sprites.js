@@ -460,6 +460,8 @@ icons: {
   srv: ["NNNNNNNNNN","NLLLLLLLLN","NLgLLLLLWN","NNNNNNNNNN","NLLLLLLLLN","NLgLLLLLWN","NNNNNNNNNN","NLLLLLLLLN","NLgLLLLLWN","NNNNNNNNNN",".KK....KK."],
   mail: ["KKKKKKKKKK","KKWWWWWWKK","KWKWWWWKWK","KWWKWWKWWK","KWWWKKWWWK","KWWWWWWWWK","KKKKKKKKKK"],
   logo_registrar: ["..KKKK..",".KYYYYK.","KYyKKyYK","KYyyyyYK","KYYYYYYK","KYYYYYYK",".KYYYYK.","..KKKK.."],
+  router: ["................","....K......K....","....K......K....","....K......K....","..KKKKKKKKKKKK..","..KnnnnnnnnnnK..","..KnLLLLLLLLnK..","..KngLLLLLLynK..","..KnLLLLLLLLnK..","..KnLLLLLLLLnK..","..KnLLLLLLLLnK..","..KKKKKKKKKKKK..","...K........K...","...K........K...","................","................"],
+  cloud: [".........KKKKK....","........KbbbbbK...",".....KKKbbbbbbbK..","....KbbbbbbbbbbbK.","...KbbWWbbbbbbbbK.","..KbbbWbbbbbbbbbK.","..KbbbbbbbbbbbbbbK",".KbbbbbbbbbbbbbbbK",".KbbbbbbbbbbbbbbbK",".KbbbbbbbbbbbbbbbK","..KBBBBBBBBBBBBbK.","...KKKbbbbbbbKKK..","......KKKKKKK....."],
   logo_cloud: ["...KK...","..KbbK..",".KbWbbK.","KbbbbbbK","KbbbbbbK","KBBBBBBK",".KKKKKK.","........"],
   item_robot: ["...KKKK...","..KnnnnK..","..KnKKnK..","..KnnnnK..",".KKKKKKKK.","KnLLLLLLnK","KnLrLLrLnK","KnLLLLLLnK","KnLLLLLLnK",".KnnnnnnK.","..KK..KK..","..KK..KK.."],
   item_mug: ["..........","..LLLLLL..",".LWWWWWWL.",".LWbbbbWLK",".LWbbbbWKK",".LWbbbbWKK",".LWbbbbWLK",".LWWWWWWL.",".LLLLLLLL.","..LLLLLL..","..........",".........."],

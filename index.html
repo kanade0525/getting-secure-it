@@ -69,6 +69,12 @@ p{margin:0 0 10px}
 .lbl{font-size:12px;fill:var(--ink);font-family:inherit}
 .pl{font-size:10px;fill:var(--ink);font-family:inherit}
 .warnT{fill:var(--danger)}
+.okT{fill:var(--safe)}
+.tapline{animation:tapflow .9s linear infinite}
+@keyframes tapflow{to{stroke-dashoffset:-16}}
+.atk-hit{animation:atkpulse .45s ease}
+@keyframes atkpulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.tapline{animation:none}.atk-hit{animation:none}}
 .log{background:var(--win-bg);color:#c9cff5;border:3px solid var(--line);padding:10px 12px;font-size:14px;line-height:1.7;min-height:150px;margin:12px 0;overflow-wrap:anywhere}
 .log .bad{color:#ff8a94}
 .log .ok{color:#7ee59a}
@@ -955,24 +961,25 @@ const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
 function renderNet(){
   const c=S.cfg,atk=attackerOf();
   const atkOn=busy||(S.last&&S.last.lines.length>0);
+  const defended=!!(S.last&&S.last.ok);
   const atkG=atkOn?`
-    <line id="tap" x1="116" y1="80" x2="116" y2="138" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 4"/>
-    ${sprG(frameRows(atk.rows,tick),90,140,3.3,'atk')}
-    <text x="116" y="210" text-anchor="middle" class="lbl warnT">攻撃者</text>`:'';
+    <line id="tap" class="${defended?'':'tapline'}" x1="116" y1="86" x2="116" y2="148" stroke="${defended?'var(--muted)':'var(--danger)'}" stroke-width="2" stroke-dasharray="4 4"/>
+    ${defended?`<g id="shield"><circle cx="116" cy="78" r="13" fill="var(--safe)" opacity="0.18"/>${sprG(IC.lock,108,71,2.1)}</g>`:''}
+    <g id="steal" opacity="0"><rect width="12" height="9" fill="var(--danger)"/></g>
+    ${sprG(frameRows(atk.rows,tick),90,150,3.3,'atk')}
+    <text x="116" y="218" text-anchor="middle" class="lbl ${defended?'okT':'warnT'}">攻撃者</text>
+    ${defended?'<text x="116" y="140" text-anchor="middle" class="lbl okT">防いだ</text>':''}`:'';
   const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、ルーター、インターネット、ショップのサーバーの通信図${atkOn?'。攻撃者が通信を盗み見ている':''}">
     <rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
     <text x="12" y="20" class="lbl">カフェのWi-Fi</text>
     <line x1="70" y1="68" x2="100" y2="68" stroke="var(--line)" stroke-width="3"/>
-    <line x1="132" y1="68" x2="176" y2="68" stroke="var(--line)" stroke-width="3"/>
-    <line x1="236" y1="68" x2="288" y2="68" stroke="var(--line)" stroke-width="3"/>
+    <line x1="134" y1="68" x2="178" y2="68" stroke="var(--line)" stroke-width="3"/>
+    <line x1="234" y1="68" x2="288" y2="68" stroke="var(--line)" stroke-width="3"/>
     ${sprG(CAST.tanaka.rows,16,34,3.3)}
     <text x="42" y="104" text-anchor="middle" class="lbl">お客さん</text>
-    <rect x="100" y="57" width="32" height="22" rx="4" fill="var(--soft)" stroke="var(--line)" stroke-width="2"/>
-    <line x1="108" y1="57" x2="105" y2="48" stroke="var(--line)" stroke-width="2"/><circle cx="105" cy="46" r="2" fill="var(--line)"/>
-    <line x1="124" y1="57" x2="127" y2="48" stroke="var(--line)" stroke-width="2"/><circle cx="127" cy="46" r="2" fill="var(--line)"/>
+    ${sprG(IC.router,100,52,2)}
     <text x="116" y="104" text-anchor="middle" class="lbl">ルーター</text>
-    <g fill="var(--line)"><circle cx="192" cy="60" r="13"/><circle cx="216" cy="57" r="15"/><circle cx="228" cy="64" r="11"/><ellipse cx="206" cy="67" rx="31" ry="14"/></g>
-    <g fill="var(--bg)"><circle cx="192" cy="60" r="10.5"/><circle cx="216" cy="57" r="12.5"/><circle cx="228" cy="64" r="8.5"/><ellipse cx="206" cy="67" rx="28.5" ry="11.5"/></g>
+    ${sprG(IC.cloud,179,46,3)}
     <text x="206" y="104" text-anchor="middle" class="lbl">インターネット</text>
     ${sprG(IC.srv,288,34,4)}
     <text x="316" y="104" text-anchor="middle" class="lbl">ショップ</text>
@@ -1197,18 +1204,36 @@ function renderConsole(){
 function animatePacket(line,r,cb){
   const g=$('pkt');
   if(!g||RM){setTimeout(cb,RM?150:0);return;}
-  const col=line.k==='ok'?'var(--safe)':line.k==='bad'?'var(--danger)':'var(--accent)';
+  const bad=line.k==='bad';
+  const col=line.k==='ok'?'var(--safe)':bad?'var(--danger)':'var(--accent)';
   g.querySelector('rect').setAttribute('fill',col);
-  $('pktL').textContent=line.k==='ok'?'#%&@!?':line.k==='bad'?(r.pkt||''):'';
+  $('pktL').textContent=line.k==='ok'?'#%&@!?':bad?(r.pkt||''):'';
   g.setAttribute('opacity','1');
-  const tap=$('tap'),t0=performance.now(),dur=1600;
+  const tap=$('tap'),t0=performance.now(),dur=1600;let fired=false;
   function step(t){
     const p=Math.min(1,(t-t0)/dur),x=62+p*226;
     g.setAttribute('transform',`translate(${x},62)`);
-    if(tap)tap.setAttribute('stroke-width',Math.abs(x+8-116)<20?'5':'2');
+    const near=Math.abs(x+8-116)<14;
+    if(tap)tap.setAttribute('stroke-width',near?'4':'2');
+    if(near&&!fired){fired=true;bad?exfil(r.pkt):defendPulse();}
     if(p<1)requestAnimationFrame(step);else{g.setAttribute('opacity','0');if(tap)tap.setAttribute('stroke-width','2');cb();}
   }
   requestAnimationFrame(step);
+}
+// 盗まれたデータが点線を伝って攻撃者へ吸い込まれる演出
+function exfil(pkt){
+  const steal=$('steal');if(!steal)return;
+  steal.querySelector('rect').setAttribute('fill','var(--danger)');
+  const t0=performance.now(),dur=600;
+  (function st(t){const p=Math.min(1,(t-t0)/dur),y=84+p*58;
+    steal.setAttribute('transform',`translate(110,${y})`);
+    steal.setAttribute('opacity',p<1?(0.5+0.5*(1-p)):'0');
+    if(p<1)requestAnimationFrame(st);else{const a=$('atk');if(a){a.classList.add('atk-hit');setTimeout(()=>a.classList.remove('atk-hit'),450);}}
+  })();
+}
+// 防げたとき：攻撃者が手を伸ばしても盾で弾かれる演出
+function defendPulse(){
+  const sh=$('shield');if(sh){sh.classList.add('atk-hit');setTimeout(()=>sh.classList.remove('atk-hit'),450);}
 }
 function runAttack(r,done){
   S.last={ok:r.ok,lines:[]};renderNet();busy=true;
