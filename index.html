@@ -179,23 +179,33 @@ select:disabled{opacity:.45}
 .rv-txt{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
 .rv-bad{background:rgba(226,88,94,.1);margin:0 -12px;padding-left:12px;padding-right:12px}
 .rv-ran{color:var(--danger)}
-.hijack{border-color:var(--danger);box-shadow:4px 4px 0 var(--danger)}
-.hijack .urlbar.danger{border-color:var(--danger)}
-.hijack .urlbar .warn{color:var(--danger);font-weight:bold}
-.hijack .viewport{animation:hjIn .45s steps(6,end)}
-.hj-note{margin:0;padding:8px 12px;background:rgba(226,88,94,.12);color:var(--danger);font-size:12px;border-bottom:2px solid var(--soft)}
-.phish{padding:14px 12px}
-.phish-h{font-weight:bold;font-size:15px}
-.phish-f{display:block;margin:10px 0 0}
-.phish-f span{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
-.phish-f input{width:100%}
-.phish .btn{margin-top:12px}
-.phish-warn{color:var(--danger);margin:10px 0 0}
-.steal{margin:0 12px 12px;border:3px solid var(--danger);background:var(--surface);padding:10px 12px}
-.steal-h{color:var(--danger);font-weight:bold;font-size:13px;margin-bottom:6px}
-.steal-c{display:block;font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--win-bg);color:#c9cff5;border:2px solid var(--line);padding:6px 8px;overflow-x:auto;white-space:pre}
-@keyframes hjIn{from{opacity:.25;transform:translateY(10px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.hijack .viewport{animation:none}}
+/* 解説カード（偽ブラウザの枠の外。ゲーム内の説明であることを明示） */
+.hj-meta{margin:0 0 10px;border:2px solid var(--line);border-left:6px solid var(--accent);background:var(--soft);padding:10px 12px}
+.hj-meta p{margin:0;font-size:13px;line-height:1.7}
+.hj-meta-h{display:inline-block;font-size:11px;font-weight:bold;color:var(--on-accent);background:var(--accent);padding:1px 8px;margin-bottom:7px}
+.hj-meta.danger{border-left-color:var(--danger)}
+.hj-meta.danger .hj-meta-h{background:var(--danger);color:#fff}
+.hj-steal-c{display:block;font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#000;color:#9cff9c;border:2px solid var(--line);padding:6px 8px;margin:6px 0 0;overflow-x:auto;white-space:pre}
+.hj-back{margin:0 0 4px}
+/* 偽ブラウザの中身＝飛ばされた先の別サイト（全体まっ黒で、お店とは別物と一目でわかる） */
+.browser.evil{border-color:var(--danger);box-shadow:4px 4px 0 var(--danger)}
+.browser.evil .chrome.danger{background:#1b0d0f}
+.browser.evil .chrome .dots i{background:#000;border-color:#5a2b2f}
+.browser.evil .urlbar.danger{background:#000;border-color:var(--danger);color:#ff8f93}
+.browser.evil .urlbar.danger .u{color:#ff8f93}
+.urlbar.danger .tri{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;background:var(--danger);color:#fff;font-weight:bold;font-size:11px}
+.browser.evil .viewport{background:#000;color:#e7e7ea;animation:hjIn .45s steps(6,end)}
+.hj-load{padding:44px 16px;text-align:center;color:#8a8a93;font-size:13px}
+.evil-head{display:flex;align-items:center;gap:8px;padding:12px;background:#000;color:#ffd23f;font-weight:bold;font-size:17px;border-bottom:2px solid #3a2a00;letter-spacing:1px}
+.evil-logo{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;background:#ffd23f;color:#000;border-radius:3px}
+.evil .phish{padding:14px 12px}
+.evil .phish-h{font-weight:bold;font-size:15px;color:#fff}
+.evil .phish-f{display:block;margin:10px 0 0}
+.evil .phish-f span{display:block;font-size:12px;color:#9a9aa3;margin-bottom:3px}
+.evil .phish-f input{width:100%;background:#15151b;color:#e7e7ea;border:2px solid #3a3a46}
+.evil .phish .btn{margin-top:12px;background:#ffd23f;color:#000;border-color:#ffd23f;box-shadow:3px 3px 0 #3a2a00}
+@keyframes hjIn{from{opacity:.2;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.browser.evil .viewport{animation:none}}
 .modal{position:fixed;inset:0;z-index:20;background:rgba(5,6,20,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
 .modal[hidden]{display:none}
 .sheet{max-width:620px;width:100%;max-height:100%;overflow:auto;background:var(--surface);border:4px solid var(--line);padding:18px}
@@ -393,33 +403,39 @@ function renderShop(){
   h+=`<p style="margin-top:18px"><button class="link" data-act="toTitle">タイトルへ戻る</button></p>`;
   $('p-shop').innerHTML=h;
 }
-function hijackHTML(){
-  return `<div class="browser hijack">
-    <div class="chrome"><span class="dots"><i></i><i></i><i></i></span>
-      <span class="urlbar danger"><span class="warn small">保護なし</span><span class="u">http://当選プレゼント.example/login</span></span>
-      <span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>
-    <div class="viewport">
-      <p class="hj-note">レビューを開いただけで、お店のサイトが勝手にこの画面に切り替わりました。</p>
-      <div class="phish">
-        <div class="phish-h">【重要】ログインの有効期限が切れました</div>
-        <p class="small" style="margin:4px 0 0">続けるには、もう一度メールアドレスとパスワードを入力してください。</p>
-        <label class="phish-f"><span>メールアドレス</span><input type="text" disabled placeholder="you@example.com"></label>
-        <label class="phish-f"><span>パスワード</span><input type="password" disabled placeholder="••••••••"></label>
-        <button class="btn primary" disabled>ログイン</button>
-        <p class="phish-warn small">※ これはニセのログイン画面。入れた情報は攻撃者に届きます（このゲームでは入力できません）。</p>
-      </div>
-      <div class="steal">
-        <div class="steal-h">同時に、攻撃者の手元へ送られたもの</div>
-        <code class="steal-c">cookie: SESSION=pixeldo_8f3ad92c17b4e6…</code>
-        <p class="small" style="margin:6px 0 0">これはお客さんのログイン状態そのもの。これがあれば、パスワードなしでログインできてしまいます。</p>
-      </div>
-    </div>
-    <div class="store-foot" style="border-top:0;text-align:left"><button class="btn" data-act="xssBack">店のサイトに戻す</button></div>
-  </div>`;
+function xssNav(day){
+  if(S.day!==day||!S.reviewRes||!S.reviewRes.xss)return;
+  S.reviewRes.redir='loading';save();render();
+  setTimeout(()=>{if(S.day===day&&S.reviewRes&&S.reviewRes.xss){S.reviewRes.redir='done';save();render();}},650);
+}
+function hijackHTML(nav){
+  const url='http://当選プレゼント.example/login';
+  const chrome=`<div class="chrome danger"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="urlbar danger"><span class="tri">!</span><span class="u">${url}</span></span>
+      <span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>`;
+  if(nav==='loading'){
+    return `<div class="hj-meta"><span class="hj-meta-h">解説</span><p>レビューを開いた瞬間、ブラウザが <b>pixeldo.shop から別のサイトへ勝手に移動</b>しはじめました。</p></div>
+      <div class="browser evil">${chrome}<div class="viewport"><div class="hj-load">当選プレゼント.example を開いています…</div></div></div>`;
+  }
+  // 枠の中（偽ブラウザ）＝お客さんの画面で実際に起きていること。枠の外のカード＝解説。
+  return `<div class="hj-meta"><span class="hj-meta-h">解説：いま起きていること</span><p>レビューを開いただけで、ブラウザが <b>pixeldo.shop から下の別サイトへ勝手に移動</b>しました。お店とは無関係の、攻撃者が用意したページです（ログイン画面もニセモノ。入力はできないようにしてあります）。</p></div>
+    <div class="browser evil">${chrome}
+      <div class="viewport">
+        <div class="evil-head"><span class="evil-logo">◆</span><span>特別当選センター</span></div>
+        <div class="phish">
+          <div class="phish-h">【重要】ログインの有効期限が切れました</div>
+          <p class="small" style="margin:4px 0 0">続けるには、もう一度メールアドレスとパスワードを入力してください。</p>
+          <label class="phish-f"><span>メールアドレス</span><input type="text" disabled placeholder="you@example.com"></label>
+          <label class="phish-f"><span>パスワード</span><input type="password" disabled placeholder="••••••••"></label>
+          <button class="btn primary" disabled>ログイン</button>
+        </div>
+      </div></div>
+    <div class="hj-meta danger"><span class="hj-meta-h">解説：画面には出ないけど、同時に起きたこと</span><p>この瞬間、お客さんのログイン状態が攻撃者の手元へ送られました。</p><code class="hj-steal-c">cookie: SESSION=pixeldo_8f3ad92c17b4e6…</code><p style="margin:6px 0 0">これがあれば、パスワードを知らなくても、そのお客さんとしてログインできてしまいます。</p></div>
+    <div class="hj-back"><button class="btn" data-act="xssBack">お店のサイト（pixeldo.shop）に戻る</button></div>`;
 }
 function browserHTML(){
   const d=DAYS[S.day],demo=d&&d.demo;
-  if(demo&&demo.kind==='review'&&S.cfg.code.review!=='escape'&&S.reviewRes&&S.reviewRes.xss&&S.reviewRes.redir)return hijackHTML();
+  if(demo&&demo.kind==='review'&&S.cfg.code.review!=='escape'&&S.reviewRes&&S.reviewRes.xss&&S.reviewRes.redir)return hijackHTML(S.reviewRes.redir);
   const sec=S.cfg.https&&S.cfg.redirect;
   const url=(sec?'https://':'http://')+esc(S.domain);
   let h=`<div class="browser">
@@ -496,7 +512,7 @@ function reviewDemoHTML(){
     if(r.xss){
       h+=rv('名無し',5,'<span class="rv-ran">（このレビューに仕込まれた命令が動きました）</span>','rv-bad');
       h+=`<div class="leak" style="margin:10px 0 2px"><div class="leakhd">このレビューを開いた人の画面で、勝手に処理が走った</div><p class="small" style="margin:6px 0 0">・知らないサイトへ飛ばされた<br>・ログイン状態（クッキー）が盗まれた</p>
-        <div class="acts" style="margin:8px 0 0"><button class="btn" data-act="xssPlay">開いた人の画面を見る</button></div></div>`;
+        <div class="acts" style="margin:8px 0 0"><button class="btn" data-act="xssPlay">開いた人の画面で何が起きるか見る</button></div></div>`;
     }else{
       h+=rv('名無し',5,esc(o.payload));
       h+=`<div class="box" style="margin:10px 0 2px;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">記号もそのまま、ただの文字として表示されました。画面は動きません。</p></div>`;
@@ -970,9 +986,9 @@ document.addEventListener('click',e=>{
   else if(a==='tryPayload'){const d=DAYS[S.day];S.shopQ=d&&d.demo?d.demo.payload:'';S.shopRes=demoSearch(S.shopQ);save();render();
     if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の個人情報が全部出てきちゃった'},{who:SHIRO,t:'これが攻撃者のやったこと。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='postReview'){const safe=S.cfg.code.review==='escape';S.reviewRes=safe?{safe:true}:{xss:true,redir:false};save();render();
-    if(!safe){const day=S.day;setTimeout(()=>{if(S.day===day&&S.reviewRes&&S.reviewRes.xss){S.reviewRes.redir=true;save();render();}},850);
+    if(!safe){const day=S.day;setTimeout(()=>{xssNav(day);},850);
       if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのピクセルハブで直そう'}]);}}}
-  else if(a==='xssPlay'){if(S.reviewRes&&S.reviewRes.xss){S.reviewRes.redir=true;save();render();}}
+  else if(a==='xssPlay'){xssNav(S.day);}
   else if(a==='xssBack'){if(S.reviewRes){S.reviewRes.redir=false;save();render();}}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();}
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
