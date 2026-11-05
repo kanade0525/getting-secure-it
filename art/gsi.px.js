@@ -182,3 +182,15 @@ sprite("item_cat", { w: 12, h: 12 }, `
   ..KyyyK...
   ..KKKKK...`)
 sheet("items", ["item_*"], { pad: 1 })
+
+// ブラウザの再読み込みアイコン（8×8、円形の矢印）
+sprite("icon_reload", { w: 8, h: 8 }, `
+  ..NNN.N.
+  .N...NNN
+  N....N.N
+  N.......
+  N.......
+  N......N
+  .N...N.N
+  ..NNN.N.`)
+sheet("ui", ["icon_*"], { pad: 1 })

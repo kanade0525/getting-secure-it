@@ -114,6 +114,41 @@ select:disabled{opacity:.45}
 .leakrow{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:2px dashed var(--soft);font-size:14px}
 .leakrow:last-of-type{border-bottom:0}
 .leakrow .lmail{color:var(--muted);font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.browser{border:3px solid var(--line);background:var(--surface);margin:12px 0 16px;box-shadow:4px 4px 0 var(--line)}
+.chrome{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--soft);border-bottom:3px solid var(--line)}
+.dots{display:flex;gap:5px;flex:none}
+.dots i{display:block;width:10px;height:10px;border:2px solid var(--line);border-radius:50%;background:var(--surface)}
+.urlbar{flex:1 1 auto;display:flex;align-items:center;gap:6px;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:3px 10px;font-size:13px;min-width:0}
+.urlbar .u{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reload{flex:none;cursor:pointer;display:flex;padding:2px}
+.viewport{background:var(--surface)}
+.store-head{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:2px solid var(--soft)}
+.store-head .sh-name{display:flex;flex-direction:column;min-width:0}
+.store-head .nm{font-size:17px;line-height:1.3}
+.store-head .tag{font-size:11px;color:var(--muted)}
+.store-head .cart{margin-left:auto;flex:none;font-size:12px;border:2px solid var(--line);padding:4px 8px;background:var(--bg)}
+.hero{display:flex;flex-direction:column;gap:2px;padding:16px 14px;background:var(--accent);color:var(--on-accent)}
+.hero-t{font-size:18px;line-height:1.3}
+.hero-s{font-size:12px;opacity:.85}
+.store-search{display:flex;gap:8px;padding:12px 12px 4px}
+.store-search input{flex:1 1 auto;min-width:0}
+.store-body{padding:4px 12px 8px}
+.store-body .grid{padding:8px 0}
+.store-foot{padding:12px;margin-top:4px;border-top:2px solid var(--soft);font-size:11px;color:var(--muted);text-align:center}
+.checkout{margin:4px 12px 0;border:2px solid var(--line)}
+.co-head{padding:8px 12px;background:var(--soft);border-bottom:2px solid var(--line)}
+.co-item{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.co-item .co-name{flex:1 1 auto}
+.co-item .co-price{color:var(--gold)}
+.co-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 12px}
+.devtools{margin:12px;border:2px solid var(--line);background:var(--win-bg);color:#c9cff5}
+.dt-head{font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:6px 10px;border-bottom:2px solid var(--line);color:#9aa3cf}
+.dt-note{font-size:12px;padding:8px 10px 0;margin:0;color:#c9cff5}
+.dt-body{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.dt-body input{font:inherit;background:#0b0d2a;color:#eef0ff;border:2px solid #3a3f6b;padding:3px 6px;min-height:36px;width:100%}
+.dt-acts{display:flex;gap:8px;flex-wrap:wrap;padding:0 10px}
+.dt-ok{font-size:12px;padding:0 10px 4px;margin:4px 0 0;color:var(--safe)}
+.devtools .btn{margin-left:10px;margin-bottom:10px}
 .modal{position:fixed;inset:0;z-index:20;background:rgba(5,6,20,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
 .modal[hidden]{display:none}
 .sheet{max-width:620px;width:100%;max-height:100%;overflow:auto;background:var(--surface);border:4px solid var(--line);padding:18px}
@@ -241,7 +276,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,orderRes:null,seenTamper:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -303,27 +338,34 @@ const CATALOG=[
 ];
 function renderShop(){
   const live=S.domain&&S.dnsOk&&S.phase!=='setup'&&S.phase!=='intro';
-  const sec=S.cfg.https&&S.cfg.redirect;
-  let h=`<h2>サイト</h2><p class="muted small">よろず屋ピクセル堂のネットショップ</p>
-  <div class="site box">${S.domain?`<div class="url">${sec?spr(IC.lock,3,'暗号化されています'):''}<span>${sec?'https':'http'}://${esc(S.domain)}</span></div>`:'<div class="url muted">ドメイン未取得</div>'}
-  <p class="state">${live?'公開中':'未公開'}</p></div>`;
+  let h=`<h2>サイト</h2><p class="muted small">お客さんから見える、お店のサイトです</p>`;
   if(S.phase==='setup')h+=`<div class="box"><p>お店はまだきみのパソコンの中にあるだけ。「管理」タブでドメインを取得して、リリースしよう。</p><button class="btn primary" data-act="goConsole">管理タブを開く</button></div>`;
+  else if(!live)h+=`<div class="box"><p class="muted">まだ公開されていません。</p></div>`;
+  else h+=browserHTML();
   h+=tasksHTML();
-  if(live)h+=shopHTML();
   h+=`<p style="margin-top:18px"><button class="link" data-act="toTitle">タイトルへ戻る</button></p>`;
   $('p-shop').innerHTML=h;
 }
-function shopHTML(){
+function browserHTML(){
   const d=DAYS[S.day],demo=d&&d.demo;
-  let h=`<div class="sec"><h3>よろず屋ピクセル堂</h3>
-    <div class="domrow"><input type="text" id="shopQ" placeholder="商品名で検索" value="${esc(S.shopQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false">
-      <button class="btn" data-act="doSearch">検索</button></div>`;
-  if(demo&&demo.payload&&S.phase!=='intro'&&S.phase!=='setup'&&S.phase!=='day0'&&(S.cfg.code.search!=='param')){
-    h+=`<div class="capanel"><p class="small" style="margin:0 0 6px">${esc(demo.hint)}</p>
+  const sec=S.cfg.https&&S.cfg.redirect;
+  const url=(sec?'https://':'http://')+esc(S.domain);
+  let h=`<div class="browser">
+    <div class="chrome"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="urlbar">${sec?spr(IC.lock,2.5,'保護された通信'):'<span class="warn small">保護なし</span>'}<span class="u">${url}</span></span>
+      <span class="reload" data-act="doSearch" role="button" aria-label="再読み込み">${spr(IC.reload,2.5,'再読み込み')}</span></div>
+    <div class="viewport">
+      <div class="store-head">${spr(IC.shop,2.5,'よろず屋ピクセル堂')}<span class="sh-name"><span class="nm">よろず屋ピクセル堂</span><span class="tag">レトロ雑貨のネットショップ</span></span><span class="cart">カート ${S.cart||0}</span></div>
+      <div class="hero"><span class="hero-t">レトロ雑貨、あつめました。</span><span class="hero-s">昭和のブリキからホーロー看板まで。</span></div>
+      <div class="store-search"><input type="text" id="shopQ" placeholder="商品名で検索" value="${esc(S.shopQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn" data-act="doSearch">検索</button></div>`;
+  if(demo&&demo.payload&&(S.cfg.code.search!=='param')){
+    h+=`<div class="capanel" style="margin:0 12px 10px"><p class="small" style="margin:0 0 6px">${esc(demo.hint)}</p>
       <div class="acts" style="align-items:center"><code class="optc" style="margin:0">${esc(demo.payload)}</code><button class="btn" data-act="tryPayload">これを入れて検索</button></div></div>`;
   }
-  h+=`<div class="res" style="padding:0 12px 8px">${searchResultHTML()}</div></div>`;
+  h+=`<div class="store-body">${searchResultHTML()}</div>`;
   if(demo&&demo.kind==='order')h+=orderDemoHTML();
+  h+=`<div class="store-foot">© よろず屋ピクセル堂　${esc(S.domain)}</div>
+    </div></div>`;
   return h;
 }
 function orderDemoHTML(){
@@ -331,30 +373,38 @@ function orderDemoHTML(){
   if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')return '';
   const fixed=S.cfg.code.price==='server';
   const price=(S.orderPrice==null?real:S.orderPrice),qty=(S.orderQty==null?1:S.orderQty);
+  const buyQty=(S.buyQty==null?1:S.buyQty);
   const yen=n=>'¥'+Number(n).toLocaleString();
-  let h=`<div class="sec"><h3>お会計</h3>
-    <div class="row"><div class="desc" style="display:flex;gap:10px;align-items:center">${spr(IC[o.product.icon],3,o.product.name)}<span>${esc(o.product.name)}<span class="note">定価 ${yen(real)}</span></span></div></div>
-    <div class="capanel"><p class="small" style="margin:0 0 4px">${esc(o.hint)}</p>
-      <p class="small muted" style="margin:0 0 8px">注文のときブラウザが送るデータ（検証ツールのNetworkで見える）</p>
-      <div class="kv" style="align-items:center;grid-template-columns:auto 1fr"><span>price</span><input type="number" id="ordPrice" value="${price}" inputmode="numeric"><span>qty</span><input type="number" id="ordQty" value="${qty}" inputmode="numeric"></div>
-      ${fixed?'<p class="small msg-ok" style="margin:8px 0 0">お店側で決める設定になっています。書き換えても注文には反映されません。</p>':`<div class="acts" style="margin-top:8px"><button class="btn" data-act="ordSet" data-p="1">price を 1 に</button><button class="btn" data-act="ordSet" data-q="-1">qty を -1 に</button></div>`}
-    </div>
-    <div class="row"><div class="desc">送る内容：${yen(price)} × ${qty}個</div><button class="btn primary" data-act="ordSend">この内容で注文する</button></div>
-    <div class="res" style="padding:0 12px 10px">${orderResultHTML()}</div></div>`;
+  // ふつうのお会計（価格は固定表示・数量だけ選べる）
+  let h=`<div class="checkout">
+    <div class="co-head">お会計</div>
+    <div class="co-item">${spr(IC[o.product.icon],3,o.product.name)}<span class="co-name">${esc(o.product.name)}</span><span class="co-price">${yen(real)}</span></div>
+    <div class="co-row"><label for="buyQty">数量</label><select id="buyQty" data-buyqty>${[1,2,3,4,5].map(n=>`<option value="${n}" ${buyQty===n?'selected':''}>${n}</option>`).join('')}</select></div>
+    <div class="co-row"><span>合計</span><b>${yen(real*buyQty)}</b></div>
+    <button class="btn primary" data-act="ordBuy" style="margin:4px 12px 12px">注文する</button>`;
+  // 開発者ツール（検証ツール）：送信データを書き換える攻撃面
+  h+=`<div class="devtools"><div class="dt-head">開発者ツール ＞ Network ＞ POST /order</div>
+      <p class="dt-note">画面では価格は変えられない。でも注文ボタンを押すと、ブラウザはこのデータを送る。検証ツールで書き換えて再送信できる。</p>
+      <div class="dt-body"><span>price</span><input type="number" id="ordPrice" value="${price}" inputmode="numeric"><span>qty</span><input type="number" id="ordQty" value="${qty}" inputmode="numeric"></div>
+      ${fixed?'<p class="dt-ok">お店側で金額を決める設定になっています。書き換えて再送信しても反映されません。</p>':`<div class="dt-acts"><button class="btn mini" data-act="ordSet" data-p="1">price を 1 に</button><button class="btn mini" data-act="ordSet" data-q="-1">qty を -1 に</button></div>`}
+      <button class="btn" data-act="ordSend" style="margin:8px 0 0">書き換えて再送信する</button></div>`;
+  h+=`<div class="res" style="padding:8px 12px 12px">${orderResultHTML()}</div></div>`;
   return h;
 }
 function orderResultHTML(){
   const r=S.orderRes;if(!r)return '';
   const yen=n=>'¥'+Number(n).toLocaleString();
-  if(r.tampered)return `<div class="leak"><div class="leakhd">不正な注文が成立してしまった：${yen(r.total)}（${r.qty}個）</div><p class="small" style="margin:6px 0 0">定価 ${yen(r.real)} の品が、送った金額のまま通ってしまいました。これが「ほらこういうことができてしまう」の状態です。</p></div>`;
-  if(r.safe)return `<div class="box" style="margin:8px 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">お店が計算し直しました：${yen(r.total)}（${r.qty}個）。送った金額は使われませんでした。</p></div>`;
+  if(r.tampered)return `<div class="leak"><div class="leakhd">不正な注文が成立してしまった：${yen(r.total)}（${r.qty}個）</div><p class="small" style="margin:6px 0 0">画面では ${yen(r.real)} なのに、送信データを書き換えただけで通ってしまいました。これが「ほらこういうことができてしまう」の状態です。</p></div>`;
+  if(r.safe)return `<div class="box" style="margin:8px 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">お店が計算し直しました：${yen(r.total)}（${r.qty}個）。送信データの金額は使われませんでした。</p></div>`;
   return `<p class="muted small" style="margin:8px 0">注文できました：${yen(r.total)}（${r.qty}個）</p>`;
 }
-function computeOrder(){
+function computeOrder(src){
   const o=DAYS[S.day].demo,real=o.product.price;
-  let price=Number(S.orderPrice==null?real:S.orderPrice),qty=Number(S.orderQty==null?1:S.orderQty);
+  let price,qty;
+  if(src==='buy'){price=real;qty=Number(S.buyQty==null?1:S.buyQty);}
+  else{price=Number(S.orderPrice==null?real:S.orderPrice);qty=Number(S.orderQty==null?1:S.orderQty);}
   if(!isFinite(price))price=real;if(!isFinite(qty))qty=1;
-  if(S.cfg.code.price==='server'){const q=Math.max(1,Math.min(99,Math.floor(qty)||1));return {safe:true,total:real*q,qty:q,real};}
+  if(S.cfg.code.price==='server'){const q=Math.max(1,Math.min(99,Math.floor(qty)||1));return {safe:src!=='buy',normal:src==='buy',total:real*q,qty:q,real};}
   const total=price*qty;
   const tampered=price<real||qty<1;
   return {tampered,total,qty,price,real};
@@ -656,7 +706,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.orderRes=null;S.seenTamper=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;
   if(d.svc==='hub')S.svc='hub';
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
@@ -812,8 +862,9 @@ document.addEventListener('click',e=>{
   else if(a==='tryPayload'){const d=DAYS[S.day];S.shopQ=d&&d.demo?d.demo.payload:'';S.shopRes=demoSearch(S.shopQ);save();render();
     if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の個人情報が全部出てきちゃった'},{who:SHIRO,t:'これが攻撃者のやったこと。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();}
-  else if(a==='ordSend'){S.orderRes=computeOrder();save();render();
-    if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、送るデータの金額を書き換えただけで、そのまま通っちゃった'},{who:SHIRO,t:'お店が客の言い値を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
+  else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
+    if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();render();}
 });
@@ -822,6 +873,7 @@ document.addEventListener('change',e=>{
   if(t.dataset.fix){c.code[t.dataset.fix]=t.dataset.v;}
   else if(t.dataset.task){c.tasks[t.dataset.task]=t.checked;}
   else if(t.dataset.app){c.app[t.dataset.app]=t.value;}
+  else if('buyqty' in t.dataset){S.buyQty=Number(t.value);}
   else if(t.dataset.act==='tlsMin')c.tlsMin=t.value;
   else if(t.dataset.act==='hstsAge')c.hstsAge=t.value;
   else if(t.dataset.ci)c.ciph[t.dataset.ci]=t.checked;

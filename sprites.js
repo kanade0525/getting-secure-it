@@ -466,6 +466,7 @@ icons: {
   item_sign: ["KKKKKKKKKK","KRRRRRRRRK","KRWWWWWWRK","KRWRRRRWRK","KRWRYYRWRK","KRWRYYRWRK","KRWRRRRWRK","KRWWWWWWRK","KRRRRRRRRK","KKKKKKKKKK","...KKKK...","...KKKK..."],
   item_bottle: ["....KK....","....Kt K..","...KttK...","...KbbK...","..KbbbbK..","..KbWbbK..","..KbbbbK..","..KbbbbK..","..KbbbbK..","..KbbbbK..","..KKKKKK..",".........."],
   item_cat: [".K.....K..","KyK...KyK.","KyyKKKyyK.","KyWWWWWyK.","KyWKWKWyK.","KyWWWWWyK.","KyWWRWWyK.",".KyWWWyK..","..KyyyK...","..KyRyK...","..KyyyK...","..KKKKK..."],
+  reload: ["..NNN.N.",".N...NNN","N....N.N","N.......","N.......","N......N",".N...N.N","..NNN.N."],
   logo_hub: [".KK..KK.","KppK.Kp.",".KKK.KK.","..Kp.pK.","..KpKK..","..KppK..",".KppppK.","..KKKK.."],
   logo_ca: ["..KKKK..",".KggggK.","KgGGGGgK","KgGWWGgK","KgGGGGgK",".KggggK.",".KGKKGK.","KGK..KGK"]
 }
