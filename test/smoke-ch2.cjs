@@ -52,7 +52,7 @@ const PLAY = {
     const label = await p.locator('.loghead span').innerText();
     const play = PLAY[day];
     await tab('console');
-    if (play.fix) { await svc('hub'); for (const k in play.fix) { await p.check(`input[data-fix="${k}"][data-v="${play.fix[k]}"]`); await p.waitForTimeout(20); } }
+    if (play.fix) { await svc('hub'); for (const k in play.fix) { await p.click(`button[data-act="applyFix"][data-key="${k}"]`); await p.waitForTimeout(40); if (await winUp()) await p.click('#win'); } }
     if (play.appsel || play.appsw) {
       await svc('cloud'); await sub('app');
       for (const k in (play.appsel || {})) { await p.selectOption(`#app-${k}`, play.appsel[k]); await p.waitForTimeout(20); }

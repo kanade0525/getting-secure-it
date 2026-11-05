@@ -1,7 +1,7 @@
 /* Getting Secure It — 第2章 アプリ編（4〜11日目）
-   学習用の防御シミュレーション。各日は「症状→原因確認→修正案を選ぶ→もう一度確かめる→解説」。
+   学習用の防御シミュレーション。各日は「症状→原因確認→対策を入れる→もう一度確かめる→解説」。
    データの形：
-     fixes:[{key,file,title,opts:[{v,l,code,note,bad?}]}]  ピクセルハブで選ぶ修正案（c.code[key]）
+     fix:{key,value,label,done}   ピクセルハブの「対策を入れる」ボタン一発で c.code[key]=value を適用
      app:[{key,l,note,type:'sw'|'sel',opts?}]              ピクセルクラウド「アプリ設定」（c.app[key]）
      tasks:[{id,l,kind}]                                   サイトタブ「お店の対応」（c.tasks[id]）
      check(c)→{ok,lines,why,blocked,todo,voices}
@@ -33,11 +33,7 @@ const D={
     products:[{name:'ブリキのロボット',price:'¥1,800'},{name:'レトロなマグカップ',price:'¥980'},{name:'ホーローの看板',price:'¥3,200'},{name:'すりガラスのびん',price:'¥600'},{name:'まねき猫の貯金箱',price:'¥1,200'}],
     members:[{name:'たなか','mail':'tanaka@****.jp'},{name:'すずき','mail':'suzuki@****.com'},{name:'やまだ','mail':'yamada@****.jp'},{name:'（ほか約1,200件）','mail':'………'}]
   },
-  fixes:[{key:'search',title:'検索の扱い方',opts:[
-    {v:'strip',l:'入力から記号を取り除く',note:'引用符などを消すだけ。別の書き方で抜けられる',bad:true},
-    {v:'reject',l:'記号が入っていたら検索しない',note:'安全だが、「M&M」のような商品名も探せなくなる'},
-    {v:'param',l:'入力は「検索する言葉」として扱う',note:'入力が何であっても命令にはせず、ただの検索語として渡す。これが基本'}
-  ]}],
+  fix:{key:'search',value:'param',label:"SQLインジェクション対策を入れる",done:"入力を命令ではなく「検索する言葉」として扱うようにした（プレースホルダ）。"},
   tasks:[
     {id:'notice',l:'漏えいのお知らせを出す',kind:'notice'},
     {id:'report',l:'個人情報保護委員会に報告する',kind:'report'}
@@ -82,13 +78,7 @@ const D={
     {who:SHIRO,t:'パスワードは「元に戻せない形」にして保存するのが基本。それでも使い回しは危ない'},
     {who:SHIRO,t:'ピクセルハブで保存方法を直して、会員に再設定の案内も出そう'}
   ],
-  fixes:[{key:'hash',file:'auth.js',title:'パスワードの保存',opts:[
-    {v:'plain',l:'そのまま保存',code:'save(password)',note:'読める形のまま。流出したら全員分が即バレる',bad:true},
-    {v:'encrypt',l:'暗号化して保存',code:'save(encrypt(password, key))',note:'鍵があれば元に戻せる。鍵も一緒に漏れたら無意味',bad:true},
-    {v:'md5',l:'MD5でハッシュ化',code:'save(md5(password))',note:'古くて速すぎる。総当たりに弱い',bad:true},
-    {v:'sha',l:'SHA-256（ソルトなし）',code:'save(sha256(password))',note:'同じパスワードが同じ値になり、一覧表で逆引きされる',bad:true},
-    {v:'bcrypt',l:'bcrypt（標準の重さ）',code:'save(bcrypt(password, cost=12))',note:'一人ずつ違う値になり、わざと時間がかかる'}
-  ]}],
+  fix:{key:'hash',value:'bcrypt',label:"パスワードを安全に保存する対策を入れる",done:"bcryptで、戻せない・一人ずつ違う・時間のかかる保存にした。"},
   app:[{key:'forceChange',l:'90日ごとにパスワード強制変更',note:'今は推奨されていない。かえって弱いパスワードを招く',type:'sw'}],
   tasks:[{id:'resetGuide',l:'会員にパスワード再設定を案内する',kind:'notice'}],
   success:()=>[{who:SHIRO,t:'保存方法も案内もこれで安心だ。5日目クリア！'}],
@@ -130,11 +120,7 @@ const D={
     hint:'注文のときブラウザが送るデータ。金額や数量は、検証ツールで書き換えられる。試してみよう。',
     product:{name:'ホーローの看板',price:3200,icon:'item_sign'}
   },
-  fixes:[{key:'price',title:'会計の決め方',opts:[
-    {v:'noedit',l:'画面で金額を編集できないようにする',note:'画面の上だけ。送信データは書き換えられる',bad:true},
-    {v:'jscheck',l:'ブラウザ側で金額を確かめる',note:'お客さんの端末の中の確認なので回避できる',bad:true},
-    {v:'server',l:'金額も数量もお店側で決める',note:'送られた値は使わず、商品台帳の値段で計算し直す。これが基本'}
-  ]}],
+  fix:{key:'price',value:'server',label:"金額をサーバーで決める対策を入れる",done:"金額も数量もサーバー側（商品台帳）で計算し直すようにした。"},
   tasks:[{id:'cancel',l:'1円注文・マイナス注文を取り消して連絡',kind:'notice'}],
   success:()=>[{who:SHIRO,t:'金額も数量もお店側で決められるようになった。6日目クリア！'}],
   check(c){
@@ -166,12 +152,7 @@ const D={
     {who:SHIRO,t:'投稿の中身を「表示する文字」ではなく「画面の命令」として扱ってるんだ。XSSっていう'},
     {who:SHIRO,t:'ピクセルハブで、表示するときに文字を無害化しよう'}
   ],
-  fixes:[{key:'review',file:'review.js',title:'レビューの表示',opts:[
-    {v:'raw',l:'そのまま表示',code:'el.innerHTML = review',note:'投稿が画面の部品として動いてしまう',bad:true},
-    {v:'stripscript',l:'script だけ取り除く',code:'review.replace(/<script>/,"")',note:'他の書き方でいくらでも動かせる',bad:true},
-    {v:'remove',l:'レビュー機能をやめる',code:'// レビュー欄を削除',note:'攻撃は消えるが、お店の魅力も消える',bad:true},
-    {v:'escape',l:'表示時に無害化する',code:'el.textContent = review',note:'記号を「ただの文字」として表示する'}
-  ]}],
+  fix:{key:'review',value:'escape',label:"XSS対策（表示時の無害化）を入れる",done:"投稿を画面の命令にせず、ただの文字として表示するようにした。"},
   tasks:[
     {id:'delete',l:'悪意のあるレビューを削除する',kind:'notice'},
     {id:'resetGuide',l:'影響を受けた会員に再設定を案内',kind:'notice'}
@@ -254,12 +235,7 @@ const D={
     {who:SHIRO,t:'お店は「ログイン済みの人からの操作」だと信じて受けてしまう。CSRFっていう手口だ'},
     {who:SHIRO,t:'ピクセルハブで、その操作がこのお店の画面から来たかを確かめよう'}
   ],
-  fixes:[{key:'csrf',file:'order.js',title:'注文の受け付け',opts:[
-    {v:'raw',l:'今のまま受ける',code:'createOrder(req)',note:'ログイン済みなら無条件で受ける',bad:true},
-    {v:'referer',l:'参照元を見る（なければ通す）',code:'if (ref && ref!==us) reject()',note:'参照元は隠せる・空にできるので抜けられる',bad:true},
-    {v:'post',l:'GETをやめてPOSTにする',code:'router.post("/order", …)',note:'リンクでは起きにくくなるが、フォーム送信では起きる',bad:true},
-    {v:'token',l:'CSRFトークンを使う',code:'if (req.token !== session.token) reject()',note:'お店の画面にだけ渡す合言葉を確認する'}
-  ]}],
+  fix:{key:'csrf',value:'token',label:"CSRF対策（トークン）を入れる",done:"お店の画面から来た操作かをトークンで確かめるようにした。"},
   tasks:[
     {id:'cancel',l:'身に覚えのない注文を取り消す',kind:'notice'},
     {id:'restore',l:'変更された届け先を元に戻す',kind:'notice'}
@@ -294,12 +270,7 @@ const D={
     {who:SHIRO,t:'ログインの確認はしても、「その人のものか」を確かめていないんだ。IDORっていう'},
     {who:SHIRO,t:'ピクセルハブで、本人の注文かをサーバーで確認しよう'}
   ],
-  fixes:[{key:'access',file:'order.js',title:'注文ページの表示',opts:[
-    {v:'raw',l:'番号で表示',code:'show(Order.find(id))',note:'番号が合えば誰のでも見せる',bad:true},
-    {v:'random',l:'番号を推測しにくくする',code:'id = randomUUID()',note:'当てにくくなるだけ。漏れたURLからは見える',bad:true},
-    {v:'login',l:'ログイン済みかだけ確認',code:'if (!user) reject()',note:'ログインしていれば他人のも見える',bad:true},
-    {v:'owner',l:'本人の注文か確認',code:'if (order.userId !== user.id) reject()',note:'持ち主とログイン中の人が一致するか'}
-  ]}],
+  fix:{key:'access',value:'owner',label:"アクセス制御（本人確認）を入れる",done:"その注文が本人のものかをサーバーで確かめるようにした。"},
   tasks:[
     {id:'api',l:'裏側のAPIにも同じ確認を入れる',kind:'report'},
     {id:'notice',l:'のぞかれた可能性をお知らせする',kind:'notice'}
@@ -334,12 +305,7 @@ const D={
     {who:SHIRO,t:'確認と記録が別々だと、ほぼ同時の注文がすり抜ける。この隙を狙われてるんだ'},
     {who:SHIRO,t:'ピクセルハブで、確認と記録を1回の更新にまとめよう'}
   ],
-  fixes:[{key:'coupon',file:'coupon.js',title:'クーポンの適用',opts:[
-    {v:'raw',l:'確認してから記録',code:'if (unused(id)) { use(); mark(id) }',note:'確認と記録の間に連打で割り込まれる',bad:true},
-    {v:'button',l:'ボタンの連打を止める',code:'button.disabled = true',note:'画面だけの対策。直接送られたら無力',bad:true},
-    {v:'confirm',l:'確認を2回に増やす',code:'if (unused(id) && unused(id))',note:'回数を増やしても、隙間は残る',bad:true},
-    {v:'atomic',l:'1回の更新で確認と記録',code:'UPDATE coupon SET used=1 WHERE id=? AND used=0',note:'更新できた1件だけが成功。同時でも1回'}
-  ]}],
+  fix:{key:'coupon',value:'atomic',label:"クーポンの二重利用対策を入れる",done:"確認と記録を1回の更新にまとめ、成功は1件だけにした。"},
   tasks:[{id:'cancel',l:'多重利用の注文を取り消す',kind:'notice'}],
   success:()=>[{who:SHIRO,t:'同時に来ても、クーポンは1回しか効かなくなった。11日目クリア！'},{who:SHIRO,t:'……ところで、やけに新しいアカウントが増えてるね。1000個近い。明日、見てみよう'}],
   check(c){

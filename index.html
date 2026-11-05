@@ -394,7 +394,7 @@ function orderDemoHTML(){
 function orderResultHTML(){
   const r=S.orderRes;if(!r)return '';
   const yen=n=>'¥'+Number(n).toLocaleString();
-  if(r.tampered)return `<div class="leak"><div class="leakhd">不正な注文が成立してしまった：${yen(r.total)}（${r.qty}個）</div><p class="small" style="margin:6px 0 0">画面では ${yen(r.real)} なのに、送信データを書き換えただけで通ってしまいました。これが「ほらこういうことができてしまう」の状態です。</p></div>`;
+  if(r.tampered)return `<div class="leak"><div class="leakhd">不正な注文が成立してしまった：${yen(r.total)}（${r.qty}個）</div><p class="small" style="margin:6px 0 0">画面では ${yen(r.real)} なのに、送信データを書き換えただけで通ってしまいました。</p></div>`;
   if(r.safe)return `<div class="box" style="margin:8px 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">お店が計算し直しました：${yen(r.total)}（${r.qty}個）。送信データの金額は使われませんでした。</p></div>`;
   return `<p class="muted small" style="margin:8px 0">注文できました：${yen(r.total)}（${r.qty}個）</p>`;
 }
@@ -413,7 +413,7 @@ function searchResultHTML(){
   const r=S.shopRes;
   const card=p=>`<div class="item">${spr(IC[p.icon],3,p.name)}<div class="iname small">${esc(p.name)}</div><div class="iprice small">${esc(p.price)}</div><button class="btn mini" data-act="cart">カートに入れる</button></div>`;
   if(!r){return `<div class="grid">${CATALOG.map(card).join('')}</div>`;}
-  if(r.leak)return `<div class="leak"><div class="leakhd">検索結果に、会員の個人情報が出てきてしまった</div>${r.members.map(m=>`<div class="leakrow"><span>${esc(m.name)}</span><span class="lmail">${esc(m.mail)}</span></div>`).join('')}<p class="small" style="margin:8px 0 0">これが「ほらこういうことができてしまう」の状態です。</p></div>`;
+  if(r.leak)return `<div class="leak"><div class="leakhd">検索結果に、会員の個人情報が出てきてしまった</div>${r.members.map(m=>`<div class="leakrow"><span>${esc(m.name)}</span><span class="lmail">${esc(m.mail)}</span></div>`).join('')}</div>`;
   if(r.blocked)return `<p class="msg-err small" style="margin:8px 0">${esc(r.msg)}</p>`;
   if(r.safe)return `<p class="muted small" style="margin:8px 0">${esc(r.msg)}</p>`;
   return r.rows.length?`<div class="grid">${r.rows.map(card).join('')}</div>`:'<p class="muted small" style="margin:8px 0">該当する商品はありません。</p>';
@@ -598,21 +598,18 @@ function cloudHTML(){
 }
 /* --- ピクセルハブ（コード共有）：修正案を選ぶ --- */
 function hubHTML(){
-  const d=DAYS[S.day];
-  if(!d||!d.fixes)return '<div class="box"><p class="muted">今日はここで直すコードはありません。</p></div>'+verifyBox();
-  let h='';
-  d.fixes.forEach(fx=>{
-    h+=`<div class="sec"><h3>${esc(fx.title)}${fx.file?`<small style="font-size:12px;color:var(--muted)">　${esc(fx.file)}</small>`:''}</h3>
-      <p class="small" style="padding:8px 12px 0;margin:0">対策をひとつ選びましょう。</p>`;
-    fx.opts.forEach(o=>{
-      const on=(S.cfg.code[fx.key]||'')===o.v;
-      h+=`<label class="opt${on?' on':''}"><input type="radio" name="fix-${fx.key}" data-fix="${fx.key}" data-v="${o.v}" ${on?'checked':''}>
-        <span class="optl">${esc(o.l)}</span>
-        ${o.code?`<code class="optc">${esc(o.code)}</code>`:''}
-        <span class="optn">${esc(o.note)}</span></label>`;
-    });
-    h+='</div>';
-  });
+  const d=DAYS[S.day],fx=d&&d.fix;
+  if(!fx)return '<div class="box"><p class="muted">今日はここで入れる対策はありません。</p></div>'+verifyBox();
+  const done=S.cfg.code[fx.key]===fx.value;
+  let h=`<div class="sec"><h3>ソースの修正</h3>
+    <p class="small" style="padding:10px 12px 0;margin:0">ピクセルハブが、この店のコードに対策を入れてくれます。</p>`;
+  if(done){
+    h+=`<div class="row"><div class="desc">${esc(fx.label)}<span class="note">${esc(fx.done)}</span></div><span class="msg-ok small">適用済み</span></div>
+      <div class="row" style="border-bottom:0"><button class="link" data-act="undoFix" data-key="${fx.key}">元に戻す</button></div>`;
+  }else{
+    h+=`<div class="row" style="border-bottom:0"><div class="desc">まだ対策が入っていません。</div><button class="btn primary" data-act="applyFix" data-key="${fx.key}" data-v="${fx.value}">${esc(fx.label)}</button></div>`;
+  }
+  h+='</div>';
   return h+verifyBox();
 }
 /* --- ピクセルクラウド「アプリ設定」 --- */
@@ -649,7 +646,7 @@ function renderConsole(){
   const tabs=[['registrar','ネームヤ','ドメイン会社'],['cloud','ピクセルクラウド','サーバー']];
   if(c.ca&&c.ca!=='self')tabs.push(['ca',CAS[c.ca].n,'認証局']);
   const dd=DAYS[S.day];
-  if(dd&&dd.fixes)tabs.push(['hub','ピクセルハブ','コード共有']);
+  if(dd&&dd.fix)tabs.push(['hub','ピクセルハブ','コード共有']);
   if(!tabs.some(t=>t[0]===S.svc))S.svc='cloud';
   const cur=tabs.find(t=>t[0]===S.svc);
   let h=`<h2>管理</h2><p class="muted small">お店に関わるサービスの管理画面です。サービスごとに役割が分かれています</p>
@@ -865,6 +862,8 @@ document.addEventListener('click',e=>{
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
     if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='applyFix'){c.code[b.dataset.key]=b.dataset.v;save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);}
+  else if(a==='undoFix'){delete c.code[b.dataset.key];save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();render();}
 });
