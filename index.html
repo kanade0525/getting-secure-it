@@ -378,7 +378,7 @@ function sprG(rows,x,y,px,id){return `<g ${id?`id="${id}"`:''} transform="transl
 function frameRows(rows,f){return f?['.'.repeat(16)].concat(rows.slice(0,13),rows.slice(14,16)):rows;}
 const castSpr=(id,px,label)=>spr(CAST[id].rows,px,label===undefined?CAST[id].name:label);
 const CUST_ID={'たなか':'tanaka','すずき':'suzuki','やまだ':'yamada','法人のお客さま':'houjin'};
-function voiceIcon(v){if(v.sys)return spr(IC.srv,4,'監視');return v.mail?spr(IC.mail,4,'メール'):castSpr(CUST_ID[v.who]||'tanaka',3,v.who);}
+function voiceIcon(v){if(v.sys)return spr(IC.srv,4,'監視');if(v.who===SHIRO)return castSpr('shiro',3,'シロ');if(v.who===YOU)return castSpr('tencho',3,'店長');if(v.mail)return spr(IC.mail,4,'メール');return castSpr(CUST_ID[v.who]||'tomo',3,v.who);}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- ステージ定義（days.js） ---------- */
@@ -507,7 +507,7 @@ function browserHTML(){
       <div class="store-search"><input type="text" id="shopQ" placeholder="商品名で検索" value="${esc(S.shopQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn" data-act="doSearch">検索</button></div>`;
   if(demo&&demo.payload&&!demo.kind&&(S.cfg.code.search!=='param')){
     h+=`<div class="capanel" style="margin:0 12px 10px"><p class="small" style="margin:0 0 6px">${esc(demo.hint)}</p>
-      <div class="acts" style="align-items:center"><code class="optc" style="margin:0">${esc(demo.payload)}</code><button class="btn" data-act="tryPayload">これを入れて検索</button></div></div>`;
+      <p class="small" style="margin:0">上の検索窓に <code class="optc">${esc(demo.payload)}</code> と入力して、「検索」を押してみよう。</p></div>`;
   }
   h+=`<div class="store-body">${searchResultHTML()}</div>`;
   if(demo&&demo.kind==='order')h+=orderDemoHTML();
@@ -951,6 +951,7 @@ function demoSearch(q){
   const base=(demo&&demo.products&&demo.products.length)?demo.products.map((p,i)=>Object.assign({icon:CATALOG[i%CATALOG.length].icon},p)):CATALOG;
   return {rows:q?base.filter(p=>p.name.includes(q)):base};
 }
+function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「ピクセルハブ」で直そう'}]);}}
 function renderVoices(){
   let h=`<h2>お客さんの声</h2><p class="muted small">問い合わせやSNSの投稿が届きます</p>`;
   if(!S.voices.length)h+=`<div class="box"><p class="muted">まだ声は届いていません。</p></div>`;
@@ -958,17 +959,24 @@ function renderVoices(){
   $('p-voice').innerHTML=h;
 }
 const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
+// 攻撃の種類で、通信図のどこを狙うか変える：wifi=お客さんの通信を盗聴 / dns=ドメイン乗っ取り / server=お店のサーバーへ
+function atkKind(d){const a=d&&d.attacker;if(a==='tochou'||a==='downgrade'||a==='sslstrip')return 'wifi';if(a==='domain')return 'dns';return 'server';}
+let NET={cx:116,ax:90,ay:150,tx:116,ty:68};
 function renderNet(){
-  const c=S.cfg,atk=attackerOf();
+  const c=S.cfg,atk=attackerOf(),d=DAYS[S.day]||{};
   const atkOn=busy||(S.last&&S.last.lines.length>0);
   const defended=!!(S.last&&S.last.ok);
+  const kind=atkKind(d);
+  if(kind==='wifi')NET={cx:85,ax:58,ay:150,tx:85,ty:68};
+  else if(kind==='dns')NET={cx:206,ax:180,ay:152,tx:206,ty:84};
+  else NET={cx:206,ax:180,ay:152,tx:300,ty:80};
+  const lx1=NET.tx,ly1=NET.ty+16,lx2=NET.cx,ly2=NET.ay+4,mX=Math.round((lx1+lx2)/2),mY=Math.round((ly1+ly2)/2);
   const atkG=atkOn?`
-    <line id="tap" class="${defended?'':'tapline'}" x1="116" y1="86" x2="116" y2="148" stroke="${defended?'var(--muted)':'var(--danger)'}" stroke-width="2" stroke-dasharray="4 4"/>
-    ${defended?`<g id="shield"><circle cx="116" cy="78" r="13" fill="var(--safe)" opacity="0.18"/>${sprG(IC.lock,108,71,2.1)}</g>`:''}
+    <line id="tap" class="${defended?'':'tapline'}" x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${defended?'var(--muted)':'var(--danger)'}" stroke-width="2" stroke-dasharray="4 4"/>
+    ${defended?`<g id="shield"><circle cx="${NET.tx}" cy="${NET.ty}" r="13" fill="var(--safe)" opacity="0.18"/>${sprG(IC.lock,Math.round(NET.tx-8),Math.round(NET.ty-7),2.1)}</g><text x="${mX}" y="${mY}" text-anchor="middle" class="lbl okT">防いだ</text>`:''}
     <g id="steal" opacity="0"><rect width="12" height="9" fill="var(--danger)"/></g>
-    ${sprG(frameRows(atk.rows,tick),90,150,3.3,'atk')}
-    <text x="116" y="218" text-anchor="middle" class="lbl ${defended?'okT':'warnT'}">攻撃者</text>
-    ${defended?'<text x="116" y="140" text-anchor="middle" class="lbl okT">防いだ</text>':''}`:'';
+    ${sprG(frameRows(atk.rows,tick),NET.ax,NET.ay,3.3,'atk')}
+    <text x="${NET.cx}" y="${NET.ay+68}" text-anchor="middle" class="lbl ${defended?'okT':'warnT'}">攻撃者</text>`:'';
   const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、ルーター、インターネット、ショップのサーバーの通信図${atkOn?'。攻撃者が通信を盗み見ている':''}">
     <rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
     <text x="12" y="20" class="lbl">カフェのWi-Fi</text>
@@ -1213,21 +1221,21 @@ function animatePacket(line,r,cb){
   function step(t){
     const p=Math.min(1,(t-t0)/dur),x=62+p*226;
     g.setAttribute('transform',`translate(${x},62)`);
-    const near=Math.abs(x+8-116)<14;
+    const near=NET.tx>=290?(x>=278):Math.abs(x+8-NET.tx)<16;
     if(tap)tap.setAttribute('stroke-width',near?'4':'2');
-    if(near&&!fired){fired=true;bad?exfil(r.pkt):defendPulse();}
+    if(near&&!fired){fired=true;bad?exfil():defendPulse();}
     if(p<1)requestAnimationFrame(step);else{g.setAttribute('opacity','0');if(tap)tap.setAttribute('stroke-width','2');cb();}
   }
   requestAnimationFrame(step);
 }
 // 盗まれたデータが点線を伝って攻撃者へ吸い込まれる演出
-function exfil(pkt){
+function exfil(){
   const steal=$('steal');if(!steal)return;
-  steal.querySelector('rect').setAttribute('fill','var(--danger)');
+  const x0=NET.tx-6,y0=NET.ty+12,x1=NET.cx-6,y1=NET.ay+6;
   const t0=performance.now(),dur=600;
-  (function st(t){const p=Math.min(1,(t-t0)/dur),y=84+p*58;
-    steal.setAttribute('transform',`translate(110,${y})`);
-    steal.setAttribute('opacity',p<1?(0.5+0.5*(1-p)):'0');
+  (function st(t){const p=Math.min(1,(t-t0)/dur);
+    steal.setAttribute('transform',`translate(${(x0+(x1-x0)*p).toFixed(1)},${(y0+(y1-y0)*p).toFixed(1)})`);
+    steal.setAttribute('opacity',p<1?(0.4+0.6*(1-p)):'0');
     if(p<1)requestAnimationFrame(st);else{const a=$('atk');if(a){a.classList.add('atk-hit');setTimeout(()=>a.classList.remove('atk-hit'),450);}}
   })();
 }
@@ -1236,7 +1244,7 @@ function defendPulse(){
   const sh=$('shield');if(sh){sh.classList.add('atk-hit');setTimeout(()=>sh.classList.remove('atk-hit'),450);}
 }
 function runAttack(r,done){
-  S.last={ok:r.ok,lines:[]};renderNet();busy=true;
+  S.last={ok:r.ok,lines:[]};busy=true;renderNet();
   const log=$('log');log.innerHTML='';
   let i=0;
   (function go(){
@@ -1270,12 +1278,13 @@ function startDay(n){
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
   say(d.start,()=>{
-    d.voices.forEach((v,i)=>setTimeout(()=>{
+    const reports=d.voices.filter(v=>v.who!==SHIRO),advice=d.voices.filter(v=>v.who===SHIRO);
+    reports.forEach((v,i)=>setTimeout(()=>{
       S.voices.unshift(Object.assign({day:n,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);
     },RM?0:i*1200));
     setTimeout(()=>{S.badge.net=S.tab!=='net';save();render();
-      say([{who:SHIRO,t:'お客さんの声は「お客さんの声」タブに届いてる。原因は「通信」タブで見てみよう'}]);
-    },RM?0:d.voices.length*1200+300);
+      say(advice.concat([{who:SHIRO,t:'報告は「お客さんの声」タブに届いてる。原因は「通信」タブで見てみよう'}]));
+    },RM?0:reports.length*1200+300);
   });
 }
 function firstAttack(){
@@ -1424,9 +1433,7 @@ document.addEventListener('click',e=>{
   else if(a==='svc'){S.svc=b.dataset.s;if(b.dataset.sub)S.sub=b.dataset.sub;save();render();window.scrollTo(0,0);}
   else if(a==='sub'){S.sub=b.dataset.sub;save();render();}
   else if(a.indexOf('app-')===0){const k=a.slice(4);c.app[k]=!c.app[k];save();render();}
-  else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();}
-  else if(a==='tryPayload'){const d=DAYS[S.day];S.shopQ=d&&d.demo?d.demo.payload:'';S.shopRes=demoSearch(S.shopQ);save();render();
-    if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の個人情報が全部出てきちゃった'},{who:SHIRO,t:'これが攻撃者のやったこと。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(a==='postReview'){const safe=S.cfg.code.review==='escape';S.reviewRes=safe?{safe:true}:{xss:true,redir:false};save();render();
     if(!safe){const day=S.day;setTimeout(()=>{xssNav(day);},850);
       if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのピクセルハブで直そう'}]);}}}
@@ -1492,7 +1499,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'||e.isComposing)return;
   if(e.target.id==='domName'){e.preventDefault();$('domSearch').click();}
-  else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();}
+  else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
 });
 
 /* ---------- 再開 ---------- */

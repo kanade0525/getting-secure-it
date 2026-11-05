@@ -111,6 +111,24 @@ cast: {
     "....KKKKKKKKK..K",
     "....KKK..KKK...."
   ]},
+  tomo: {name:"友達", role:"テスト役の友達", group:"friend", rows:[
+    "................",
+    ".....KKKKKK.....",
+    "....KNNNNNNK....",
+    "...KNnnnnnnNK...",
+    "...KNSSSSSSNK...",
+    "...KKSSKSSKKK...",
+    "...KSSKSSKSSK...",
+    "...KsSSSSSSsK...",
+    "....KsSSSSsK....",
+    "....KKGGGGKK....",
+    "...KGGgggGGGK...",
+    "..KSKGgggGGKSK..",
+    "..KKKGGGGGKKK...",
+    "....KGGGGGGK....",
+    "....KNNKKNNK....",
+    "....KKK..KKK...."
+  ]},
   tochou: {name:"カフェの盗聴者", role:"1日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",

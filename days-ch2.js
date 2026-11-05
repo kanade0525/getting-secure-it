@@ -27,7 +27,7 @@ const D={
     {who:SHIRO,t:'「管理」タブの「ピクセルハブ」で、検索の扱い方を直そう'}
   ],
   demo:{
-    hint:'攻撃者はこう入力したらしい。試してみよう。',
+    hint:'友達がテスト用アカウントで試したのと同じ入力を、自分でもやってみよう。',
     payload:"' OR '1'='1",
     products:[{name:'ブリキのロボット',price:'¥1,800'},{name:'レトロなマグカップ',price:'¥980'},{name:'ホーローの看板',price:'¥3,200'},{name:'すりガラスのびん',price:'¥600'},{name:'まねき猫の貯金箱',price:'¥1,200'}],
     members:[{name:'たなか','mail':'tanaka@****.jp'},{name:'すずき','mail':'suzuki@****.com'},{name:'やまだ','mail':'yamada@****.jp'},{name:'（ほか約1,200件）','mail':'………'}]
