@@ -382,12 +382,12 @@ function orderDemoHTML(){
     <div class="co-row"><label for="buyQty">数量</label><select id="buyQty" data-buyqty>${[1,2,3,4,5].map(n=>`<option value="${n}" ${buyQty===n?'selected':''}>${n}</option>`).join('')}</select></div>
     <div class="co-row"><span>合計</span><b>${yen(real*buyQty)}</b></div>
     <button class="btn primary" data-act="ordBuy" style="margin:4px 12px 12px">注文する</button>`;
-  // 開発者ツール（検証ツール）：送信データを書き換える攻撃面
-  h+=`<div class="devtools"><div class="dt-head">開発者ツール ＞ Network ＞ POST /order</div>
-      <p class="dt-note">画面では価格は変えられない。でも注文ボタンを押すと、ブラウザはこのデータを送る。検証ツールで書き換えて再送信できる。</p>
-      <div class="dt-body"><span>price</span><input type="number" id="ordPrice" value="${price}" inputmode="numeric"><span>qty</span><input type="number" id="ordQty" value="${qty}" inputmode="numeric"></div>
-      ${fixed?'<p class="dt-ok">お店側で金額を決める設定になっています。書き換えて再送信しても反映されません。</p>':`<div class="dt-acts"><button class="btn mini" data-act="ordSet" data-p="1">price を 1 に</button><button class="btn mini" data-act="ordSet" data-q="-1">qty を -1 に</button></div>`}
-      <button class="btn" data-act="ordSend" style="margin:8px 0 0">書き換えて再送信する</button></div>`;
+  // 舞台裏：注文ボタンを押すとブラウザが送るデータ。攻撃者はこれを書き換えて送り直す
+  h+=`<div class="devtools"><div class="dt-head">舞台裏：注文ボタンを押すと、ブラウザがお店にこっそり送るデータ</div>
+      <p class="dt-note">画面の金額は変えられません。でも「注文する」を押した瞬間、ブラウザは裏でこんなデータをお店に送っています。攻撃者はこれを書き換えてから送れます。</p>
+      <div class="dt-body"><span>価格</span><input type="number" id="ordPrice" value="${price}" inputmode="numeric"><span>数量</span><input type="number" id="ordQty" value="${qty}" inputmode="numeric"></div>
+      ${fixed?'<p class="dt-ok">お店側で金額を決める設定になりました。書き換えて送っても、反映されません。</p>':`<div class="dt-acts"><button class="btn mini" data-act="ordSet" data-p="1">価格を1円にする</button><button class="btn mini" data-act="ordSet" data-q="-1">数量を-1にする</button></div>`}
+      <button class="btn" data-act="ordSend" style="margin:8px 0 0">このまま送る（攻撃者のつもりで）</button></div>`;
   h+=`<div class="res" style="padding:8px 12px 12px">${orderResultHTML()}</div></div>`;
   return h;
 }
