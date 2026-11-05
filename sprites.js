@@ -461,6 +461,7 @@ icons: {
   mail: ["KKKKKKKKKK","KKWWWWWWKK","KWKWWWWKWK","KWWKWWKWWK","KWWWKKWWWK","KWWWWWWWWK","KKKKKKKKKK"],
   logo_registrar: ["..KKKK..",".KYYYYK.","KYyKKyYK","KYyyyyYK","KYYYYYYK","KYYYYYYK",".KYYYYK.","..KKKK.."],
   logo_cloud: ["...KK...","..KbbK..",".KbWbbK.","KbbbbbbK","KbbbbbbK","KBBBBBBK",".KKKKKK.","........"],
+  logo_hub: [".KK..KK.","KppK.Kp.",".KKK.KK.","..Kp.pK.","..KpKK..","..KppK..",".KppppK.","..KKKK.."],
   logo_ca: ["..KKKK..",".KggggK.","KgGGGGgK","KgGWWGgK","KgGGGGgK",".KggggK.",".KGKKGK.","KGK..KGK"]
 }
 };

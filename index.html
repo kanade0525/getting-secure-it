@@ -97,6 +97,13 @@ select:disabled{opacity:.45}
 .chk:last-child{border-bottom:0}
 .chk input{width:20px;height:20px;accent-color:var(--accent)}
 .chk .note{font-size:12px;color:var(--muted);margin-left:auto}
+.opt{display:grid;grid-template-columns:24px 1fr;gap:4px 10px;align-items:start;padding:10px 12px;border-bottom:2px dashed var(--soft);cursor:pointer}
+.opt:last-child{border-bottom:0}
+.opt input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent)}
+.opt.on{background:var(--soft)}
+.optl{grid-column:2;font-size:15px}
+.optc{grid-column:2;display:block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;background:var(--win-bg);color:#c9cff5;border:2px solid var(--line);padding:4px 8px;margin:2px 0;overflow-x:auto;white-space:pre;overflow-wrap:normal}
+.optn{grid-column:2;font-size:12px;color:var(--muted)}
 .modal{position:fixed;inset:0;z-index:20;background:rgba(5,6,20,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
 .modal[hidden]{display:none}
 .sheet{max-width:620px;width:100%;max-height:100%;overflow:auto;background:var(--surface);border:4px solid var(--line);padding:18px}
@@ -198,6 +205,7 @@ input[type="text"]:disabled{opacity:.6}
 
 <script src="sprites.js"></script>
 <script src="days.js"></script>
+<script src="days-ch2.js"></script>
 <script>
 (function(){
 const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -225,11 +233,12 @@ const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon',
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
 const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
-  cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300'}});
+  cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg)S=Object.assign(fresh(),s);}catch(e){}
 delete S.trust;delete S.victims;
 if(!S.sub)S.sub='server';
+if(!S.cfg.code)S.cfg.code={};if(!S.cfg.app)S.cfg.app={};if(!S.cfg.tasks)S.cfg.tasks={};
 if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
 if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
@@ -282,6 +291,7 @@ function renderShop(){
   <div class="site box">${S.domain?`<div class="url">${sec?spr(IC.lock,3,'暗号化されています'):''}<span>${sec?'https':'http'}://${esc(S.domain)}</span></div>`:'<div class="url muted">ドメイン未取得</div>'}
   <p class="state">${live?'公開中':'未公開'}</p></div>`;
   if(S.phase==='setup')h+=`<div class="box"><p>お店はまだきみのパソコンの中にあるだけ。「管理」タブでドメインを取得して、リリースしよう。</p><button class="btn primary" data-act="goConsole">管理タブを開く</button></div>`;
+  h+=tasksHTML();
   h+=`<p style="margin-top:18px"><button class="link" data-act="toTitle">タイトルへ戻る</button></p>`;
   $('p-shop').innerHTML=h;
 }
@@ -443,23 +453,72 @@ function verifyBox(){
 function cloudHTML(){
   const live=isLive(),subs=[['server','サーバー']];
   if(live&&S.day>=1)subs.push(['cert','証明書'],['net','通信設定']);
+  const dd=DAYS[S.day];
+  if(live&&dd&&dd.app)subs.push(['app','アプリ設定']);
   if(!subs.some(s=>s[0]===S.sub))S.sub='server';
   let h=`<div class="subs" role="tablist" aria-label="ピクセルクラウドのメニュー">${subs.map(s=>`<button role="tab" class="sub" data-act="sub" data-sub="${s[0]}" aria-selected="${s[0]===S.sub}">${s[1]}</button>`).join('')}</div>`;
-  h+=S.sub==='cert'?certCloudHTML():S.sub==='net'?cloudNetHTML():cloudServerHTML();
+  h+=S.sub==='cert'?certCloudHTML():S.sub==='net'?cloudNetHTML():S.sub==='app'?appHTML():cloudServerHTML();
   if(live&&S.day>=1)h+=verifyBox();
   return h;
+}
+/* --- ピクセルハブ（コード共有）：修正案を選ぶ --- */
+function hubHTML(){
+  const d=DAYS[S.day];
+  if(!d||!d.fixes)return '<div class="box"><p class="muted">今日はここで直すコードはありません。</p></div>'+verifyBox();
+  let h='';
+  d.fixes.forEach(fx=>{
+    h+=`<div class="sec"><h3>${esc(fx.title)}<small style="font-size:12px;color:var(--muted)">　${esc(fx.file)}</small></h3>
+      <p class="small" style="padding:8px 12px 0;margin:0">直し方をひとつ選びましょう。</p>`;
+    fx.opts.forEach(o=>{
+      const on=(S.cfg.code[fx.key]||'')===o.v;
+      h+=`<label class="opt${on?' on':''}"><input type="radio" name="fix-${fx.key}" data-fix="${fx.key}" data-v="${o.v}" ${on?'checked':''}>
+        <span class="optl">${esc(o.l)}</span>
+        <code class="optc">${esc(o.code)}</code>
+        <span class="optn">${esc(o.note)}</span></label>`;
+    });
+    h+='</div>';
+  });
+  return h+verifyBox();
+}
+/* --- ピクセルクラウド「アプリ設定」 --- */
+function appHTML(){
+  const d=DAYS[S.day];
+  if(!d||!d.app)return '<div class="sec"><h3>アプリ設定</h3><p class="small" style="padding:10px 12px">今日はここで変える設定はありません。</p></div>';
+  let h='<div class="sec"><h3>アプリ設定</h3>';
+  d.app.forEach(it=>{
+    if(it.type==='sw'){const on=!!S.cfg.app[it.key];
+      h+=`<div class="row"><div class="desc">${esc(it.l)}${it.note?`<span class="note">${esc(it.note)}</span>`:''}</div>${sw('app-'+it.key,on,false)}</div>`;
+    }else{
+      h+=`<div class="row"><label class="desc" for="app-${it.key}">${esc(it.l)}${it.note?`<span class="note">${esc(it.note)}</span>`:''}</label>
+        <select id="app-${it.key}" data-app="${it.key}"><option value="">—</option>${it.opts.map(([v,n])=>`<option value="${v}" ${S.cfg.app[it.key]===v?'selected':''}>${esc(n)}</option>`).join('')}</select></div>`;
+    }
+  });
+  return h+'</div>';
+}
+/* --- サイトタブ「お店の対応」：後始末のチェックリスト --- */
+function tasksHTML(){
+  const d=DAYS[S.day];
+  if(!d||!d.tasks||!d.tasks.length)return '';
+  if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0'||S.phase==='incident')return '';
+  let h=`<div class="sec"><h3>お店の対応</h3><p class="small" style="padding:8px 12px 0;margin:0">攻撃のあとに、お店としてやることです。</p>`;
+  d.tasks.forEach(t=>{const on=!!S.cfg.tasks[t.id];
+    h+=`<label class="chk"><input type="checkbox" data-task="${t.id}" ${on?'checked':''}><span>${esc(t.l)}</span><span class="note">${t.kind==='report'?'報告':'お知らせ'}</span></label>`;
+  });
+  return h+'</div>';
 }
 
 function renderConsole(){
   const c=S.cfg;
   const tabs=[['registrar','ネームヤ','ドメイン会社'],['cloud','ピクセルクラウド','サーバー']];
   if(c.ca&&c.ca!=='self')tabs.push(['ca',CAS[c.ca].n,'認証局']);
+  const dd=DAYS[S.day];
+  if(dd&&dd.fixes)tabs.push(['hub','ピクセルハブ','コード共有']);
   if(!tabs.some(t=>t[0]===S.svc))S.svc='cloud';
   const cur=tabs.find(t=>t[0]===S.svc);
   let h=`<h2>管理</h2><p class="muted small">お店に関わるサービスの管理画面です。サービスごとに役割が分かれています</p>
     <div class="svcs" role="tablist" aria-label="サービス">${tabs.map(t=>`<button role="tab" id="svc-${t[0]}" class="svc svc-${t[0]}" data-act="svc" data-s="${t[0]}" aria-selected="${t[0]===S.svc}">${spr(IC['logo_'+t[0]],2)}<span>${t[1]}<small>${t[2]}</small></span></button>`).join('')}</div>
     <div class="svcframe svc-${S.svc}"><div class="svchead">${spr(IC['logo_'+S.svc],4)}<span>${cur[1]}<small>${cur[2]}の管理画面</small></span></div>`;
-  h+=(S.svc==='registrar'?registrarHTML():S.svc==='ca'?caHTML():cloudHTML())+'</div>';
+  h+=(S.svc==='registrar'?registrarHTML():S.svc==='ca'?caHTML():S.svc==='hub'?hubHTML():cloudHTML())+'</div>';
   $('p-console').innerHTML=h;
 }
 
@@ -509,7 +568,9 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  if(d.sub){S.svc='cloud';S.sub=d.sub;}
+  S.cfg.tasks={};
+  if(d.svc==='hub')S.svc='hub';
+  if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
   say(d.start,()=>{
     d.voices.forEach((v,i)=>setTimeout(()=>{
@@ -535,7 +596,7 @@ function verify(){
     else{
       save();render();
       (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*700));
-      say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
+      say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':r.todo?'攻撃は防げた。あとは後始末だ':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
     }
   });
 }
@@ -561,10 +622,11 @@ function showLearn(){
 }
 function showEnd(){
   S.phase='end';save();render();
-  showModal(`<h2 id="mTitle">第1章 通信編はここまで</h2>
-    <p>お客さんとお店の間の通信は、HTTPS・TLS 1.2以上・HSTSで守られるようになりました。</p>
-    <p class="muted small">第2章 アプリ編で待っている攻撃</p>
-    <ul><li>4日目　商品検索のSQLインジェクション</li><li>5日目　パスワードの平文保存が発覚</li><li>6日目　1円で買われる（価格改ざん）</li><li>7日目　レビュー欄のXSS</li><li>8日目　セッション乗っ取り</li></ul>
+  showModal(`<h2 id="mTitle">第2章 アプリ編はここまで</h2>
+    <p>通信もアプリの中身も守れるようになりました。検索・パスワード・会計・レビュー・ログイン状態・なりすまし・他人のデータ・クーポンの穴をふさぎました。</p>
+    <p class="muted small">第3章 防壁編で待っていること</p>
+    <ul><li>12日目　ボットの大量登録（クーポン連打部隊が再登場）</li><li>13日目　ログインの総当たり</li><li>14日目　大量アクセスでサイトを止める攻撃</li><li>15日目　WAFのすり抜け</li></ul>
+    <p class="small muted">デモはここまでです。</p>
     <div class="acts"><button class="btn primary" data-act="toTitle">タイトルへ戻る</button><button class="btn" data-act="close">閉じる</button></div>`);
 }
 function reset(){
@@ -643,10 +705,14 @@ document.addEventListener('click',e=>{
   }
   else if(a==='svc'){S.svc=b.dataset.s;if(b.dataset.sub)S.sub=b.dataset.sub;save();render();window.scrollTo(0,0);}
   else if(a==='sub'){S.sub=b.dataset.sub;save();render();}
+  else if(a.indexOf('app-')===0){const k=a.slice(4);c.app[k]=!c.app[k];save();render();}
 });
 document.addEventListener('change',e=>{
   const t=e.target,c=S.cfg;
-  if(t.dataset.act==='tlsMin')c.tlsMin=t.value;
+  if(t.dataset.fix){c.code[t.dataset.fix]=t.dataset.v;}
+  else if(t.dataset.task){c.tasks[t.dataset.task]=t.checked;}
+  else if(t.dataset.app){c.app[t.dataset.app]=t.value;}
+  else if(t.dataset.act==='tlsMin')c.tlsMin=t.value;
   else if(t.dataset.act==='hstsAge')c.hstsAge=t.value;
   else if(t.dataset.ci)c.ciph[t.dataset.ci]=t.checked;
   else if('whois' in t.dataset)S.whois=t.checked;

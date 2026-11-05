@@ -102,3 +102,15 @@ scene("title", { w: 180, h: 110, bg: "D" },
   layer("spill", { light: 1 }, rect(64, 70, 54, 10, "y"), rect(26, 70, 18, 8, "y"), rect(138, 70, 18, 8, "y")),
   glow("y", { r: 7, strength: 0.45 })
 )
+
+// ピクセルハブ（コード共有）：分岐のアイコン
+sprite("logo_hub", { w: 8, h: 8 }, `
+  .KK..KK.
+  KppK.Kp.
+  .KKK.KK.
+  ..Kp.pK.
+  ..KpKK..
+  ..KppK..
+  .KppppK.
+  ..KKKK..`)
+
