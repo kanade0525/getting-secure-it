@@ -337,7 +337,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -463,6 +463,7 @@ function browserHTML(){
   if(demo&&demo.kind==='coupon')h+=couponDemoHTML();
   if(demo&&demo.kind==='csrf')h+=csrfIntroHTML();
   if(demo&&demo.kind==='idor')h+=idorIntroHTML();
+  if(demo&&demo.kind==='session')h+=sessionDemoHTML();
   h+=`<div class="store-foot">© よろず屋ピクセル堂　${esc(S.domain)}</div>
     </div></div>`;
   return h;
@@ -536,6 +537,20 @@ function reviewDemoHTML(){
   return h;
 }
 function demoOff(){return S.phase==='intro'||S.phase==='setup'||S.phase==='day0';}
+function sessionDemoHTML(){
+  if(demoOff())return '';
+  const onCookie=!!(S.cfg.app&&S.cfg.app.store==='cookie');const r=S.sessionRes;
+  const url=onCookie?'https://pixeldo.shop/mypage':'https://pixeldo.shop/mypage?sid=a1b2c3d4e5f6';
+  let h=`<div class="leakwrap"><div class="co-head">いまのログイン用ページのURL</div>
+    <div class="dbdump" style="padding:10px 12px"><code class="dbval">${esc(url)}</code></div>
+    <div class="capanel" style="margin:10px 12px 12px"><p class="small" style="margin:0 0 8px">このURLを、別の人（攻撃者）に渡したらどうなる？</p>
+    <button class="btn" data-act="sessShare">このURLをコピーして別の人に渡す</button>`;
+  if(r){
+    if(onCookie)h+=`<div class="box" style="margin:10px 0 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">URLに合言葉が入っていないので、受け取った人が開いても<b>ログインできません</b>。合言葉はCookieの中にあり、URLには出ません。</p></div>`;
+    else h+=`<div class="leak" style="margin:10px 0 0"><div class="leakhd">受け取った人が、あなたとしてログインできてしまった</div><p class="small" style="margin:6px 0 0">URLの <code>sid=…</code> がログインの合言葉です。URLは履歴・共有・紹介元に残るので、そこから乗っ取られます。</p></div>`;
+  }
+  h+=`</div></div>`;return h;
+}
 function storeDemoHTML(){
   const o=DAYS[S.day].demo;if(demoOff())return '';
   const hashed=S.cfg.code.hash==='bcrypt';const r=S.storeRes;
@@ -619,7 +634,7 @@ function idorBrowserHTML(){
     </div></div>
     <div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
-function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.orderRes=null;}
+function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;}
 function idorSeen(){
   const o=DAYS[S.day].demo;
   if(S.idorId!==o.myId&&o.orders[S.idorId]&&S.cfg.code.access!=='owner'&&!S.seenIdor){S.seenIdor=true;save();say([{who:SHIRO,t:'ほら、番号を変えただけで、他のお客さんの注文と住所が見えちゃった'},{who:SHIRO,t:'「本人のものか」を確かめてないんだ。「管理」タブのピクセルハブで直そう'}]);}
@@ -929,7 +944,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;
   if(d.svc==='hub')S.svc='hub';
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
@@ -1098,6 +1113,8 @@ document.addEventListener('click',e=>{
   else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
   else if(a==='idorStep'){const o=DAYS[S.day].demo;S.idorId=Math.max(1000,Math.min(1004,(S.idorId||o.myId)+Number(b.dataset.d)));save();render();idorSeen();}
   else if(a==='idorSet'){S.idorId=Number(b.dataset.v);save();render();idorSeen();}
+  else if(a==='sessShare'){S.sessionRes={shared:true};save();render();
+    if(!(S.cfg.app&&S.cfg.app.store==='cookie')&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのアプリ設定でCookieに移そう'}]);}}
   else if(a==='couponFire'){const atomic=S.cfg.code.coupon==='atomic';S.couponRes=atomic?{safe:true}:{times:10};save();render();
     if(!atomic&&!S.seenCoupon){S.seenCoupon=true;save();say([{who:SHIRO,t:'ほら、1回限りのはずのクーポンが、連打で何回も効いちゃった'},{who:SHIRO,t:'確認と記録が別々だから隙間ができる。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();}
@@ -1107,7 +1124,9 @@ document.addEventListener('click',e=>{
   else if(a==='applyFix'){c.code[b.dataset.key]=b.dataset.v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
-  else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();render();}
+  else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();
+    const dd=DAYS[S.day];
+    if(S.phase==='fix'&&dd&&dd.check(S.cfg).ok)verify();else render();}
 });
 document.addEventListener('change',e=>{
   const t=e.target,c=S.cfg;

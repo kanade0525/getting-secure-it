@@ -206,9 +206,11 @@ const D={
   ],
   alert:[
     {who:SHIRO,t:'ログイン状態の合言葉が、URLに入って持ち歩かれてる'},
+    {who:SHIRO,t:'サイトタブで、ログイン用URLを別の人に渡すとどうなるか試してみて。そのままログインされちゃう'},
     {who:SHIRO,t:'URLは共有や履歴に残る。合言葉はCookieにしてURLから外そう'},
     {who:SHIRO,t:'ピクセルクラウドの「アプリ設定」で、Cookieの持ち方を整えよう'}
   ],
+  demo:{kind:'session'},
   app:[
     {key:'store',l:'ログイン状態の保存先',type:'sel',opts:[['url','URLに付ける'],['cookie','Cookie']]},
     {key:'secure',l:'Secure（HTTPSのときだけ送る）',type:'sw'},
