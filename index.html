@@ -241,7 +241,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,orderRes:null,seenTamper:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -318,12 +318,46 @@ function shopHTML(){
   let h=`<div class="sec"><h3>よろず屋ピクセル堂</h3>
     <div class="domrow"><input type="text" id="shopQ" placeholder="商品名で検索" value="${esc(S.shopQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false">
       <button class="btn" data-act="doSearch">検索</button></div>`;
-  if(demo&&S.phase!=='intro'&&S.phase!=='setup'&&S.phase!=='day0'&&(S.cfg.code.search!=='param')){
+  if(demo&&demo.payload&&S.phase!=='intro'&&S.phase!=='setup'&&S.phase!=='day0'&&(S.cfg.code.search!=='param')){
     h+=`<div class="capanel"><p class="small" style="margin:0 0 6px">${esc(demo.hint)}</p>
       <div class="acts" style="align-items:center"><code class="optc" style="margin:0">${esc(demo.payload)}</code><button class="btn" data-act="tryPayload">これを入れて検索</button></div></div>`;
   }
   h+=`<div class="res" style="padding:0 12px 8px">${searchResultHTML()}</div></div>`;
+  if(demo&&demo.kind==='order')h+=orderDemoHTML();
   return h;
+}
+function orderDemoHTML(){
+  const o=DAYS[S.day].demo,real=o.product.price;
+  if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')return '';
+  const fixed=S.cfg.code.price==='server';
+  const price=(S.orderPrice==null?real:S.orderPrice),qty=(S.orderQty==null?1:S.orderQty);
+  const yen=n=>'¥'+Number(n).toLocaleString();
+  let h=`<div class="sec"><h3>お会計</h3>
+    <div class="row"><div class="desc" style="display:flex;gap:10px;align-items:center">${spr(IC[o.product.icon],3,o.product.name)}<span>${esc(o.product.name)}<span class="note">定価 ${yen(real)}</span></span></div></div>
+    <div class="capanel"><p class="small" style="margin:0 0 4px">${esc(o.hint)}</p>
+      <p class="small muted" style="margin:0 0 8px">注文のときブラウザが送るデータ（検証ツールのNetworkで見える）</p>
+      <div class="kv" style="align-items:center;grid-template-columns:auto 1fr"><span>price</span><input type="number" id="ordPrice" value="${price}" inputmode="numeric"><span>qty</span><input type="number" id="ordQty" value="${qty}" inputmode="numeric"></div>
+      ${fixed?'<p class="small msg-ok" style="margin:8px 0 0">お店側で決める設定になっています。書き換えても注文には反映されません。</p>':`<div class="acts" style="margin-top:8px"><button class="btn" data-act="ordSet" data-p="1">price を 1 に</button><button class="btn" data-act="ordSet" data-q="-1">qty を -1 に</button></div>`}
+    </div>
+    <div class="row"><div class="desc">送る内容：${yen(price)} × ${qty}個</div><button class="btn primary" data-act="ordSend">この内容で注文する</button></div>
+    <div class="res" style="padding:0 12px 10px">${orderResultHTML()}</div></div>`;
+  return h;
+}
+function orderResultHTML(){
+  const r=S.orderRes;if(!r)return '';
+  const yen=n=>'¥'+Number(n).toLocaleString();
+  if(r.tampered)return `<div class="leak"><div class="leakhd">不正な注文が成立してしまった：${yen(r.total)}（${r.qty}個）</div><p class="small" style="margin:6px 0 0">定価 ${yen(r.real)} の品が、送った金額のまま通ってしまいました。これが「ほらこういうことができてしまう」の状態です。</p></div>`;
+  if(r.safe)return `<div class="box" style="margin:8px 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">お店が計算し直しました：${yen(r.total)}（${r.qty}個）。送った金額は使われませんでした。</p></div>`;
+  return `<p class="muted small" style="margin:8px 0">注文できました：${yen(r.total)}（${r.qty}個）</p>`;
+}
+function computeOrder(){
+  const o=DAYS[S.day].demo,real=o.product.price;
+  let price=Number(S.orderPrice==null?real:S.orderPrice),qty=Number(S.orderQty==null?1:S.orderQty);
+  if(!isFinite(price))price=real;if(!isFinite(qty))qty=1;
+  if(S.cfg.code.price==='server'){const q=Math.max(1,Math.min(99,Math.floor(qty)||1));return {safe:true,total:real*q,qty:q,real};}
+  const total=price*qty;
+  const tampered=price<real||qty<1;
+  return {tampered,total,qty,price,real};
 }
 function searchResultHTML(){
   const r=S.shopRes;
@@ -622,7 +656,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.orderRes=null;S.seenTamper=false;
   if(d.svc==='hub')S.svc='hub';
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
@@ -777,6 +811,9 @@ document.addEventListener('click',e=>{
   else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();}
   else if(a==='tryPayload'){const d=DAYS[S.day];S.shopQ=d&&d.demo?d.demo.payload:'';S.shopRes=demoSearch(S.shopQ);save();render();
     if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の個人情報が全部出てきちゃった'},{who:SHIRO,t:'これが攻撃者のやったこと。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();}
+  else if(a==='ordSend'){S.orderRes=computeOrder();save();render();
+    if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、送るデータの金額を書き換えただけで、そのまま通っちゃった'},{who:SHIRO,t:'お店が客の言い値を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();render();}
 });
@@ -799,6 +836,8 @@ document.addEventListener('input',e=>{
   if(e.target.id==='nrName')nr.name=e.target.value;
   else if(e.target.id==='nrVal')nr.val=e.target.value;
   else if(e.target.id==='shopQ')S.shopQ=e.target.value;
+  else if(e.target.id==='ordPrice')S.orderPrice=e.target.value===''?null:Number(e.target.value);
+  else if(e.target.id==='ordQty')S.orderQty=e.target.value===''?null:Number(e.target.value);
 });
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'||e.isComposing)return;
