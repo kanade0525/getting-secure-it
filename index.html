@@ -279,6 +279,28 @@ input[type="text"]:disabled{opacity:.6}
 .state{margin:12px 0 0;color:var(--muted);font-size:14px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.more{animation:none}.toast{transition:none}}
+.codeanim{position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;z-index:70;padding:16px;animation:caFade .18s ease}
+.codeanim.done{animation:caFade .22s ease reverse;opacity:0}
+.ca-win{width:min(540px,100%);background:#0b0d16;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.ca-bar{display:flex;align-items:center;gap:7px;padding:9px 13px;background:#14161f;border-bottom:1px solid var(--soft)}
+.ca-dot{width:11px;height:11px;border-radius:50%}
+.ca-dot.r{background:#ff5f57}.ca-dot.y{background:#febc2e}.ca-dot.g{background:#28c840}
+.ca-file{color:var(--muted);font-size:12px;margin-left:7px}
+.ca-tag{margin-left:auto;color:var(--gold);font-size:12px}
+.ca-tag.ok{color:var(--safe)}
+.ca-code{padding:15px 13px;font-size:13px;line-height:1.75;overflow-x:auto}
+.ca-row{display:flex;gap:13px;white-space:pre}
+.ca-ln{color:#4a4f70;user-select:none;min-width:14px;text-align:right}
+.ca-tx{color:var(--ink)}
+.ca-row.chg .ca-tx{color:#ff9aa6}
+.ca-row.active{background:rgba(242,193,78,.08)}
+.ca-tx.del{color:var(--danger);text-decoration:line-through}
+.ca-tx.cur::after{content:'▋';color:var(--gold);animation:caBlink .6s step-end infinite}
+.ca-tx.added{color:var(--safe)}
+.ca-row.ok .ca-ln{color:var(--safe)}
+@keyframes caFade{from{opacity:0}to{opacity:1}}
+@keyframes caBlink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.codeanim{animation:none}}
 </style>
 </head>
 <body>
@@ -635,6 +657,64 @@ function idorBrowserHTML(){
     <div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
 function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;}
+/* --- 「対策を入れる」ときに、コードが書き換わるアニメ --- */
+const SNIP={
+  search:{file:'search.py',lines:[
+    ['sql = "SELECT * FROM members"','sql = "SELECT * FROM members"'],
+    ['sql += " WHERE name = " + input   // 連結','sql += " WHERE name = ?"          // プレースホルダ'],
+    ['db.run(sql)','db.run(sql, [input])']]},
+  hash:{file:'users.py',lines:[
+    ['db.save(user, {','db.save(user, {'],
+    ['  password: input          // そのまま','  password: bcrypt(input, salt)'],
+    ['})','})']]},
+  price:{file:'order.py',lines:[
+    ['item  = body                 // 画面の値を信用','item  = catalog.get(body.id) // 台帳から取得'],
+    ['total = item.price * body.qty','total = item.price * body.qty'],
+    ['createOrder(total)','createOrder(total)']]},
+  review:{file:'review.py',lines:[
+    ['html = "<p>" + review + "</p>"','html = "<p>" + escape(review) + "</p>"'],
+    ['render(html)','render(html)']]},
+  csrf:{file:'order.py',lines:[
+    ['if (user.loggedIn) {','if (user.loggedIn && tokenOK(body)) {'],
+    ['  createOrder(body)   // 無条件で受理','  createOrder(body)'],
+    ['}','}']]},
+  access:{file:'order.py',lines:[
+    ['order = Order.get(body.id)','order = Order.get(body.id)'],
+    ['// 持ち主チェックなし','if (order.owner != me) deny()'],
+    ['return order','return order']]},
+  coupon:{file:'checkout.py',lines:[
+    ['if (coupon.unused)      // 確認','n = coupon.useOnce()    // 確認と記録を1回で'],
+    ['  apply(coupon)         // この隙間で割り込み','if (n == 1)'],
+    ['coupon.markUsed()       // 記録（別）','  apply(coupon)']]}
+};
+function playCodeAnim(key,done){
+  const s=SNIP[key];
+  if(!s){done();return;}
+  const ov=document.createElement('div');ov.className='codeanim';ov.id='codeanim';
+  const rows=s.lines.map((ln,i)=>{const chg=ln[0]!==ln[1];return '<div class="ca-row'+(chg?' chg':'')+'" data-i="'+i+'"><span class="ca-ln">'+(i+1)+'</span><span class="ca-tx">'+esc(ln[0])+'</span></div>';}).join('');
+  ov.innerHTML='<div class="ca-win"><div class="ca-bar"><span class="ca-dot r"></span><span class="ca-dot y"></span><span class="ca-dot g"></span><span class="ca-file">'+esc(s.file)+'</span><span class="ca-tag">対策を書き込み中…</span></div><div class="ca-code">'+rows+'</div></div>';
+  document.body.appendChild(ov);
+  const changed=s.lines.map((ln,i)=>({i,from:ln[0],to:ln[1]})).filter(x=>x.from!==x.to);
+  const finish=()=>{const tag=ov.querySelector('.ca-tag');if(tag){tag.textContent='対策を適用しました';tag.className='ca-tag ok';}setTimeout(()=>{ov.classList.add('done');setTimeout(()=>{ov.remove();done();},240);},460);};
+  let ci=0;
+  (function nextLine(){
+    if(ci>=changed.length){finish();return;}
+    const c=changed[ci++];
+    const row=ov.querySelector('.ca-row[data-i="'+c.i+'"]');
+    const tx=row.querySelector('.ca-tx');
+    row.classList.add('active');tx.className='ca-tx del';
+    let txt=c.from;
+    function erase(){
+      if(txt.length>0){txt=txt.slice(0,-1);tx.textContent=txt;setTimeout(erase,8);return;}
+      tx.className='ca-tx cur';let j=0;
+      (function type(){
+        if(j<=c.to.length){tx.textContent=c.to.slice(0,j);j++;setTimeout(type,16);return;}
+        tx.className='ca-tx added';row.classList.remove('active');row.classList.add('ok');setTimeout(nextLine,120);
+      })();
+    }
+    setTimeout(erase,240);
+  })();
+}
 function idorSeen(){
   const o=DAYS[S.day].demo;
   if(S.idorId!==o.myId&&o.orders[S.idorId]&&S.cfg.code.access!=='owner'&&!S.seenIdor){S.seenIdor=true;save();say([{who:SHIRO,t:'ほら、番号を変えただけで、他のお客さんの注文と住所が見えちゃった'},{who:SHIRO,t:'「本人のものか」を確かめてないんだ。「管理」タブのピクセルハブで直そう'}]);}
@@ -1121,7 +1201,7 @@ document.addEventListener('click',e=>{
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
     if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
-  else if(a==='applyFix'){c.code[b.dataset.key]=b.dataset.v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);}
+  else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;const go=()=>{c.code[key]=v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);};if(RM)go();else playCodeAnim(key,go);}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();
