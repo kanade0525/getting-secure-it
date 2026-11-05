@@ -301,6 +301,20 @@ input[type="text"]:disabled{opacity:.6}
 @keyframes caFade{from{opacity:0}to{opacity:1}}
 @keyframes caBlink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.codeanim{animation:none}}
+.monitor{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.mon-h{font-size:12px;color:var(--muted);margin-bottom:8px}
+.signup-form{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.signup-form input{background:var(--bg);border:1px solid var(--soft);border-radius:6px;padding:7px 9px;color:var(--ink);font:inherit}
+.captcha{border:1px solid var(--line);border-radius:6px;padding:7px 9px;color:var(--muted);font-size:13px}
+.brute-count{font-size:14px;margin:8px 0}
+.meter{height:16px;background:var(--bg);border:1px solid var(--soft);border-radius:8px;overflow:hidden}
+.meter-bar{height:100%;transition:width .5s steps(8)}
+.mon-res{margin-top:10px;padding:9px 11px;border-radius:8px;font-size:13px;display:flex;flex-direction:column;gap:3px}
+.mon-res b{font-size:14px}
+.mon-res span{color:var(--muted)}
+.mon-res.ok{border:1px solid var(--safe)}
+.mon-res.bad{border:1px solid var(--danger)}
+@media (prefers-reduced-motion:reduce){.meter-bar{transition:none}}
 </style>
 </head>
 <body>
@@ -334,6 +348,7 @@ input[type="text"]:disabled{opacity:.6}
 <script src="sprites.js"></script>
 <script src="days.js"></script>
 <script src="days-ch2.js"></script>
+<script src="days-ch3.js"></script>
 <script>
 (function(){
 const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -347,7 +362,7 @@ function sprG(rows,x,y,px,id){return `<g ${id?`id="${id}"`:''} transform="transl
 function frameRows(rows,f){return f?['.'.repeat(16)].concat(rows.slice(0,13),rows.slice(14,16)):rows;}
 const castSpr=(id,px,label)=>spr(CAST[id].rows,px,label===undefined?CAST[id].name:label);
 const CUST_ID={'たなか':'tanaka','すずき':'suzuki','やまだ':'yamada','法人のお客さま':'houjin'};
-function voiceIcon(v){return v.mail?spr(IC.mail,4,'メール'):castSpr(CUST_ID[v.who]||'tanaka',3,v.who);}
+function voiceIcon(v){if(v.sys)return spr(IC.srv,4,'監視');return v.mail?spr(IC.mail,4,'メール'):castSpr(CUST_ID[v.who]||'tanaka',3,v.who);}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- ステージ定義（days.js） ---------- */
@@ -359,7 +374,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -486,6 +501,10 @@ function browserHTML(){
   if(demo&&demo.kind==='csrf')h+=csrfIntroHTML();
   if(demo&&demo.kind==='idor')h+=idorIntroHTML();
   if(demo&&demo.kind==='session')h+=sessionDemoHTML();
+  if(demo&&demo.kind==='signup')h+=signupDemoHTML();
+  if(demo&&demo.kind==='login')h+=loginDemoHTML();
+  if(demo&&demo.kind==='dos')h+=dosDemoHTML();
+  if(demo&&demo.kind==='waf')h+=wafDemoHTML();
   h+=`<div class="store-foot">© よろず屋ピクセル堂　${esc(S.domain)}</div>
     </div></div>`;
   return h;
@@ -656,7 +675,55 @@ function idorBrowserHTML(){
     </div></div>
     <div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
-function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;}
+function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;}
+/* --- 第3章 防壁編のデモ（店長の監視視点で再現） --- */
+function signupDemoHTML(){
+  if(demoOff())return '';
+  const fixed=S.cfg.code.signup==='verify',r=S.botRes;
+  let h=`<div class="sec"><h3>会員登録</h3><div class="monitor"><div class="mon-h">新規会員登録フォーム</div>
+    <div class="signup-form"><input disabled placeholder="メールアドレス"><input disabled placeholder="パスワード">${fixed?'<div class="captcha">☑ 私はロボットではありません</div>':''}<button class="btn" disabled>登録</button></div>
+    <button class="btn primary" data-act="botRun">自動で100件登録してみる</button>`;
+  if(r)h+=r.blocked
+    ?`<div class="mon-res ok"><b>${r.made}件で停止</b><span>人間確認とレート制限が、自動の連続登録を弾いた</span></div>`
+    :`<div class="mon-res bad"><b>${r.made}件 登録成功</b><span>人間確認がないので、いくらでも作れてしまった</span><div class="dbdump">${r.list.map(m=>'<div>'+esc(m)+'</div>').join('')}<div>…ほか約${r.made-r.list.length}件</div></div></div>`;
+  return h+'</div></div>';
+}
+function loginDemoHTML(){
+  if(demoOff())return '';
+  const n=S.bruteN||0,r=S.bruteRes;
+  let h=`<div class="sec"><h3>ログイン</h3><div class="monitor"><div class="mon-h">tanaka さんのアカウントを狙う</div>
+    <div class="signup-form"><input disabled value="tanaka@example.com"><input disabled placeholder="パスワード（当てにいく）"></div>
+    <div class="brute-count">試行回数：<b>${n}</b>${r&&r.locked?' <span class="warnT">ロック中</span>':''}</div>
+    <button class="btn primary" data-act="bruteTry">パスワードを100回試す</button>`;
+  if(r)h+=r.locked
+    ?`<div class="mon-res ok"><b>${r.at}回でロック</b><span>連続失敗を制限したので、総当たりが成立しない</span></div>`
+    :`<div class="mon-res bad"><b>${n}回試しても止まらない</b><span>このまま続ければ、いつか当てられてしまう</span></div>`;
+  return h+'</div></div>';
+}
+function dosDemoHTML(){
+  if(demoOff())return '';
+  const r=S.dosRes,load=r?r.load:8,col=load>90?'var(--danger)':load>60?'var(--gold)':'var(--safe)';
+  let h=`<div class="sec"><h3>サーバーの負荷</h3><div class="monitor"><div class="mon-h">アクセス状況</div>
+    <div class="meter"><div class="meter-bar" style="width:${Math.min(100,load)}%;background:${col}"></div></div>
+    <div class="small muted" style="margin:6px 0 0">負荷 ${load}%${r&&r.down?' — ダウン':''}</div>
+    <button class="btn primary" data-act="dosFire" style="margin-top:8px">大量アクセスを送る</button>`;
+  if(r)h+=r.down
+    ?`<div class="mon-res bad"><b>サーバーダウン</b><span>全部そのまま受けたので、量で押し切られた。本物のお客さんも開けない</span></div>`
+    :`<div class="mon-res ok"><b>耐えた（負荷 ${load}%）</b><span>前段で吸収し、異常な集中をレート制限で遮断した</span></div>`;
+  return h+'</div></div>';
+}
+function wafDemoHTML(){
+  if(demoOff())return '';
+  const layered=S.cfg.code.defense==='layered',enc=!!S.wafEnc,r=S.wafRes;
+  let h=`<div class="sec"><h3>WAF（防壁）の動き</h3><div class="monitor"><div class="mon-h">商品検索へ攻撃を送る</div>
+    <div class="dbdump"><div>${enc?'%27%20OR%201%3D1%20--（エンコード）':esc("' OR 1=1 --")+'（そのまま）'}</div></div>
+    <div class="acts" style="margin-top:8px"><button class="btn" data-act="wafEnc" aria-pressed="${enc}">${enc?'エンコードを解除':'エンコードを変える'}</button><button class="btn primary" data-act="wafSend">送信する</button></div>`;
+  if(r)h+=r.pass
+    ?(layered?`<div class="mon-res ok"><b>WAF通過 → でも根本で無効化</b><span>入力検証と最小権限で、届いても実行されない</span></div>`
+             :`<div class="mon-res bad"><b>WAFを通過して届いた</b><span>WAF頼みだと、書き方を変えられると素通りする</span></div>`)
+    :`<div class="mon-res ok"><b>WAFがブロック</b><span>既知のパターンは弾けた（でも書き方を変えると…？）</span></div>`;
+  return h+'</div></div>';
+}
 /* --- 「対策を入れる」ときに、コードが書き換わるアニメ --- */
 const SNIP={
   search:{file:'search.py',lines:[
@@ -685,7 +752,22 @@ const SNIP={
   coupon:{file:'checkout.py',lines:[
     ['if (coupon.unused)      // 確認','n = coupon.useOnce()    // 確認と記録を1回で'],
     ['  apply(coupon)         // この隙間で割り込み','if (n == 1)'],
-    ['coupon.markUsed()       // 記録（別）','  apply(coupon)']]}
+    ['coupon.markUsed()       // 記録（別）','  apply(coupon)']]},
+  signup:{file:'signup.py',lines:[
+    ['def register(req):','def register(req):'],
+    ['    create_user(req)   # 誰でも作成','    if not captcha_ok(req): reject()'],
+    ['    return ok','    rate_limit(req.ip); create_user(req)']]},
+  login:{file:'login.py',lines:[
+    ['def login(req):','def login(req):'],
+    ['    check(req.pw)      # 何回でも','    if fails(req.user) >= 5: lock()'],
+    ['    return ok','    throttle(); check(req.pw)']]},
+  dos:{file:'infra.yml',lines:[
+    ['edge:   none        # 直接受ける','edge:   cdn + waf   # 前段で吸収'],
+    ['limit:  none','limit:  100/min     # レート制限'],
+    ['app.handle(all)','app.handle(allowed)']]},
+  defense:{file:'defense.py',lines:[
+    ['defense = [waf]            # WAF頼み','defense = [waf, validate, least_priv]'],
+    ['run(req.raw)              # そのまま','run(validate(req.input))  # 検証してから']]}
 };
 function playCodeAnim(key,done){
   const s=SNIP[key];
@@ -754,7 +836,7 @@ function demoSearch(q){
 function renderVoices(){
   let h=`<h2>お客さんの声</h2><p class="muted small">問い合わせやSNSの投稿が届きます</p>`;
   if(!S.voices.length)h+=`<div class="box"><p class="muted">まだ声は届いていません。</p></div>`;
-  else h+=`<div class="box">${S.voices.map(v=>`<div class="voice${v.unread?' new':''}">${voiceIcon(v)}<div><div class="vn">${esc(v.who)}${v.unread?'<span class="tag newtag">新着</span>':''}<span class="tag">${v.mail?'メール':'投稿'}</span><span class="tag">${v.day}日目</span></div><div>${esc(v.t)}</div></div></div>`).join('')}</div>`;
+  else h+=`<div class="box">${S.voices.map(v=>`<div class="voice${v.unread?' new':''}">${voiceIcon(v)}<div><div class="vn">${esc(v.who)}${v.unread?'<span class="tag newtag">新着</span>':''}<span class="tag">${v.sys?'アラート':v.mail?'メール':'投稿'}</span><span class="tag">${v.day}日目</span></div><div>${esc(v.t)}</div></div></div>`).join('')}</div>`;
   $('p-voice').innerHTML=h;
 }
 const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
@@ -1046,7 +1128,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;
   if(d.svc==='hub')S.svc='hub';
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
@@ -1083,7 +1165,7 @@ function hideModal(){$('modal').hidden=true;}
 const toast=$('toast');let toastT=null;
 function showToast(v){
   $('toastIcon').innerHTML=voiceIcon(v);
-  $('toastTitle').textContent='新着　'+v.who+'（'+(v.mail?'メール':'投稿')+'）';
+  $('toastTitle').textContent='新着　'+v.who+'（'+(v.sys?'アラート':v.mail?'メール':'投稿')+'）';
   $('toastText').textContent=v.t;
   clearTimeout(toastT);toast.hidden=false;
   requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.remove('out')));
@@ -1225,6 +1307,11 @@ document.addEventListener('click',e=>{
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
     if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='botRun'){const fixed=S.cfg.code.signup==='verify';const list=[];for(let i=0;i<4;i++)list.push('user'+(1000+Math.floor(Math.random()*8999))+'@tempmail.example');S.botRes=fixed?{blocked:true,made:3,list:[]}:{blocked:false,made:100,list};save();render();if(!fixed&&!S.seenBot){S.seenBot=true;save();say([{who:SHIRO,t:'ほら、人間確認がないから、自動で何件でも作れちゃう'},{who:SHIRO,t:'管理タブのピクセルハブで、登録に人間確認とレート制限を入れよう'}]);}}
+  else if(a==='bruteTry'){const fixed=S.cfg.code.login==='throttle';if(fixed){S.bruteN=5;S.bruteRes={locked:true,at:5};}else{S.bruteN=(S.bruteN||0)+100;S.bruteRes={locked:false};}save();render();if(!fixed&&!S.seenBrute){S.seenBrute=true;save();say([{who:SHIRO,t:'何回失敗しても止まらないから、試し放題だ'},{who:SHIRO,t:'ピクセルハブで、失敗が続いたらロックする仕組みを入れよう'}]);}}
+  else if(a==='dosFire'){const fixed=S.cfg.code.dos==='shield';S.dosRes=fixed?{load:55,down:false}:{load:100,down:true};save();render();if(!fixed&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'ほら、一気に送られるとサーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルハブで、前段で受け止めてレート制限する仕組みを入れよう'}]);}}
+  else if(a==='wafEnc'){S.wafEnc=!S.wafEnc;S.wafRes=null;save();render();}
+  else if(a==='wafSend'){const enc=!!S.wafEnc,layered=S.cfg.code.defense==='layered';S.wafRes={pass:enc};save();render();if(enc&&!layered&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'エンコードを変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。ピクセルハブで、根本対策を重ねて多層防御にしよう'}]);}}
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;const go=()=>{c.code[key]=v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);};if(RM)go();else playCodeAnim(key,go);}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
