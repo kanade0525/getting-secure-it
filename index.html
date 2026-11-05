@@ -791,7 +791,7 @@ function renderNet(){
   if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')hint='リリースすると、ここに通信のようすが表示されます。';
   else if(S.phase==='incident')hint='このタブを開くと、攻撃のようすが再生されます。';
   $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint||'お客さんとお店の間を流れるデータと、攻撃者に見えているもの'}</p>${svg}
-    <div class="loghead">${castSpr(atk.id||'tochou',2,'')}<span>攻撃者の画面</span></div><div class="log" id="log" aria-live="polite">${lines}</div>
+    <div class="loghead">${atkOn?castSpr(atk.id||'tochou',2,'')+'<span>攻撃者の画面</span>':'<span>通信ログ</span>'}</div><div class="log" id="log" aria-live="polite">${lines}</div>
     ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify">防げたか確かめる</button>':''}`;
 }
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
