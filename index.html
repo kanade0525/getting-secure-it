@@ -808,6 +808,16 @@ const isLive=()=>S.phase!=='intro'&&S.phase!=='setup';
 function sw(id,on,dis){return `<button class="sw" id="${id}" data-act="${id}" aria-pressed="${on}" ${dis?'disabled':''}>${on?'オン':'オフ'}</button>`;}
 const intro=t=>`<p class="small" style="padding:10px 12px 0;margin:0">${t}</p>`;
 
+/* --- WHOIS：公開代行なしなら、その場で持ち主情報の露出を見せて回収 --- */
+function whoisBox(){
+  if(S.whois)return '<div class="box" style="margin:10px 12px 12px"><p class="small" style="margin:0">WHOISを引いても、出てくるのは代行会社の情報だけ。あなたの氏名・住所・連絡先は隠れています。</p></div>';
+  const d=esc(S.domain);
+  return '<div class="box" style="margin:10px 12px 12px;border-color:var(--danger)">'
+    +'<p class="small" style="margin:0 0 6px"><b>WHOISで '+d+' を検索した結果</b></p>'
+    +'<div class="dbdump"><div>登録者　山田 太郎</div><div>住所　　東京都○○区△△ 1-2-3</div><div>電話　　090-1234-5678</div><div>メール　tencho@'+d+'</div></div>'
+    +'<p class="small" style="margin:8px 0 0">誰でもこれが見られます。攻撃者がこの情報でドメイン会社になりすませば、<b>ドメインごと乗っ取られる</b>きっかけになります。</p>'
+    +'<button class="btn primary" data-act="whoisOn" style="margin-top:8px">WHOIS公開代行をオンにする</button></div>';
+}
 /* --- ドメイン会社（ネームヤ） --- */
 function registrarHTML(){
   const ds=S.ds||{};let h='';
@@ -825,7 +835,7 @@ function registrarHTML(){
     return h+'</div>';
   }
   const recs=S.dns||[],live=isLive();
-  h+=`<div class="sec"><h3>契約中のドメイン</h3><div class="row"><div class="desc">${esc(S.domain)}<span class="note">${S.whois?'WHOIS公開代行あり':'WHOIS公開代行なし'}</span></div></div></div>
+  h+=`<div class="sec"><h3>契約中のドメイン</h3><div class="row"><div class="desc">${esc(S.domain)}<span class="note">${S.whois?'WHOIS公開代行あり':'WHOIS公開代行なし'}</span></div>${S.whois?'<span class="msg-ok small">保護中</span>':''}</div>${whoisBox()}</div>
     <div class="sec"><h3>DNS設定</h3>${intro(esc(S.domain)+' へ来た人を、どこへ案内するかを登録します。')}
     <div class="drow dhead" style="margin-top:8px"><span>タイプ</span><span>名前</span><span>値</span><span></span></div>
     ${recs.length?recs.map((r,i)=>{const lock=live&&r.type==='A'&&r.name==='@'&&r.value===SERVER_IP;return `<div class="drow"><span>${esc(r.type)}</span><span>${esc(r.name)}</span><span>${esc(r.value)}</span>${lock?'<span class="small muted">公開中</span>':`<button class="link" data-act="dnsDel" data-i="${i}">削除</button>`}</div>`;}).join(''):'<p class="small muted" style="padding:8px 12px;margin:0">レコードはまだありません</p>'}
@@ -1157,8 +1167,8 @@ document.addEventListener('click',e=>{
   else if(a==='install'){
     const r=document.querySelector('input[name="inst"]:checked');
     if(!r){S.instMsg='設置するファイルを選んでください';render();return;}
-    c.installed=r.value;c.cert=true;S.instMsg='';save();render();say([{who:SHIRO,t:'設置できた。「通信設定」でHTTPSを有効にできるよ'}]);}
-  else if(a==='autorenew'){c.autoRenew=!c.autoRenew;save();render();}
+    c.installed=r.value;c.cert=true;S.instMsg='';save();render();say([{who:SHIRO,t:'設置できた。「通信設定」でHTTPSを有効にできるよ'},{who:SHIRO,t:'証明書には期限がある。切れると来た人みんなが警告画面になるから、「自動更新」をオンにしておこう'}]);}
+  else if(a==='autorenew'){c.autoRenew=!c.autoRenew;save();render();if(c.autoRenew)say([{who:SHIRO,t:'自動更新オン。期限が切れる前に、申請から設置まで自動でやり直してくれる。更新忘れで事故る心配が減るよ'}]);}
   else if(a==='https'){c.https=!c.https;if(!c.https){c.redirect=false;c.hsts=false;}save();render();}
   else if(a==='redirect'){c.redirect=!c.redirect;if(!c.redirect)c.hsts=false;save();render();}
   else if(a==='hsts'){c.hsts=!c.hsts;save();render();}
@@ -1172,7 +1182,9 @@ document.addEventListener('click',e=>{
     S.ds={name,tld,full,status,msg};save();render();
   }
   else if(a==='domBuy'){if(!S.ds||S.ds.status!=='ok')return;S.domain=S.ds.full;S.ds=null;save();render();
-    say([{who:SHIRO,t:S.domain+'、いい住所だね！'},{who:SHIRO,t:'次は、このドメインをサーバーにつなごう。サーバーのIPアドレスは「ピクセルクラウド」で確認できるよ'},{who:SHIRO,t:'つなぐ設定（DNS）は、ドメインを取ったこの「ネームヤ」でやるんだ'}]);}
+    const w=S.whois?[{who:SHIRO,t:'WHOIS公開代行にしたんだね。持ち主情報が隠れるから安心だ'}]:[{who:SHIRO,t:'公開代行を使わなかったね。試しに今のWHOISを引いてみた。この画面の下に出てるよ'},{who:SHIRO,t:'きみの氏名も住所も丸見えだ。攻撃者がこれでドメイン会社になりすますと、ドメインごと乗っ取られる。公開代行はオンにしておこう'}];
+    say([{who:SHIRO,t:S.domain+'、いい住所だね！'}].concat(w).concat([{who:SHIRO,t:'次は、このドメインをサーバーにつなごう。サーバーのIPアドレスは「ピクセルクラウド」で確認できるよ'},{who:SHIRO,t:'つなぐ設定（DNS）は、ドメインを取ったこの「ネームヤ」でやるんだ'}]));}
+  else if(a==='whoisOn'){S.whois=true;save();render();say([{who:SHIRO,t:'公開代行をオンにしたよ。これでWHOISからは代行会社の情報しか出ない。乗っ取りの手がかりを一つ消せた'}]);}
   else if(a==='publish'){
     if(S.phase!=='setup'||!S.domain||relBusy)return;
     relBusy=true;S.relMsg='ドメインの向き先を確認しています……';render();
