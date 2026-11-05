@@ -10,27 +10,19 @@
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#dfe6f1;--surface:#ffffff;--ink:#1d2042;--muted:#555b7e;--line:#1d2042;--soft:#cdd6e8;
-  --gold:#a86e00;--danger:#c42f3c;--safe:#23793a;--accent:#3552c4;--on-accent:#ffffff;
-  --win-bg:#10123a;--win-ink:#ffffff;--win-line:#ffffff;
-  color-scheme:light;
+  --bg:#07080d;--surface:#14161f;--ink:#eef0ff;--muted:#a6abd4;--line:#8d93cc;--soft:#20233a;
+  --gold:#f2c14e;--danger:#ff6d7a;--safe:#6fd38a;--accent:#97adff;--on-accent:#07080d;
+  --win-bg:#000000;--win-ink:#ffffff;--win-line:#ffffff;
+  color-scheme:dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0d1030;--surface:#191d47;--ink:#eef0ff;--muted:#a6abd4;--line:#8d93cc;--soft:#2a2f63;
-    --gold:#f2c14e;--danger:#ff6d7a;--safe:#6fd38a;--accent:#97adff;--on-accent:#10123a;
-    --win-bg:#000000;--win-ink:#ffffff;--win-line:#ffffff;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0d1030;--surface:#191d47;--ink:#eef0ff;--muted:#a6abd4;--line:#8d93cc;--soft:#2a2f63;
-  --gold:#f2c14e;--danger:#ff6d7a;--safe:#6fd38a;--accent:#97adff;--on-accent:#10123a;
-  --win-bg:#000000;--win-ink:#ffffff;--win-line:#ffffff;
-  color-scheme:dark;
+:root[data-theme="light"]{
+  --bg:#dfe6f1;--surface:#ffffff;--ink:#1d2042;--muted:#555b7e;--line:#1d2042;--soft:#cdd6e8;
+  --gold:#a86e00;--danger:#c42f3c;--safe:#23793a;--accent:#3552c4;--on-accent:#ffffff;
+  --win-bg:#10123a;--win-ink:#ffffff;--win-line:#ffffff;
+  color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -194,9 +186,9 @@ select:disabled{opacity:.45}
 .browser.evil .urlbar.danger{background:#000;border-color:var(--danger);color:#ff8f93}
 .browser.evil .urlbar.danger .u{color:#ff8f93}
 .urlbar.danger .tri{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;background:var(--danger);color:#fff;font-weight:bold;font-size:11px}
-.browser.evil .viewport{background:#000;color:#e7e7ea;animation:hjIn .45s steps(6,end)}
-.hj-load{padding:44px 16px;text-align:center;color:#8a8a93;font-size:13px}
-.evil-head{display:flex;align-items:center;gap:8px;padding:12px;background:#000;color:#ffd23f;font-weight:bold;font-size:17px;border-bottom:2px solid #3a2a00;letter-spacing:1px}
+.browser.evil .viewport{background:#120407;color:#f0e6e6;animation:hjIn .45s steps(6,end)}
+.hj-load{padding:44px 16px;text-align:center;color:#b08a8a;font-size:13px;background:#120407}
+.evil-head{display:flex;align-items:center;gap:8px;padding:12px;background:#2a0006;color:#ffd23f;font-weight:bold;font-size:17px;border-bottom:2px solid #5a0010;letter-spacing:1px}
 .evil-logo{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;background:#ffd23f;color:#000;border-radius:3px}
 .evil .phish{padding:14px 12px}
 .evil .phish-h{font-weight:bold;font-size:15px;color:#fff}
