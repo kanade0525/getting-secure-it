@@ -114,3 +114,71 @@ sprite("logo_hub", { w: 8, h: 8 }, `
   .KppppK.
   ..KKKK..`)
 
+
+// ---------- 商品アイコン（12×12） ----------
+sprite("item_robot", { w: 12, h: 12 }, `
+  ...KKKK...
+  ..KnnnnK..
+  ..KnKKnK..
+  ..KnnnnK..
+  .KKKKKKKK.
+  KnLLLLLLnK
+  KnLrLLrLnK
+  KnLLLLLLnK
+  KnLLLLLLnK
+  .KnnnnnnK.
+  ..KK..KK..
+  ..KK..KK..`)
+sprite("item_mug", { w: 12, h: 12 }, `
+  ..........
+  ..LLLLLL..
+  .LWWWWWWL.
+  .LWbbbbWLK
+  .LWbbbbWKK
+  .LWbbbbWKK
+  .LWbbbbWLK
+  .LWWWWWWL.
+  .LLLLLLLL.
+  ..LLLLLL..
+  ..........
+  ..........`)
+sprite("item_sign", { w: 12, h: 12 }, `
+  KKKKKKKKKK
+  KRRRRRRRRK
+  KRWWWWWWRK
+  KRWRRRRWRK
+  KRWRYYRWRK
+  KRWRYYRWRK
+  KRWRRRRWRK
+  KRWWWWWWRK
+  KRRRRRRRRK
+  KKKKKKKKKK
+  ...KKKK...
+  ...KKKK...`)
+sprite("item_bottle", { w: 12, h: 12 }, `
+  ....KK....
+  ....Kt K..
+  ...KttK...
+  ...KbbK...
+  ..KbbbbK..
+  ..KbWbbK..
+  ..KbbbbK..
+  ..KbbbbK..
+  ..KbbbbK..
+  ..KbbbbK..
+  ..KKKKKK..
+  ..........`)
+sprite("item_cat", { w: 12, h: 12 }, `
+  .K.....K..
+  KyK...KyK.
+  KyyKKKyyK.
+  KyWWWWWyK.
+  KyWKWKWyK.
+  KyWWWWWyK.
+  KyWWRWWyK.
+  .KyWWWyK..
+  ..KyyyK...
+  ..KyRyK...
+  ..KyyyK...
+  ..KKKKK...`)
+sheet("items", ["item_*"], { pad: 1 })

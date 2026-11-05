@@ -66,7 +66,7 @@ const PLAY = {
       for (const k of (play.appsw || [])) { const btn = p.locator(`#app-${k}`); if ((await btn.getAttribute('aria-pressed')) !== 'true') await btn.click(); await p.waitForTimeout(20); }
     }
     // 後始末タスク
-    if (play.tasks) { await tab('shop'); for (const id of play.tasks) { await p.check(`input[data-task="${id}"]`); await p.waitForTimeout(20); } }
+    if (play.tasks) { await tab('shop'); for (const id of play.tasks) { await p.click(`button[data-act="task"][data-id="${id}"]`); await p.waitForTimeout(40); await p.click(`#sheet [data-act="taskDone"][data-id="${id}"]`); await p.waitForTimeout(40); } }
     // 確かめる
     await tab('net'); await p.waitForTimeout(40);
     await p.click('#verifyNet');

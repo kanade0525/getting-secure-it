@@ -461,6 +461,11 @@ icons: {
   mail: ["KKKKKKKKKK","KKWWWWWWKK","KWKWWWWKWK","KWWKWWKWWK","KWWWKKWWWK","KWWWWWWWWK","KKKKKKKKKK"],
   logo_registrar: ["..KKKK..",".KYYYYK.","KYyKKyYK","KYyyyyYK","KYYYYYYK","KYYYYYYK",".KYYYYK.","..KKKK.."],
   logo_cloud: ["...KK...","..KbbK..",".KbWbbK.","KbbbbbbK","KbbbbbbK","KBBBBBBK",".KKKKKK.","........"],
+  item_robot: ["...KKKK...","..KnnnnK..","..KnKKnK..","..KnnnnK..",".KKKKKKKK.","KnLLLLLLnK","KnLrLLrLnK","KnLLLLLLnK","KnLLLLLLnK",".KnnnnnnK.","..KK..KK..","..KK..KK.."],
+  item_mug: ["..........","..LLLLLL..",".LWWWWWWL.",".LWbbbbWLK",".LWbbbbWKK",".LWbbbbWKK",".LWbbbbWLK",".LWWWWWWL.",".LLLLLLLL.","..LLLLLL..","..........",".........."],
+  item_sign: ["KKKKKKKKKK","KRRRRRRRRK","KRWWWWWWRK","KRWRRRRWRK","KRWRYYRWRK","KRWRYYRWRK","KRWRRRRWRK","KRWWWWWWRK","KRRRRRRRRK","KKKKKKKKKK","...KKKK...","...KKKK..."],
+  item_bottle: ["....KK....","....Kt K..","...KttK...","...KbbK...","..KbbbbK..","..KbWbbK..","..KbbbbK..","..KbbbbK..","..KbbbbK..","..KbbbbK..","..KKKKKK..",".........."],
+  item_cat: [".K.....K..","KyK...KyK.","KyyKKKyyK.","KyWWWWWyK.","KyWKWKWyK.","KyWWWWWyK.","KyWWRWWyK.",".KyWWWyK..","..KyyyK...","..KyRyK...","..KyyyK...","..KKKKK..."],
   logo_hub: [".KK..KK.","KppK.Kp.",".KKK.KK.","..Kp.pK.","..KpKK..","..KppK..",".KppppK.","..KKKK.."],
   logo_ca: ["..KKKK..",".KggggK.","KgGGGGgK","KgGWWGgK","KgGGGGgK",".KggggK.",".KGKKGK.","KGK..KGK"]
 }

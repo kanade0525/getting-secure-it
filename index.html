@@ -104,6 +104,16 @@ select:disabled{opacity:.45}
 .optl{grid-column:2;font-size:15px}
 .optc{grid-column:2;display:block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;background:var(--win-bg);color:#c9cff5;border:2px solid var(--line);padding:4px 8px;margin:2px 0;overflow-x:auto;white-space:pre;overflow-wrap:normal}
 .optn{grid-column:2;font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding:10px 0}
+.item{background:var(--surface);border:3px solid var(--line);padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.item .iname{line-height:1.3}
+.item .iprice{color:var(--gold)}
+.btn.mini{font-size:12px;min-height:34px;padding:4px 8px;box-shadow:2px 2px 0 var(--line)}
+.leak{border:3px solid var(--danger);background:var(--surface);padding:10px 12px;margin:10px 0}
+.leakhd{color:var(--danger);font-size:14px;margin-bottom:8px}
+.leakrow{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:2px dashed var(--soft);font-size:14px}
+.leakrow:last-of-type{border-bottom:0}
+.leakrow .lmail{color:var(--muted);font-family:ui-monospace,Menlo,monospace;font-size:13px}
 .modal{position:fixed;inset:0;z-index:20;background:rgba(5,6,20,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
 .modal[hidden]{display:none}
 .sheet{max-width:620px;width:100%;max-height:100%;overflow:auto;background:var(--surface);border:4px solid var(--line);padding:18px}
@@ -231,7 +241,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -284,6 +294,13 @@ function renderTabs(){
   });
   ['shop','voice','net','console'].forEach(t=>{$('p-'+t).hidden=t!==S.tab;});
 }
+const CATALOG=[
+  {icon:'item_robot',name:'ブリキのロボット',price:'¥1,800'},
+  {icon:'item_mug',name:'レトロなマグカップ',price:'¥980'},
+  {icon:'item_sign',name:'ホーローの看板',price:'¥3,200'},
+  {icon:'item_bottle',name:'すりガラスのびん',price:'¥600'},
+  {icon:'item_cat',name:'まねき猫の貯金箱',price:'¥1,200'}
+];
 function renderShop(){
   const live=S.domain&&S.dnsOk&&S.phase!=='setup'&&S.phase!=='intro';
   const sec=S.cfg.https&&S.cfg.redirect;
@@ -292,8 +309,42 @@ function renderShop(){
   <p class="state">${live?'公開中':'未公開'}</p></div>`;
   if(S.phase==='setup')h+=`<div class="box"><p>お店はまだきみのパソコンの中にあるだけ。「管理」タブでドメインを取得して、リリースしよう。</p><button class="btn primary" data-act="goConsole">管理タブを開く</button></div>`;
   h+=tasksHTML();
+  if(live)h+=shopHTML();
   h+=`<p style="margin-top:18px"><button class="link" data-act="toTitle">タイトルへ戻る</button></p>`;
   $('p-shop').innerHTML=h;
+}
+function shopHTML(){
+  const d=DAYS[S.day],demo=d&&d.demo;
+  let h=`<div class="sec"><h3>よろず屋ピクセル堂</h3>
+    <div class="domrow"><input type="text" id="shopQ" placeholder="商品名で検索" value="${esc(S.shopQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="btn" data-act="doSearch">検索</button></div>`;
+  if(demo&&S.phase!=='intro'&&S.phase!=='setup'&&S.phase!=='day0'&&(S.cfg.code.search!=='param')){
+    h+=`<div class="capanel"><p class="small" style="margin:0 0 6px">${esc(demo.hint)}</p>
+      <div class="acts" style="align-items:center"><code class="optc" style="margin:0">${esc(demo.payload)}</code><button class="btn" data-act="tryPayload">これを入れて検索</button></div></div>`;
+  }
+  h+=`<div class="res" style="padding:0 12px 8px">${searchResultHTML()}</div></div>`;
+  return h;
+}
+function searchResultHTML(){
+  const r=S.shopRes;
+  const card=p=>`<div class="item">${spr(IC[p.icon],3,p.name)}<div class="iname small">${esc(p.name)}</div><div class="iprice small">${esc(p.price)}</div><button class="btn mini" data-act="cart">カートに入れる</button></div>`;
+  if(!r){return `<div class="grid">${CATALOG.map(card).join('')}</div>`;}
+  if(r.leak)return `<div class="leak"><div class="leakhd">検索結果に、会員の個人情報が出てきてしまった</div>${r.members.map(m=>`<div class="leakrow"><span>${esc(m.name)}</span><span class="lmail">${esc(m.mail)}</span></div>`).join('')}<p class="small" style="margin:8px 0 0">これが「ほらこういうことができてしまう」の状態です。</p></div>`;
+  if(r.blocked)return `<p class="msg-err small" style="margin:8px 0">${esc(r.msg)}</p>`;
+  if(r.safe)return `<p class="muted small" style="margin:8px 0">${esc(r.msg)}</p>`;
+  return r.rows.length?`<div class="grid">${r.rows.map(card).join('')}</div>`:'<p class="muted small" style="margin:8px 0">該当する商品はありません。</p>';
+}
+function demoSearch(q){
+  const d=DAYS[S.day],demo=d&&d.demo;q=(q||'').trim();
+  const looksInj=q.includes("'")||/\bor\b/i.test(q)||q.includes('--')||q.includes('=');
+  if(demo&&looksInj){
+    const fix=S.cfg.code.search;
+    if(fix==='param')return {safe:true,msg:'「'+q+'」に一致する商品はありません。（ただの検索語として扱われた）'};
+    if(fix==='reject')return {blocked:true,msg:'記号は使えません。（この対策だと、記号を含む商品名も探せません）'};
+    return {leak:true,members:demo.members};
+  }
+  const base=(demo&&demo.products&&demo.products.length)?demo.products.map((p,i)=>Object.assign({icon:CATALOG[i%CATALOG.length].icon},p)):CATALOG;
+  return {rows:q?base.filter(p=>p.name.includes(q)):base};
 }
 function renderVoices(){
   let h=`<h2>お客さんの声</h2><p class="muted small">問い合わせやSNSの投稿が届きます</p>`;
@@ -467,13 +518,13 @@ function hubHTML(){
   if(!d||!d.fixes)return '<div class="box"><p class="muted">今日はここで直すコードはありません。</p></div>'+verifyBox();
   let h='';
   d.fixes.forEach(fx=>{
-    h+=`<div class="sec"><h3>${esc(fx.title)}<small style="font-size:12px;color:var(--muted)">　${esc(fx.file)}</small></h3>
-      <p class="small" style="padding:8px 12px 0;margin:0">直し方をひとつ選びましょう。</p>`;
+    h+=`<div class="sec"><h3>${esc(fx.title)}${fx.file?`<small style="font-size:12px;color:var(--muted)">　${esc(fx.file)}</small>`:''}</h3>
+      <p class="small" style="padding:8px 12px 0;margin:0">対策をひとつ選びましょう。</p>`;
     fx.opts.forEach(o=>{
       const on=(S.cfg.code[fx.key]||'')===o.v;
       h+=`<label class="opt${on?' on':''}"><input type="radio" name="fix-${fx.key}" data-fix="${fx.key}" data-v="${o.v}" ${on?'checked':''}>
         <span class="optl">${esc(o.l)}</span>
-        <code class="optc">${esc(o.code)}</code>
+        ${o.code?`<code class="optc">${esc(o.code)}</code>`:''}
         <span class="optn">${esc(o.note)}</span></label>`;
     });
     h+='</div>';
@@ -502,7 +553,9 @@ function tasksHTML(){
   if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0'||S.phase==='incident')return '';
   let h=`<div class="sec"><h3>お店の対応</h3><p class="small" style="padding:8px 12px 0;margin:0">攻撃のあとに、お店としてやることです。</p>`;
   d.tasks.forEach(t=>{const on=!!S.cfg.tasks[t.id];
-    h+=`<label class="chk"><input type="checkbox" data-task="${t.id}" ${on?'checked':''}><span>${esc(t.l)}</span><span class="note">${t.kind==='report'?'報告':'お知らせ'}</span></label>`;
+    h+=`<div class="row"><div class="desc">${esc(t.l)}<span class="note">${t.kind==='report'?'個人情報保護委員会へ':'お客さまへ'}</span></div>`;
+    h+= on?'<span class="msg-ok small">対応済み</span>':`<button class="btn" data-act="task" data-id="${t.id}" data-kind="${t.kind}">${t.kind==='report'?'報告する':'お知らせを出す'}</button>`;
+    h+='</div>';
   });
   return h+'</div>';
 }
@@ -568,7 +621,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;
   if(d.svc==='hub')S.svc='hub';
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
@@ -619,6 +672,20 @@ function showLearn(){
     <ul>${l.points.map(p=>`<li>${p}</li>`).join('')}</ul>
     <p class="real small">${l.real}</p>
     <div class="acts"><button class="btn primary" data-act="nextDay">${S.day<LAST_DAY?(S.day+1)+'日目へ進む':'まとめを見る'}</button></div>`);
+}
+function reportSheet(id){
+  return `<p class="muted small">個人情報保護委員会</p><h2 id="mTitle">個人情報漏えいの報告</h2>
+    <div class="kv"><span>発生したこと</span><b>検索窓からの不正アクセスで、会員のメールアドレスが流出</b>
+      <span>対象</span><b>会員 約1,200件</b><span>発生日</span><b>本日</b><span>対応</span><b>検索の処理を修正済み</b></div>
+    <p class="real small">実際には、個人情報保護委員会への報告（速報と確報）と、本人への通知が必要です。漏えいの内容・件数・原因・再発防止策を書きます。</p>
+    <div class="acts"><button class="btn primary" data-act="taskDone" data-id="${id}">報告を送信する</button><button class="btn" data-act="close">やめる</button></div>`;
+}
+function noticeSheet(id){
+  return `<p class="muted small">お客さまへのお知らせ</p><h2 id="mTitle">お詫びとご報告</h2>
+    <p class="small">このたび、当店の検索機能の不具合により、会員のメールアドレスが外部から閲覧できる状態になっていました。すでに原因は修正しております。</p>
+    <p class="small">心当たりのないメールにはご注意ください。ご迷惑をおかけし申し訳ありません。</p>
+    <p class="real small">黙ってやり過ごす選択肢はありません。事実と対応、お客さまへのお願いを、正直に伝えます。</p>
+    <div class="acts"><button class="btn primary" data-act="taskDone" data-id="${id}">このお知らせを出す</button><button class="btn" data-act="close">やめる</button></div>`;
 }
 function showEnd(){
   S.phase='end';save();render();
@@ -706,6 +773,11 @@ document.addEventListener('click',e=>{
   else if(a==='svc'){S.svc=b.dataset.s;if(b.dataset.sub)S.sub=b.dataset.sub;save();render();window.scrollTo(0,0);}
   else if(a==='sub'){S.sub=b.dataset.sub;save();render();}
   else if(a.indexOf('app-')===0){const k=a.slice(4);c.app[k]=!c.app[k];save();render();}
+  else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();}
+  else if(a==='tryPayload'){const d=DAYS[S.day];S.shopQ=d&&d.demo?d.demo.payload:'';S.shopRes=demoSearch(S.shopQ);save();render();
+    if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の個人情報が全部出てきちゃった'},{who:SHIRO,t:'これが攻撃者のやったこと。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
+  else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();render();}
 });
 document.addEventListener('change',e=>{
   const t=e.target,c=S.cfg;
@@ -725,10 +797,12 @@ document.addEventListener('change',e=>{
 document.addEventListener('input',e=>{
   if(e.target.id==='nrName')nr.name=e.target.value;
   else if(e.target.id==='nrVal')nr.val=e.target.value;
+  else if(e.target.id==='shopQ')S.shopQ=e.target.value;
 });
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'||e.isComposing)return;
   if(e.target.id==='domName'){e.preventDefault();$('domSearch').click();}
+  else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();}
 });
 
 /* ---------- 再開 ---------- */

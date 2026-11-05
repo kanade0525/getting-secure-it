@@ -23,15 +23,20 @@ const D={
     {who:'やまだ',t:'私のアドレスが流出したって本当ですか？'}
   ],
   alert:[
-    {who:SHIRO,t:'検索した言葉が、そのままデータベースへの命令文に差し込まれてる'},
-    {who:SHIRO,t:'だから入力した文字が「命令」として実行されてしまうんだ。「SQLインジェクション」っていう'},
-    {who:SHIRO,t:'「管理」タブの「ピクセルハブ」で、検索のコードを直そう'}
+    {who:SHIRO,t:'検索した言葉が、そのままデータベースへの命令として扱われてる'},
+    {who:SHIRO,t:'サイトタブの検索窓で、試しに攻撃者と同じ入力をしてみて。ほら、会員の一覧が出てきちゃう'},
+    {who:SHIRO,t:'「管理」タブの「ピクセルハブ」で、検索の扱い方を直そう'}
   ],
-  fixes:[{key:'search',file:'search.js',title:'商品検索',opts:[
-    {v:'raw',l:'今のまま',code:'const sql = "…WHERE name LIKE %" + q + "%"',note:'入力をそのまま命令文につないでいる',bad:true},
-    {v:'strip',l:'引用符を取り除く',code:'q = q.split("\'").join("")',note:'引用符を消すだけ。別の書き方で抜けられる',bad:true},
-    {v:'reject',l:'記号をすべて拒否',code:'if (hasSymbol(q)) return error()',note:'文字と数字以外を全部はじく'},
-    {v:'param',l:'プレースホルダを使う',code:'db.query("…WHERE name LIKE ?", [q])',note:'命令文の形は固定し、入力は「値」として渡す'}
+  demo:{
+    hint:'攻撃者はこう入力したらしい。試してみよう。',
+    payload:"' OR '1'='1",
+    products:[{name:'ブリキのロボット',price:'¥1,800'},{name:'レトロなマグカップ',price:'¥980'},{name:'ホーローの看板',price:'¥3,200'},{name:'すりガラスのびん',price:'¥600'},{name:'まねき猫の貯金箱',price:'¥1,200'}],
+    members:[{name:'たなか','mail':'tanaka@****.jp'},{name:'すずき','mail':'suzuki@****.com'},{name:'やまだ','mail':'yamada@****.jp'},{name:'（ほか約1,200件）','mail':'………'}]
+  },
+  fixes:[{key:'search',title:'検索の扱い方',opts:[
+    {v:'strip',l:'入力から記号を取り除く',note:'引用符などを消すだけ。別の書き方で抜けられる',bad:true},
+    {v:'reject',l:'記号が入っていたら検索しない',note:'安全だが、「M&M」のような商品名も探せなくなる'},
+    {v:'param',l:'入力は「検索する言葉」として扱う',note:'入力が何であっても命令にはせず、ただの検索語として渡す。これが基本'}
   ]}],
   tasks:[
     {id:'notice',l:'漏えいのお知らせを出す',kind:'notice'},
