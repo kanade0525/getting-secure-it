@@ -315,6 +315,15 @@ input[type="text"]:disabled{opacity:.6}
 .mon-res.ok{border:1px solid var(--safe)}
 .mon-res.bad{border:1px solid var(--danger)}
 @media (prefers-reduced-motion:reduce){.meter-bar{transition:none}}
+.certwarn{border:1px solid var(--danger);border-radius:8px;padding:11px;background:rgba(255,109,122,.06)}
+.certwarn-h{color:var(--danger);font-weight:600;font-size:14px}
+.certok{display:flex;align-items:center;gap:10px}
+.vulnlist{display:flex;flex-direction:column;gap:6px}
+.vrow{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:6px;border:1px solid var(--soft)}
+.vrow b{font-size:13px}
+.vrow span{font-size:12px;color:var(--muted)}
+.vrow.bad{border-color:var(--danger)}
+.vrow.ok{border-color:var(--safe)}
 </style>
 </head>
 <body>
@@ -349,6 +358,7 @@ input[type="text"]:disabled{opacity:.6}
 <script src="days.js"></script>
 <script src="days-ch2.js"></script>
 <script src="days-ch3.js"></script>
+<script src="days-ch4.js"></script>
 <script>
 (function(){
 const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -374,7 +384,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -505,6 +515,12 @@ function browserHTML(){
   if(demo&&demo.kind==='login')h+=loginDemoHTML();
   if(demo&&demo.kind==='dos')h+=dosDemoHTML();
   if(demo&&demo.kind==='waf')h+=wafDemoHTML();
+  if(demo&&demo.kind==='cert')h+=certDemoHTML();
+  if(demo&&demo.kind==='vuln')h+=vulnDemoHTML();
+  if(demo&&demo.kind==='skimmer')h+=skimmerDemoHTML();
+  if(demo&&demo.kind==='apikey')h+=apikeyDemoHTML();
+  if(demo&&demo.kind==='domain')h+=domainDemoHTML();
+  if(demo&&demo.kind==='exfil')h+=exfilDemoHTML();
   h+=`<div class="store-foot">© よろず屋ピクセル堂　${esc(S.domain)}</div>
     </div></div>`;
   return h;
@@ -675,7 +691,7 @@ function idorBrowserHTML(){
     </div></div>
     <div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
-function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;}
+function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;}
 /* --- 第3章 防壁編のデモ（店長の監視視点で再現） --- */
 function signupDemoHTML(){
   if(demoOff())return '';
@@ -724,6 +740,82 @@ function wafDemoHTML(){
     :`<div class="mon-res ok"><b>WAFがブロック</b><span>既知のパターンは弾けた（でも書き方を変えると…？）</span></div>`;
   return h+'</div></div>';
 }
+/* --- 第4章 運用編のデモ --- */
+function certDemoHTML(){
+  if(demoOff())return '';
+  const ok=S.cfg.autoRenew;
+  let h=`<div class="sec"><h3>お客さんに見えている画面</h3><div class="monitor">`;
+  if(!ok){
+    h+=`<div class="certwarn"><div class="certwarn-h">保護されていない通信</div>
+      <p class="small" style="margin:6px 0">${esc(S.domain||'pixeldo.shop')} の証明書は <b>有効期限が切れています</b>。この接続は安全ではありません。</p>
+      <div class="acts"><button class="btn" disabled>詳細</button><button class="btn" disabled>このまま進む</button></div></div>
+      <div class="mon-res bad"><b>全員に警告画面</b><span>慣れた人が「このまま進む」を押し、その通信を盗み見られる</span></div>
+      <button class="btn primary" data-act="autorenew" style="margin-top:10px">自動更新をオンにして更新する</button>`;
+  }else{
+    h+=`<div class="certok">${spr(IC.lock,4,'')}<div><b>保護された接続</b><div class="small muted">証明書は有効。自動更新：オン</div></div></div>
+      <div class="mon-res ok"><b>期限切れは起きない</b><span>期限が近づくと、自動で更新・設置をやり直す</span></div>`;
+  }
+  return h+'</div></div>';
+}
+function vulnDemoHTML(){
+  const o=DAYS[S.day].demo;if(demoOff())return '';
+  const fixed=S.cfg.code[o.fixKey]==='update',done=fixed||S.vulnShown;
+  let h=`<div class="sec"><h3>${esc(o.title)}</h3><div class="monitor">`;
+  if(!done){
+    h+=`<div class="mon-h">構成を調べます</div><button class="btn primary" data-act="vulnScan">脆弱性スキャンを実行</button>`;
+  }else{
+    const list=fixed?o.after:o.items;
+    h+=`<div class="mon-h">${fixed?'更新後':'検出された問題'}</div><div class="vulnlist">${list.map(it=>`<div class="vrow ${fixed?'ok':'bad'}"><b>${esc(it.name)}</b><span>${esc(it.note)}</span></div>`).join('')}</div>`;
+    h+= fixed?`<div class="mon-res ok"><b>既知の穴なし</b><span>更新で、公開済みの脆弱性はふさがった</span></div>`
+            :`<div class="mon-res bad"><b>既知の脆弱性あり</b><span>バージョンを調べれば、誰でも狙える状態</span></div>`;
+  }
+  return h+'</div></div>';
+}
+function skimmerDemoHTML(){
+  if(demoOff())return '';
+  const locked=S.cfg.code.thirdparty==='lock',r=S.skimRes;
+  let h=`<div class="sec"><h3>決済ページ</h3><div class="monitor"><div class="mon-h">読み込まれているスクリプト</div>
+    <div class="dbdump"><div>/js/app.js（自分のサイト）</div><div>cdn.payments.example/pay.js（決済）</div><div class="${locked?'':'warnT'}">cdn.analytics-free.example/track.js ${locked?'（SRIで検証）':'← 差し替え済み'}</div></div>
+    <div class="signup-form" style="margin-top:8px"><input disabled placeholder="カード番号 4242 4242 4242 4242"></div>
+    <button class="btn primary" data-act="skimPay">カード情報を入力して送信</button>`;
+  if(r)h+= r.stolen
+    ?`<div class="mon-res bad"><b>外部へ送信された</b><span>差し替えられた track.js が、入力を攻撃者のサーバーへコピーした</span></div>`
+    :`<div class="mon-res ok"><b>盗まれない</b><span>SRIで差し替えを検知して読み込まず、CSPで許可外への送信も遮断</span></div>`;
+  return h+'</div></div>';
+}
+function apikeyDemoHTML(){
+  if(demoOff())return '';
+  const safe=S.cfg.code.apikey==='server',r=S.keyRes;
+  let h=`<div class="sec"><h3>ページのソース</h3><div class="monitor"><div class="mon-h">公開中のJavaScript（誰でも見られる）</div>
+    <div class="dbdump"><div>fetch("/api/pay", {</div><div>&nbsp;&nbsp;headers: { "Authorization":</div><div class="${safe?'':'warnT'}">&nbsp;&nbsp;&nbsp;&nbsp;${safe?'&lt;サーバー側で付与&gt;':'"Bearer sk_live_9f2a7c4e1b8d6…"'} }</div><div>})</div></div>
+    <button class="btn primary" data-act="keyView">このキーをコピーして使ってみる</button>`;
+  if(r)h+= r.abused
+    ?`<div class="mon-res bad"><b>そのまま使えた</b><span>見えるキーは誰でも悪用できる。不正利用で請求が急増する</span></div>`
+    :`<div class="mon-res ok"><b>キーが無い</b><span>キーはサーバー側だけ。ブラウザからは取り出せない</span></div>`;
+  return h+'</div></div>';
+}
+function domainDemoHTML(){
+  if(demoOff())return '';
+  const locked=S.cfg.code.registrar==='lock',r=S.domRes;
+  let h=`<div class="sec"><h3>ドメイン会社からの通知</h3><div class="monitor"><div class="mon-h">登録者変更・移管の申請</div>
+    <div class="dbdump"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：pixeldo.shop を別の管理者へ移管</div><div class="${locked?'':'warnT'}">本人確認：${locked?'移管ロック＋2段階認証':'確認メールのみ'}</div></div>
+    <button class="btn primary" data-act="domTry">攻撃者として移管を申請する</button>`;
+  if(r)h+= r.hijacked
+    ?`<div class="mon-res bad"><b>受理されかけた</b><span>本人確認が甘く、ドメインごと乗っ取られる寸前</span></div>`
+    :`<div class="mon-res ok"><b>拒否された</b><span>移管ロックと2段階認証で、なりすまし申請を止めた</span></div>`;
+  return h+'</div></div>';
+}
+function exfilDemoHTML(){
+  if(demoOff())return '';
+  const guarded=S.cfg.code.egress==='monitor',r=S.exfilRes;
+  let h=`<div class="sec"><h3>夜間の通信ログ</h3><div class="monitor"><div class="mon-h">外向きの通信（深夜帯）</div>
+    <div class="dbdump"><div>02:14  → unknown-host.example  2 KB</div><div>02:41  → unknown-host.example  3 KB</div><div>03:08  → unknown-host.example  2 KB</div><div>…小分けで継続</div></div>
+    <button class="btn primary" data-act="exfilRun" style="margin-top:8px">この外向き通信を試す</button>`;
+  if(r)h+= r.leaked
+    ?`<div class="mon-res bad"><b>素通りした</b><span>外向きが自由なので、少量ずつ会員データを持ち出せた</span></div>`
+    :`<div class="mon-res ok"><b>遮断・検知した</b><span>許可外の宛先への送信を止め、異常として通報した</span></div>`;
+  return h+'</div></div>';
+}
 /* --- 「対策を入れる」ときに、コードが書き換わるアニメ --- */
 const SNIP={
   search:{file:'search.py',lines:[
@@ -767,7 +859,27 @@ const SNIP={
     ['app.handle(all)','app.handle(allowed)']]},
   defense:{file:'defense.py',lines:[
     ['defense = [waf]            # WAF頼み','defense = [waf, validate, least_priv]'],
-    ['run(req.raw)              # そのまま','run(validate(req.input))  # 検証してから']]}
+    ['run(req.raw)              # そのまま','run(validate(req.input))  # 検証してから']]},
+  os:{file:'server.sh',lines:[
+    ['# OpenSSL 1.0.1 (Heartbleed)','apt update && apt upgrade -y'],
+    ['# OpenSSH 6.6 / 未適用12件','# OS・ミドルウェアを更新'],
+    ['run_server()','run_server()  # 既知CVEなし']]},
+  deps:{file:'package.json',lines:[
+    ['"image-lib": "1.2.0",   // RCE','"image-lib": "3.4.1",'],
+    ['"web-util":  "0.9.3"','"web-util":  "2.1.0"']]},
+  thirdparty:{file:'checkout.html',lines:[
+    ['<script src="//cdn.ext/track.js">','<script src="//cdn.ext/track.js"'],
+    ['<\/script>','  integrity="sha384-…" crossorigin><\/script>'],
+    ['# CSP: なし','# CSP: default-src self; connect-src self']]},
+  apikey:{file:'pay.js',lines:[
+    ['const KEY = "sk_live_9f2a…"  // 丸見え','// キーはサーバー側だけで扱う'],
+    ['fetch(api, {key: KEY})','fetch("/api/pay")   // 署名はサーバーで']]},
+  registrar:{file:'domain.cfg',lines:[
+    ['transfer_lock: off','transfer_lock: on      # 移管ロック'],
+    ['account_2fa:    off','account_2fa:    on      # 2段階認証']]},
+  egress:{file:'egress.cfg',lines:[
+    ['egress: allow all        # 出口自由','egress: allow [known_hosts]  # 許可先だけ'],
+    ['monitor: off','monitor: on  alert_on_anomaly  # 異常検知']]}
 };
 function playCodeAnim(key,done){
   const s=SNIP[key];
@@ -1128,7 +1240,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;
   if(d.svc==='hub')S.svc='hub';
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
@@ -1196,11 +1308,16 @@ function noticeSheet(id){
 }
 function showEnd(){
   S.phase='end';save();render();
-  showModal(`<h2 id="mTitle">第2章 アプリ編はここまで</h2>
-    <p>通信もアプリの中身も守れるようになりました。検索・パスワード・会計・レビュー・ログイン状態・なりすまし・他人のデータ・クーポンの穴をふさぎました。</p>
-    <p class="muted small">第3章 防壁編で待っていること</p>
-    <ul><li>12日目　ボットの大量登録（クーポン連打部隊が再登場）</li><li>13日目　ログインの総当たり</li><li>14日目　大量アクセスでサイトを止める攻撃</li><li>15日目　WAFのすり抜け</li></ul>
-    <p class="small muted">デモはここまでです。</p>
+  showModal(`<h2 id="mTitle">全22日、守りきった！</h2>
+    <p>よろず屋ピクセル堂は、通信・アプリの中身・防壁・運用のすべてを守れるお店になりました。</p>
+    <p class="muted small">きみが身につけた守り</p>
+    <ul>
+      <li>通信編：HTTPS・暗号の更新・HSTS</li>
+      <li>アプリ編：SQLi・パスワード保存・価格・XSS・セッション・CSRF・IDOR・クーポン</li>
+      <li>防壁編：bot登録・総当たり・DoS・WAFと多層防御</li>
+      <li>運用編：証明書更新・OS/ライブラリ更新・外部JS・APIキー・ドメイン・情報持ち出し</li>
+    </ul>
+    <p class="small">共通していたのは「悪用される前に気づいて、根本からふさぐ」こと。おつかれさま！</p>
     <div class="acts"><button class="btn primary" data-act="toTitle">タイトルへ戻る</button><button class="btn" data-act="close">閉じる</button></div>`);
 }
 function reset(){
@@ -1312,6 +1429,11 @@ document.addEventListener('click',e=>{
   else if(a==='dosFire'){const fixed=S.cfg.code.dos==='shield';S.dosRes=fixed?{load:55,down:false}:{load:100,down:true};save();render();if(!fixed&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'ほら、一気に送られるとサーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルハブで、前段で受け止めてレート制限する仕組みを入れよう'}]);}}
   else if(a==='wafEnc'){S.wafEnc=!S.wafEnc;S.wafRes=null;save();render();}
   else if(a==='wafSend'){const enc=!!S.wafEnc,layered=S.cfg.code.defense==='layered';S.wafRes={pass:enc};save();render();if(enc&&!layered&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'エンコードを変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。ピクセルハブで、根本対策を重ねて多層防御にしよう'}]);}}
+  else if(a==='vulnScan'){S.vulnShown=true;save();render();if(!S.seenVuln){S.seenVuln=true;save();say([{who:SHIRO,t:'ほら、使ってるソフトのバージョンが、そのまま公開済みの穴になってる'},{who:SHIRO,t:'ピクセルハブで更新しよう'}]);}}
+  else if(a==='skimPay'){const locked=S.cfg.code.thirdparty==='lock';S.skimRes={stolen:!locked};save();render();if(!locked&&!S.seenSkim){S.seenSkim=true;save();say([{who:SHIRO,t:'差し替えられた外部スクリプトが、入力を外へ送っちゃった'},{who:SHIRO,t:'ピクセルハブで、SRIで固定しCSPで制限しよう'}]);}}
+  else if(a==='keyView'){const safe=S.cfg.code.apikey==='server';S.keyRes={abused:!safe};save();render();if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'ピクセルハブで、キーをサーバー側に隠して失効・再発行しよう'}]);}}
+  else if(a==='domTry'){const locked=S.cfg.code.registrar==='lock';S.domRes={hijacked:!locked};save();render();if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'ピクセルハブで、移管ロックと2段階認証をかけよう'}]);}}
+  else if(a==='exfilRun'){const guarded=S.cfg.code.egress==='monitor';S.exfilRes={leaked:!guarded};save();render();if(!guarded&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルハブで、出口を制限して異常を検知しよう'}]);}}
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;const go=()=>{c.code[key]=v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);};if(RM)go();else playCodeAnim(key,go);}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
