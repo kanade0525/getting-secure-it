@@ -760,19 +760,32 @@ function renderVoices(){
 const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
 function renderNet(){
   const c=S.cfg,atk=attackerOf();
-  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、攻撃者、ショップのサーバーの通信図">
-    <rect x="6" y="24" width="206" height="198" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
-    <text x="12" y="18" class="lbl">カフェのWi-Fi</text>
-    ${sprG(CAST.tanaka.rows,20,36,3.5)}
-    <text x="48" y="104" text-anchor="middle" class="lbl">お客さん</text>
-    <line x1="72" y1="78" x2="284" y2="78" stroke="var(--line)" stroke-width="3"/>
-    <line id="tap" x1="140" y1="84" x2="140" y2="140" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 4"/>
-    ${sprG(frameRows(atk.rows,tick),112,140,3.5,'atk')}
-    <text x="140" y="212" text-anchor="middle" class="lbl">攻撃者</text>
-    ${sprG(IC.srv,290,34,4)}
-    <text x="310" y="96" text-anchor="middle" class="lbl">ショップ</text>
-    ${c.https?sprG(IC.lock,298,6,3):'<text x="310" y="22" text-anchor="middle" class="lbl warnT">HTTP</text>'}
-    <g id="pkt" transform="translate(80,72)" opacity="0"><rect width="16" height="12" fill="var(--danger)"/><text id="pktL" x="8" y="-5" text-anchor="middle" class="pl"></text></g>
+  const atkOn=busy||(S.last&&S.last.lines.length>0);
+  const atkG=atkOn?`
+    <line id="tap" x1="116" y1="80" x2="116" y2="138" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 4"/>
+    ${sprG(frameRows(atk.rows,tick),90,140,3.3,'atk')}
+    <text x="116" y="210" text-anchor="middle" class="lbl warnT">攻撃者</text>`:'';
+  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、ルーター、インターネット、ショップのサーバーの通信図${atkOn?'。攻撃者が通信を盗み見ている':''}">
+    <rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="12" y="20" class="lbl">カフェのWi-Fi</text>
+    <line x1="70" y1="68" x2="100" y2="68" stroke="var(--line)" stroke-width="3"/>
+    <line x1="132" y1="68" x2="176" y2="68" stroke="var(--line)" stroke-width="3"/>
+    <line x1="236" y1="68" x2="288" y2="68" stroke="var(--line)" stroke-width="3"/>
+    ${sprG(CAST.tanaka.rows,16,34,3.3)}
+    <text x="42" y="104" text-anchor="middle" class="lbl">お客さん</text>
+    <rect x="100" y="57" width="32" height="22" rx="4" fill="var(--soft)" stroke="var(--line)" stroke-width="2"/>
+    <line x1="108" y1="57" x2="105" y2="48" stroke="var(--line)" stroke-width="2"/><circle cx="105" cy="46" r="2" fill="var(--line)"/>
+    <line x1="124" y1="57" x2="127" y2="48" stroke="var(--line)" stroke-width="2"/><circle cx="127" cy="46" r="2" fill="var(--line)"/>
+    <text x="116" y="104" text-anchor="middle" class="lbl">ルーター</text>
+    <circle cx="194" cy="60" r="12" fill="var(--soft)"/><circle cx="218" cy="58" r="14" fill="var(--soft)"/>
+    <ellipse cx="206" cy="66" rx="30" ry="14" fill="var(--soft)"/>
+    <ellipse cx="206" cy="66" rx="30" ry="14" fill="none" stroke="var(--line)" stroke-width="2"/>
+    <text x="206" y="104" text-anchor="middle" class="lbl">インターネット</text>
+    ${sprG(IC.srv,288,34,4)}
+    <text x="316" y="104" text-anchor="middle" class="lbl">ショップ</text>
+    ${c.https?sprG(IC.lock,320,6,3):'<text x="316" y="24" text-anchor="middle" class="lbl warnT">HTTP</text>'}
+    ${atkG}
+    <g id="pkt" transform="translate(62,62)" opacity="0"><rect width="16" height="12" fill="var(--danger)"/><text id="pktL" x="8" y="-5" text-anchor="middle" class="pl"></text></g>
   </svg>`;
   const lines=S.last&&S.last.lines.length?S.last.lines.map(l=>`<div class="${l.k}">› ${esc(l.t)}</div>`).join(''):'<div class="info">まだ何も記録されていません</div>';
   let hint='';
@@ -985,12 +998,12 @@ function animatePacket(line,r,cb){
   g.querySelector('rect').setAttribute('fill',col);
   $('pktL').textContent=line.k==='ok'?'#%&@!?':line.k==='bad'?(r.pkt||''):'';
   g.setAttribute('opacity','1');
-  const tap=$('tap'),t0=performance.now(),dur=1000;
+  const tap=$('tap'),t0=performance.now(),dur=1600;
   function step(t){
-    const p=Math.min(1,(t-t0)/dur),x=80+p*188;
-    g.setAttribute('transform',`translate(${x},72)`);
-    tap.setAttribute('stroke-width',Math.abs(x+8-140)<22?'5':'2');
-    if(p<1)requestAnimationFrame(step);else{g.setAttribute('opacity','0');tap.setAttribute('stroke-width','2');cb();}
+    const p=Math.min(1,(t-t0)/dur),x=62+p*226;
+    g.setAttribute('transform',`translate(${x},62)`);
+    if(tap)tap.setAttribute('stroke-width',Math.abs(x+8-116)<20?'5':'2');
+    if(p<1)requestAnimationFrame(step);else{g.setAttribute('opacity','0');if(tap)tap.setAttribute('stroke-width','2');cb();}
   }
   requestAnimationFrame(step);
 }
@@ -1002,7 +1015,7 @@ function runAttack(r,done){
     if(showing){setTimeout(go,150);return;}
     if(i>=r.lines.length){busy=false;save();render();done();return;}
     const src=r.lines[i++],line={k:src.k,t:dm(src.t)};
-    animatePacket(line,r,()=>{S.last.lines.push(line);const div=document.createElement('div');div.className=line.k;div.textContent='› '+line.t;log.appendChild(div);setTimeout(go,RM?0:150);});
+    animatePacket(line,r,()=>{S.last.lines.push(line);const div=document.createElement('div');div.className=line.k;div.textContent='› '+line.t;log.appendChild(div);setTimeout(go,RM?0:350);});
   })();
 }
 
@@ -1031,10 +1044,10 @@ function startDay(n){
   say(d.start,()=>{
     d.voices.forEach((v,i)=>setTimeout(()=>{
       S.voices.unshift(Object.assign({day:n,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);
-    },RM?0:i*700));
+    },RM?0:i*1200));
     setTimeout(()=>{S.badge.net=S.tab!=='net';save();render();
       say([{who:SHIRO,t:'お客さんの声は「お客さんの声」タブに届いてる。原因は「通信」タブで見てみよう'}]);
-    },RM?0:d.voices.length*700+200);
+    },RM?0:d.voices.length*1200+300);
   });
 }
 function firstAttack(){
@@ -1051,7 +1064,7 @@ function verify(){
     if(r.ok){S.phase='clear';save();render();say(d.success(S.cfg),showLearn);}
     else{
       save();render();
-      (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*700));
+      (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*1200));
       say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':r.todo?'攻撃は防げた。あとは後始末だ':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
     }
   });
@@ -1065,7 +1078,7 @@ function showToast(v){
   $('toastText').textContent=v.t;
   clearTimeout(toastT);toast.hidden=false;
   requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.remove('out')));
-  toastT=setTimeout(hideToast,4000);
+  toastT=setTimeout(hideToast,4500);
 }
 function hideToast(){clearTimeout(toastT);toast.classList.add('out');toastT=setTimeout(()=>{toast.hidden=true;},RM?0:300);}
 toast.addEventListener('click',()=>setTab('voice'));
