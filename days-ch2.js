@@ -75,9 +75,19 @@ const D={
   ],
   alert:[
     {who:SHIRO,t:'パスワードがそのまま読める形で保存されてる。流出したら即アウトだ'},
+    {who:SHIRO,t:'サイトタブで、保存データを攻撃者のつもりで読んでみて。全員分そのまま読めちゃう'},
     {who:SHIRO,t:'パスワードは「元に戻せない形」にして保存するのが基本。それでも使い回しは危ない'},
     {who:SHIRO,t:'ピクセルハブで保存方法を直して、会員に再設定の案内も出そう'}
   ],
+  demo:{
+    kind:'store',
+    hint:'もし今このデータベースが流出したら、保存されているパスワードはどう見える？',
+    members:[
+      {mail:'tanaka@example.com',pw:'sakura0401'},
+      {mail:'suzuki@example.com',pw:'password123'},
+      {mail:'yamada@example.com',pw:'yamada1115'}
+    ]
+  },
   fix:{key:'hash',value:'bcrypt',label:"パスワードを安全に保存する対策を入れる",done:"bcryptで、戻せない・一人ずつ違う・時間のかかる保存にした。"},
   app:[{key:'forceChange',l:'90日ごとにパスワード強制変更',note:'今は推奨されていない。かえって弱いパスワードを招く',type:'sw'}],
   tasks:[{id:'resetGuide',l:'会員にパスワード再設定を案内する',kind:'notice'}],
@@ -243,9 +253,14 @@ const D={
   ],
   alert:[
     {who:SHIRO,t:'ログイン中のお客さんが別サイトを開いた瞬間、裏でこのお店に注文が送られてる'},
+    {who:SHIRO,t:'サイトタブで、ログインしたままワナのサイトを開いてみて。裏で勝手に注文が入る'},
     {who:SHIRO,t:'お店は「ログイン済みの人からの操作」だと信じて受けてしまう。CSRFっていう手口だ'},
     {who:SHIRO,t:'ピクセルハブで、その操作がこのお店の画面から来たかを確かめよう'}
   ],
+  demo:{
+    kind:'csrf',
+    trap:{name:'猫まとめ動画',url:'http://neko-matome.example'}
+  },
   fix:{key:'csrf',value:'token',label:"CSRF対策（トークン）を入れる",done:"お店の画面から来た操作かをトークンで確かめるようにした。"},
   tasks:[
     {id:'cancel',l:'身に覚えのない注文を取り消す',kind:'notice'},
@@ -278,9 +293,19 @@ const D={
   ],
   alert:[
     {who:SHIRO,t:'注文ページが、番号さえ合えば誰のものでも見せてしまってる'},
+    {who:SHIRO,t:'サイトタブで注文確認ページを開いて、URLの番号を変えてみて。他人の注文が見える'},
     {who:SHIRO,t:'ログインの確認はしても、「その人のものか」を確かめていないんだ。IDORっていう'},
     {who:SHIRO,t:'ピクセルハブで、本人の注文かをサーバーで確認しよう'}
   ],
+  demo:{
+    kind:'idor',
+    myId:1001,
+    orders:{
+      1001:{who:'あなた',item:'ブリキのロボット',addr:'東京都○○区△△ 1-2-3（あなたの住所）'},
+      1002:{who:'すずき 様',item:'ホーローの看板',addr:'大阪府○○市□□ 4-5-6'},
+      1003:{who:'たなか 様',item:'まねき猫の貯金箱',addr:'福岡県○○市◇◇ 7-8-9'}
+    }
+  },
   fix:{key:'access',value:'owner',label:"アクセス制御（本人確認）を入れる",done:"その注文が本人のものかをサーバーで確かめるようにした。"},
   tasks:[
     {id:'api',l:'裏側のAPIにも同じ確認を入れる',kind:'report'},
@@ -313,9 +338,15 @@ const D={
   ],
   alert:[
     {who:SHIRO,t:'「使ったか確認」と「使用済みにする」の間に、連打で割り込まれてる'},
+    {who:SHIRO,t:'サイトタブで、同じクーポンをほぼ同時に何回も送ってみて。何回も効いちゃう'},
     {who:SHIRO,t:'確認と記録が別々だと、ほぼ同時の注文がすり抜ける。この隙を狙われてるんだ'},
     {who:SHIRO,t:'ピクセルハブで、確認と記録を1回の更新にまとめよう'}
   ],
+  demo:{
+    kind:'coupon',
+    product:{name:'ホーローの看板',price:3200,icon:'item_sign'},
+    coupon:{code:'WELCOME1000',off:1000}
+  },
   fix:{key:'coupon',value:'atomic',label:"クーポンの二重利用対策を入れる",done:"確認と記録を1回の更新にまとめ、成功は1件だけにした。"},
   tasks:[{id:'cancel',l:'多重利用の注文を取り消す',kind:'notice'}],
   success:()=>[{who:SHIRO,t:'同時に来ても、クーポンは1回しか効かなくなった。11日目クリア！'},{who:SHIRO,t:'……ところで、やけに新しいアカウントが増えてるね。1000個近い。明日、見てみよう'}],

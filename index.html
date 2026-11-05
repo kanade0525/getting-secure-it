@@ -198,6 +198,18 @@ select:disabled{opacity:.45}
 .evil .phish .btn{margin-top:12px;background:#ffd23f;color:#000;border-color:#ffd23f;box-shadow:3px 3px 0 #3a2a00}
 @keyframes hjIn{from{opacity:.2;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.browser.evil .viewport{animation:none}}
+.leakwrap{margin:4px 12px 0;border:2px solid var(--line)}
+.dbdump{padding:0 12px}
+.dbval{font-family:ui-monospace,Menlo,monospace;font-size:12px;overflow-wrap:anywhere;color:var(--ink)}
+.ordpage{margin:12px}
+.ordpage-h{font-weight:bold;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ordmine{font-size:11px;font-weight:bold;border:2px solid var(--safe);color:var(--safe);padding:0 6px}
+.ordother{font-size:11px;font-weight:bold;background:var(--danger);color:#fff;padding:1px 6px}
+.orow{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:2px dashed var(--soft);font-size:14px;flex-wrap:wrap}
+.orow:last-child{border-bottom:0}
+.orow>span{color:var(--muted)}
+.idor-ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px 0}
+.idor-id{font-family:ui-monospace,Menlo,monospace;font-size:13px;min-width:70px;text-align:center}
 .modal{position:fixed;inset:0;z-index:20;background:rgba(5,6,20,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
 .modal[hidden]{display:none}
 .sheet{max-width:620px;width:100%;max-height:100%;overflow:auto;background:var(--surface);border:4px solid var(--line);padding:18px}
@@ -325,7 +337,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -428,6 +440,8 @@ function hijackHTML(nav){
 function browserHTML(){
   const d=DAYS[S.day],demo=d&&d.demo;
   if(demo&&demo.kind==='review'&&S.cfg.code.review!=='escape'&&S.reviewRes&&S.reviewRes.xss&&S.reviewRes.redir)return hijackHTML(S.reviewRes.redir);
+  if(demo&&demo.kind==='csrf'&&S.csrfRes&&S.csrfRes.open)return csrfBrowserHTML();
+  if(demo&&demo.kind==='idor'&&S.idorRes&&S.idorRes.open)return idorBrowserHTML();
   const sec=S.cfg.https&&S.cfg.redirect;
   const url=(sec?'https://':'http://')+esc(S.domain);
   let h=`<div class="browser">
@@ -445,6 +459,10 @@ function browserHTML(){
   h+=`<div class="store-body">${searchResultHTML()}</div>`;
   if(demo&&demo.kind==='order')h+=orderDemoHTML();
   if(demo&&demo.kind==='review')h+=reviewDemoHTML();
+  if(demo&&demo.kind==='store')h+=storeDemoHTML();
+  if(demo&&demo.kind==='coupon')h+=couponDemoHTML();
+  if(demo&&demo.kind==='csrf')h+=csrfIntroHTML();
+  if(demo&&demo.kind==='idor')h+=idorIntroHTML();
   h+=`<div class="store-foot">© よろず屋ピクセル堂　${esc(S.domain)}</div>
     </div></div>`;
   return h;
@@ -516,6 +534,95 @@ function reviewDemoHTML(){
     ${safe?'<p class="dt-ok" style="margin:6px 0 0">対策済み。投稿しても、ただの文字として表示されます。</p>':''}</div>`;
   h+=`</div>`;
   return h;
+}
+function demoOff(){return S.phase==='intro'||S.phase==='setup'||S.phase==='day0';}
+function storeDemoHTML(){
+  const o=DAYS[S.day].demo;if(demoOff())return '';
+  const hashed=S.cfg.code.hash==='bcrypt';const r=S.storeRes;
+  const salt=['u7QaRf','K3xLm9','9ZpvТ2'];
+  const store=(m,i)=>hashed?('$2b$12$'+salt[i%3]+'Hn3b8e1cVrT0pS6wZ2x4qO'):m.pw;
+  let h=`<div class="leakwrap"><div class="co-head">会員データベースに保存されているパスワード</div>
+    <div class="dbdump">`;
+  h+=o.members.map((m,i)=>`<div class="leakrow"><span class="lmail">${esc(m.mail)}</span><span class="dbval">${esc(store(m,i))}</span></div>`).join('');
+  h+=`</div>
+    <div class="capanel" style="margin:10px 12px 12px"><p class="small" style="margin:0 0 8px">${esc(o.hint)}</p>
+    <button class="btn" data-act="storeRead">攻撃者のつもりで中身を読む</button>`;
+  if(r){
+    if(hashed)h+=`<div class="box" style="margin:10px 0 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">どれも <code>$2b$…</code> の形。元のパスワードは取り出せません（総当たりにも現実的でない時間がかかります）。</p></div>`;
+    else h+=`<div class="leak" style="margin:10px 0 0"><div class="leakhd">全員分のパスワードが、そのまま読めてしまった</div><p class="small" style="margin:6px 0 0">他のサイトで使い回していれば、そちらにも次々ログインされます。</p></div>`;
+  }
+  h+=`</div></div>`;return h;
+}
+function couponDemoHTML(){
+  const o=DAYS[S.day].demo;if(demoOff())return '';
+  const r=S.couponRes;const yen=n=>'¥'+Number(n).toLocaleString();
+  let h=`<div class="checkout"><div class="co-head">お会計</div>
+    <div class="co-item">${spr(IC[o.product.icon],3,o.product.name)}<span class="co-name">${esc(o.product.name)}</span><span class="co-price">${yen(o.product.price)}</span></div>
+    <div class="co-row"><label for="cpn">クーポン</label><input type="text" id="cpn" value="${esc(o.coupon.code)}" readonly style="max-width:180px"></div>
+    <p class="small" style="padding:0 12px;margin:2px 0 0;color:var(--muted)">「${esc(o.coupon.code)}」＝${yen(o.coupon.off)}引き・お一人さま1回まで</p>
+    <button class="btn primary" data-act="couponFire" style="margin:10px 12px 12px">このクーポンで、ほぼ同時に10回注文する</button>`;
+  if(r){
+    if(r.safe)h+=`<div class="res" style="padding:0 12px 12px"><div class="box" style="margin:4px 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">適用できたのは <b>1回だけ</b>。残り9回は「使用済み」で失敗しました。合計 ${yen(o.product.price-o.coupon.off)}。</p></div></div>`;
+    else h+=`<div class="res" style="padding:0 12px 12px"><div class="leak" style="margin:4px 0"><div class="leakhd">1回限りのはずが、${r.times}回も適用された</div><p class="small" style="margin:6px 0 0">割引 −${yen(o.coupon.off*r.times)}、合計 ${yen(o.product.price-o.coupon.off*r.times)}（マイナス！）。その分お店が損をします。</p></div></div>`;
+  }
+  h+=`</div>`;return h;
+}
+function csrfIntroHTML(){
+  const o=DAYS[S.day].demo;if(demoOff())return '';
+  return `<div class="box" style="margin:12px"><p style="margin:0 0 4px">あなたは今、ピクセル堂に<b>ログイン中</b>です。</p>
+    <p class="small muted" style="margin:0 0 10px">この状態のまま、まったく別の「${esc(o.trap.name)}」というサイトを開いてみましょう。</p>
+    <button class="btn primary" data-act="csrfOpen">ワナのサイトを開く（ログインしたまま）</button></div>`;
+}
+function csrfBrowserHTML(){
+  const o=DAYS[S.day].demo;const token=S.cfg.code.csrf==='token';
+  return `<div class="hj-meta"><span class="hj-meta-h">解説：いま起きていること</span><p>開いたのは猫の動画サイト。でもこのページには<b>見えない仕掛け</b>があり、あなたのログインを使って、裏でピクセル堂に操作を送ります。</p></div>
+    <div class="browser evil"><div class="chrome danger"><span class="dots"><i></i><i></i><i></i></span><span class="urlbar danger"><span class="tri">!</span><span class="u">${esc(o.trap.url)}</span></span><span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>
+      <div class="viewport"><div class="evil-head"><span class="evil-logo">◆</span><span>${esc(o.trap.name)}</span></div>
+        <div class="phish"><p style="margin:0">かわいい猫の動画まとめ 第1位〜第50位！（ふつうに見えるページ）</p></div>
+      </div></div>
+    <div class="hj-meta danger"><span class="hj-meta-h">解説：裏でピクセル堂に送られた操作</span>
+      <code class="hj-steal-c">POST pixeldo.shop/order（あなたとして）
+・ホーローの看板 ×1 を注文
+・届け先を攻撃者の住所に変更</code>
+      ${token?`<div class="box" style="margin:8px 0 0;border-color:var(--safe)"><p class="msg-ok small" style="margin:0">お店が合言葉（トークン）を確認。別サイトからで合言葉がないので<b>拒否</b>されました。</p></div>`:`<p style="margin:8px 0 0">お店は「ログイン済みの本人」と信じて<b>受理</b>。注文が入り、届け先まで書き換わりました。</p>`}
+    </div>
+    <div class="hj-back"><button class="btn" data-act="csrfBack">ピクセル堂に戻る</button></div>`;
+}
+function idorIntroHTML(){
+  if(demoOff())return '';
+  return `<div class="box" style="margin:12px"><p style="margin:0 0 10px">あなたの注文確認ページを開いてみましょう。URLの番号を変えると、何が見えるでしょう？</p>
+    <button class="btn primary" data-act="idorOpen">注文確認ページを開く</button></div>`;
+}
+function idorBrowserHTML(){
+  const o=DAYS[S.day].demo;const owner=S.cfg.code.access==='owner';
+  const id=S.idorId||o.myId;const mine=id===o.myId;const ord=o.orders[id];
+  const url='pixeldo.shop/order?id='+id;
+  let body;
+  if(ord&&(mine||!owner)){
+    body=`<div class="ordpage"><div class="ordpage-h">注文確認 #${id}${mine?'<span class="ordmine">あなたの注文</span>':'<span class="ordother">他人の注文！</span>'}</div>
+      <div class="orow"><span>ご注文者</span><b>${esc(ord.who)}</b></div>
+      <div class="orow"><span>商品</span><b>${esc(ord.item)}</b></div>
+      <div class="orow"><span>お届け先</span><b>${esc(ord.addr)}</b></div></div>`;
+    if(!mine)body+=`<div class="hj-meta danger" style="margin:10px 12px 0"><span class="hj-meta-h">解説</span><p>番号を変えただけで、他のお客さんの注文と住所が見えています。ログインの確認はしても「あなたのものか」は確かめていません。</p></div>`;
+  }else if(ord&&owner&&!mine){
+    body=`<div class="ordpage"><div class="ordpage-h">注文確認 #${id}</div><div class="box" style="margin:12px"><p class="msg-ok small" style="margin:0">この注文はあなたのものではありません。表示できません。</p></div></div>
+      <div class="hj-meta" style="margin:0 12px"><span class="hj-meta-h">解説</span><p>本人の注文かをサーバーで確認するようにしたので、他人の番号を入れても見られなくなりました。</p></div>`;
+  }else{
+    body=`<div class="ordpage"><div class="box" style="margin:12px"><p class="muted small" style="margin:0">その番号の注文はありません。</p></div></div>`;
+  }
+  return `<div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="urlbar"><span class="u">${esc(url)}</span></span><span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>
+    <div class="viewport">
+      <div class="idor-ctl"><button class="btn mini" data-act="idorStep" data-d="-1">− 1</button><span class="idor-id">id=${id}</span><button class="btn mini" data-act="idorStep" data-d="1">+ 1</button></div>
+      <div class="idor-ctl"><button class="btn mini" data-act="idorSet" data-v="${o.myId}">自分の注文(${o.myId})</button><button class="btn mini" data-act="idorSet" data-v="1002">他人の注文(1002)にする</button></div>
+      ${body}
+    </div></div>
+    <div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
+}
+function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.orderRes=null;}
+function idorSeen(){
+  const o=DAYS[S.day].demo;
+  if(S.idorId!==o.myId&&o.orders[S.idorId]&&S.cfg.code.access!=='owner'&&!S.seenIdor){S.seenIdor=true;save();say([{who:SHIRO,t:'ほら、番号を変えただけで、他のお客さんの注文と住所が見えちゃった'},{who:SHIRO,t:'「本人のものか」を確かめてないんだ。「管理」タブのピクセルハブで直そう'}]);}
 }
 function computeOrder(src){
   const o=DAYS[S.day].demo,real=o.product.price;
@@ -822,7 +929,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;
   if(d.svc==='hub')S.svc='hub';
   if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
   save();render();
@@ -982,12 +1089,23 @@ document.addEventListener('click',e=>{
       if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのピクセルハブで直そう'}]);}}}
   else if(a==='xssPlay'){xssNav(S.day);}
   else if(a==='xssBack'){if(S.reviewRes){S.reviewRes.redir=false;save();render();}}
+  else if(a==='storeRead'){S.storeRes={read:true};save();render();
+    if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、保存ファイルを開いただけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='csrfOpen'){S.csrfRes={open:true};save();render();
+    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のサイトを開いただけなのに、裏でこのお店に勝手な注文が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='csrfBack'){if(S.csrfRes)S.csrfRes.open=false;save();render();}
+  else if(a==='idorOpen'){S.idorRes={open:true};S.idorId=DAYS[S.day].demo.myId;save();render();}
+  else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
+  else if(a==='idorStep'){const o=DAYS[S.day].demo;S.idorId=Math.max(1000,Math.min(1004,(S.idorId||o.myId)+Number(b.dataset.d)));save();render();idorSeen();}
+  else if(a==='idorSet'){S.idorId=Number(b.dataset.v);save();render();idorSeen();}
+  else if(a==='couponFire'){const atomic=S.cfg.code.coupon==='atomic';S.couponRes=atomic?{safe:true}:{times:10};save();render();
+    if(!atomic&&!S.seenCoupon){S.seenCoupon=true;save();say([{who:SHIRO,t:'ほら、1回限りのはずのクーポンが、連打で何回も効いちゃった'},{who:SHIRO,t:'確認と記録が別々だから隙間ができる。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();}
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
     if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
-  else if(a==='applyFix'){c.code[b.dataset.key]=b.dataset.v;if(b.dataset.key==='review')S.reviewRes=null;save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);}
-  else if(a==='undoFix'){delete c.code[b.dataset.key];if(b.dataset.key==='review')S.reviewRes=null;save();render();}
+  else if(a==='applyFix'){c.code[b.dataset.key]=b.dataset.v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);}
+  else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();render();}
 });
