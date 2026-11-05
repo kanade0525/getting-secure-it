@@ -150,8 +150,19 @@ const D={
   alert:[
     {who:SHIRO,t:'レビューに書かれた文字が、そのまま画面の部品として動いてる'},
     {who:SHIRO,t:'投稿の中身を「表示する文字」ではなく「画面の命令」として扱ってるんだ。XSSっていう'},
+    {who:SHIRO,t:'サイトタブのレビュー欄で、用意した投稿を出してみて。ほら、開いた人の画面が勝手に動く'},
     {who:SHIRO,t:'ピクセルハブで、表示するときに文字を無害化しよう'}
   ],
+  demo:{
+    kind:'review',
+    hint:'画面の部品として動く文字を、レビューに書いて投稿してみよう。',
+    payload:'<img src=x onerror="location=\'http://偽サイト.example\'">',
+    product:{name:'ブリキのロボット',price:1800,icon:'item_robot'},
+    reviews:[
+      {who:'さとう',stars:5,t:'箱もきれいで、昭和の雰囲気そのままでした。'},
+      {who:'このみ',stars:4,t:'思ったより小さめ。でもかわいいです。'}
+    ]
+  },
   fix:{key:'review',value:'escape',label:"XSS対策（表示時の無害化）を入れる",done:"投稿を画面の命令にせず、ただの文字として表示するようにした。"},
   tasks:[
     {id:'delete',l:'悪意のあるレビューを削除する',kind:'notice'},
