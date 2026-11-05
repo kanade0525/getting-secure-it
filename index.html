@@ -141,14 +141,34 @@ select:disabled{opacity:.45}
 .co-item .co-name{flex:1 1 auto}
 .co-item .co-price{color:var(--gold)}
 .co-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 12px}
-.devtools{margin:12px;border:2px solid var(--line);background:var(--win-bg);color:#c9cff5}
-.dt-head{font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:6px 10px;border-bottom:2px solid var(--line);color:#9aa3cf}
-.dt-note{font-size:12px;padding:8px 10px 0;margin:0;color:#c9cff5}
-.dt-body{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
-.dt-body input{font:inherit;background:#0b0d2a;color:#eef0ff;border:2px solid #3a3f6b;padding:3px 6px;min-height:36px;width:100%}
-.dt-acts{display:flex;gap:8px;flex-wrap:wrap;padding:0 10px}
-.dt-ok{font-size:12px;padding:0 10px 4px;margin:4px 0 0;color:var(--safe)}
-.devtools .btn{margin-left:10px;margin-bottom:10px}
+.devtools{margin:12px 12px 0;border:1px solid #3c4043;background:#202124;color:#e8eaed;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;border-radius:6px 6px 0 0;overflow:hidden}
+.dt-win{display:flex;align-items:center;gap:7px;background:#292a2d;border-bottom:1px solid #3c4043;padding:6px 10px;color:#9aa0a6;font-size:11px}
+.dt-win i{display:block;width:8px;height:8px;border-radius:50%;background:#5f6368}
+.dt-win .t{margin-left:4px}
+.dt-win .f12{margin-left:auto;border:1px solid #5f6368;border-radius:3px;padding:0 5px;line-height:16px}
+.dt-tabs{display:flex;background:#292a2d;border-bottom:1px solid #3c4043;overflow-x:auto;white-space:nowrap}
+.dt-tabs .t{padding:7px 11px;color:#9aa0a6;border-bottom:2px solid transparent;flex:0 0 auto}
+.dt-tabs .t.on{color:#8ab4f8;border-bottom-color:#8ab4f8}
+.dt-reqhead,.dt-req{display:grid;grid-template-columns:1fr auto auto;align-items:center}
+.dt-reqhead{background:#292a2d;color:#9aa0a6;border-bottom:1px solid #3c4043}
+.dt-reqhead span{padding:4px 10px}
+.dt-req span{padding:6px 10px;color:#e8eaed}
+.dt-req{background:#0b57d0;border-bottom:1px solid #3c4043}
+.dt-req span{color:#fff}
+.dt-sub{display:flex;background:#292a2d;border-bottom:1px solid #3c4043;overflow-x:auto;white-space:nowrap}
+.dt-sub span{padding:6px 11px;color:#9aa0a6;border-bottom:2px solid transparent;flex:0 0 auto}
+.dt-sub span.on{color:#e8eaed;border-bottom-color:#8ab4f8}
+.dt-pl{padding:9px 10px 11px}
+.dt-pl .ttl{color:#9aa0a6;margin:0 0 7px;font-size:11px}
+.dt-kv{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;margin:5px 0}
+.dt-kv>span{color:#9aa0a6}
+.dt-kv input{font:inherit;background:#202124;color:#e8eaed;border:1px solid #5f6368;border-radius:3px;padding:4px 6px;min-height:34px;width:100%}
+.dt-expl{margin:0 12px 0;border:3px solid var(--line);border-top:0;background:var(--surface);padding:11px 12px}
+.dt-expl p{margin:0 0 9px;font-size:13px;line-height:1.7}
+.dt-expl p:last-child{margin-bottom:0}
+.dt-acts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 9px}
+.dt-ok{font-size:13px;margin:0;color:var(--safe)}
+.dt-expl .btn{margin:0}
 .modal{position:fixed;inset:0;z-index:20;background:rgba(5,6,20,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-top:calc(16px + env(safe-area-inset-top,0px))}
 .modal[hidden]{display:none}
 .sheet{max-width:620px;width:100%;max-height:100%;overflow:auto;background:var(--surface);border:4px solid var(--line);padding:18px}
@@ -382,12 +402,21 @@ function orderDemoHTML(){
     <div class="co-row"><label for="buyQty">数量</label><select id="buyQty" data-buyqty>${[1,2,3,4,5].map(n=>`<option value="${n}" ${buyQty===n?'selected':''}>${n}</option>`).join('')}</select></div>
     <div class="co-row"><span>合計</span><b>${yen(real*buyQty)}</b></div>
     <button class="btn primary" data-act="ordBuy" style="margin:4px 12px 12px">注文する</button>`;
-  // 舞台裏：注文ボタンを押すとブラウザが送るデータ。攻撃者はこれを書き換えて送り直す
-  h+=`<div class="devtools"><div class="dt-head">舞台裏：注文ボタンを押すと、ブラウザがお店にこっそり送るデータ</div>
-      <p class="dt-note">画面の金額は変えられません。でも「注文する」を押した瞬間、ブラウザは裏でこんなデータをお店に送っています。攻撃者はこれを書き換えてから送れます。</p>
-      <div class="dt-body"><span>価格</span><input type="number" id="ordPrice" value="${price}" inputmode="numeric"><span>数量</span><input type="number" id="ordQty" value="${qty}" inputmode="numeric"></div>
-      ${fixed?'<p class="dt-ok">お店側で金額を決める設定になりました。書き換えて送っても、反映されません。</p>':`<div class="dt-acts"><button class="btn mini" data-act="ordSet" data-p="1">価格を1円にする</button><button class="btn mini" data-act="ordSet" data-q="-1">数量を-1にする</button></div>`}
-      <button class="btn" data-act="ordSend" style="margin:8px 0 0">このまま送る（攻撃者のつもりで）</button></div>`;
+  // Chromeの検証ツール（開発者ツール）を開いているような見た目で、送信データを書き換える
+  h+=`<div class="devtools" aria-label="Chromeの検証ツール">
+      <div class="dt-win"><i></i><i></i><i></i><span class="t">検証ツール</span><span class="f12">F12</span></div>
+      <div class="dt-tabs"><span class="t">要素</span><span class="t">コンソール</span><span class="t">ソース</span><span class="t on">ネットワーク</span><span class="t">アプリ</span></div>
+      <div class="dt-reqhead"><span>名前</span><span>方式</span><span>状態</span></div>
+      <div class="dt-req"><span>order</span><span>POST</span><span>200</span></div>
+      <div class="dt-sub"><span>ヘッダー</span><span class="on">ペイロード</span><span>応答</span></div>
+      <div class="dt-pl"><p class="ttl">フォームデータ</p>
+        <div class="dt-kv"><span>price</span><input type="number" id="ordPrice" value="${price}" inputmode="numeric"></div>
+        <div class="dt-kv"><span>qty</span><input type="number" id="ordQty" value="${qty}" inputmode="numeric"></div>
+      </div></div>`;
+  h+=`<div class="dt-expl">
+      <p>これは、どのChromeにもある「検証ツール」。<b>F12</b>で開けます。「注文する」を押すと、ブラウザは裏でこの <code>price</code>（価格）と <code>qty</code>（数量）をお店に送っています。攻撃者はここを書き換えてから送れます。</p>
+      ${fixed?'<p class="dt-ok">お店側で金額を決める設定になりました。書き換えて送っても、反映されません。</p>':`<div class="dt-acts"><button class="btn mini" data-act="ordSet" data-p="1">price を 1 にする</button><button class="btn mini" data-act="ordSet" data-q="-1">qty を -1 にする</button></div>`}
+      <button class="btn" data-act="ordSend">書き換えた値で送る</button></div>`;
   h+=`<div class="res" style="padding:8px 12px 12px">${orderResultHTML()}</div></div>`;
   return h;
 }
