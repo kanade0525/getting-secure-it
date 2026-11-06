@@ -507,7 +507,6 @@ function browserHTML(){
   h+=`<div class="store-body">${searchResultHTML()}</div>`;
   if(demo&&demo.kind==='order')h+=orderDemoHTML();
   if(demo&&demo.kind==='review')h+=reviewDemoHTML();
-  if(demo&&demo.kind==='store')h+=storeDemoHTML();
   if(demo&&demo.kind==='coupon')h+=couponDemoHTML();
   if(demo&&demo.kind==='csrf')h+=csrfIntroHTML();
   if(demo&&demo.kind==='idor')h+=idorIntroHTML();
@@ -614,8 +613,9 @@ function storeDemoHTML(){
   const hashed=S.cfg.code.hash==='bcrypt';const r=S.storeRes;
   const salt=['u7QaRf','K3xLm9','9ZpvТ2'];
   const store=(m,i)=>hashed?('$2b$12$'+salt[i%3]+'Hn3b8e1cVrT0pS6wZ2x4qO'):m.pw;
-  let h=`<div class="leakwrap"><div class="co-head">会員データベースに保存されているパスワード</div>
-    <div class="dbdump">`;
+  let h=`<div class="sec"><h3>会員データベース（DB）</h3>
+    <p class="small muted" style="padding:0 12px 2px;margin:0">shop-server-01 がつないでいるデータベースの中身です。お店のサイトには出ません。サーバーに侵入されたりDBが流出したときに、攻撃者が目にするものです。</p>
+    <div class="dbdump" style="margin:8px 12px 0">`;
   h+=o.members.map((m,i)=>`<div class="leakrow"><span class="lmail">${esc(m.mail)}</span><span class="dbval">${esc(store(m,i))}</span></div>`).join('');
   h+=`</div>
     <div class="capanel" style="margin:10px 12px 12px"><p class="small" style="margin:0 0 8px">${esc(o.hint)}</p>
@@ -1075,6 +1075,8 @@ function cloudServerHTML(){
   if(!live)h+=`<div class="row"><div class="desc">サイトを公開する<span class="note">${S.domain?'ドメインがこのサーバーを指していれば公開できます':'先にドメインを取得してください'}</span></div><button class="btn primary" data-act="publish" ${S.domain&&!relBusy?'':'disabled'}>リリースする</button></div>
     ${S.relMsg?`<p class="res small ${relBusy?'muted':'msg-err'}">${S.relMsg}</p>`:''}`;
   h+='</div>';
+  const dd=DAYS[S.day];
+  if(live&&dd&&dd.demo&&dd.demo.kind==='store')h+=storeDemoHTML();
   if(live&&S.day<1)h+='<div class="box"><p class="muted">今のところ設定することはありません。</p></div>';
   return h;
 }
