@@ -513,14 +513,9 @@ function browserHTML(){
   if(demo&&demo.kind==='session')h+=sessionDemoHTML();
   if(demo&&demo.kind==='signup')h+=signupDemoHTML();
   if(demo&&demo.kind==='login')h+=loginDemoHTML();
-  if(demo&&demo.kind==='dos')h+=dosDemoHTML();
-  if(demo&&demo.kind==='waf')h+=wafDemoHTML();
   if(demo&&demo.kind==='cert')h+=certDemoHTML();
-  if(demo&&demo.kind==='vuln')h+=vulnDemoHTML();
   if(demo&&demo.kind==='skimmer')h+=skimmerDemoHTML();
   if(demo&&demo.kind==='apikey')h+=apikeyDemoHTML();
-  if(demo&&demo.kind==='domain')h+=domainDemoHTML();
-  if(demo&&demo.kind==='exfil')h+=exfilDemoHTML();
   h+=`<div class="store-foot">© よろず屋ピクセル堂　${esc(S.domain)}</div>
     </div></div>`;
   return h;
@@ -1049,6 +1044,7 @@ function registrarHTML(){
       <button class="btn" data-act="dnsAdd">追加</button></div>
     ${clip?'<p class="res"><button class="link" data-act="paste">コピーした値を「値」に貼り付け</button></p>':''}
     ${S.dnsAddMsg?`<p class="res small msg-err">${S.dnsAddMsg}</p>`:''}</div>`;
+  if(DAYS[S.day]&&DAYS[S.day].demo&&DAYS[S.day].demo.kind==='domain')h+=domainDemoHTML();
   return h;
 }
 
@@ -1076,7 +1072,12 @@ function cloudServerHTML(){
     ${S.relMsg?`<p class="res small ${relBusy?'muted':'msg-err'}">${S.relMsg}</p>`:''}`;
   h+='</div>';
   const dd=DAYS[S.day];
-  if(live&&dd&&dd.demo&&dd.demo.kind==='store')h+=storeDemoHTML();
+  if(live&&dd&&dd.demo){const k=dd.demo.kind;
+    if(k==='store')h+=storeDemoHTML();
+    else if(k==='dos')h+=dosDemoHTML();
+    else if(k==='waf')h+=wafDemoHTML();
+    else if(k==='vuln')h+=vulnDemoHTML();
+    else if(k==='exfil')h+=exfilDemoHTML();}
   if(live&&S.day<1)h+='<div class="box"><p class="muted">今のところ設定することはありません。</p></div>';
   return h;
 }
@@ -1258,8 +1259,8 @@ function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
   S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;
-  if(d.svc==='hub')S.svc='hub';
-  if(d.sub){S.svc=d.svc||'cloud';S.sub=d.sub;}
+  if(d.svc)S.svc=d.svc;
+  if(d.sub){if(!d.svc)S.svc='cloud';S.sub=d.sub;}
   save();render();
   say(d.start,()=>{
     const reports=d.voices.filter(v=>v.who!==SHIRO),advice=d.voices.filter(v=>v.who===SHIRO);
