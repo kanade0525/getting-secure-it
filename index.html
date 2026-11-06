@@ -207,6 +207,12 @@ select:disabled{opacity:.45}
 .leakwrap{margin:4px 12px 0;border:2px solid var(--line)}
 .dbdump{padding:0 12px}
 .dbval{font-family:ui-monospace,Menlo,monospace;font-size:12px;overflow-wrap:anywhere;color:var(--ink)}
+.term{margin:8px 12px 0;border:1px solid #3c4043;background:#0b0e14;color:#e8eaed;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;border-radius:6px;overflow:hidden}
+.term-h{background:#202124;color:#9aa0a6;padding:4px 10px;font-size:11px;border-bottom:1px solid #3c4043}
+.term-b{padding:8px 10px;overflow-x:auto;white-space:pre;line-height:1.55;margin:0}
+.term-b .tp{color:#6fd38a}
+.term-b .dim{color:#9aa0a6}
+.term-b .cur{color:#e8eaed}
 .ordpage{margin:12px}
 .ordpage-h{font-weight:bold;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ordmine{font-size:11px;font-weight:bold;border:2px solid var(--safe);color:var(--safe);padding:0 6px}
@@ -605,18 +611,31 @@ function sessionDemoHTML(){
 }
 function storeDemoHTML(){
   const o=DAYS[S.day].demo;if(demoOff())return '';
-  const hashed=S.cfg.code.hash==='bcrypt';const r=S.storeRes;
-  const salt=['u7QaRf','K3xLm9','9ZpvТ2'];
-  const store=(m,i)=>hashed?('$2b$12$'+salt[i%3]+'Hn3b8e1cVrT0pS6wZ2x4qO'):m.pw;
+  const hashed=S.cfg.code.hash==='bcrypt';const ran=!!S.storeRes;
+  const salt=['u7QaRf','K3xLm9','9Zpv2T'];
+  const val=(m,i)=>hashed?('$2b$12$'+salt[i%3]+'Hn3b8e1cVrT0pS6wZ2x4qO'):m.pw;
+  const pad=(x,w)=>{x=String(x);return x+' '.repeat(Math.max(0,w-x.length));};
+  const vals=o.members.map((m,i)=>val(m,i));
+  const ew=Math.max(5,...o.members.map(m=>m.mail.length));
+  const pw=Math.max(8,...vals.map(v=>v.length));
+  const bar='+'+'-'.repeat(ew+2)+'+'+'-'.repeat(pw+2)+'+';
+  let table=bar+'\n| '+pad('email',ew)+' | '+pad('password',pw)+' |\n'+bar+'\n';
+  o.members.forEach((m,i)=>{table+='| '+pad(m.mail,ew)+' | '+pad(vals[i],pw)+' |\n';});
+  table+=bar;
+  const SQL='SELECT email, password FROM members;';
+  let body=`<span class="tp">app@shop-server-01:~$</span> mysql -u app -p shop\n<span class="dim">Welcome to the MySQL monitor.  Server version: 8.0.36</span>\n`;
+  if(ran){
+    body+=`<span class="tp">mysql&gt;</span> ${SQL}\n${table}\n<span class="dim">${o.members.length} rows in set (0.00 sec)</span>\n<span class="tp">mysql&gt;</span> <span class="cur">▋</span>`;
+  }else{
+    body+=`<span class="tp">mysql&gt;</span> ${SQL}<span class="cur">▋</span>`;
+  }
   let h=`<div class="sec"><h3>会員データベース（DB）</h3>
-    <p class="small muted" style="padding:0 12px 2px;margin:0">shop-server-01 がつないでいるデータベースの中身です。お店のサイトには出ません。サーバーに侵入されたりDBが流出したときに、攻撃者が目にするものです。</p>
-    <div class="dbdump" style="margin:8px 12px 0">`;
-  h+=o.members.map((m,i)=>`<div class="leakrow"><span class="lmail">${esc(m.mail)}</span><span class="dbval">${esc(store(m,i))}</span></div>`).join('');
-  h+=`</div>
+    <p class="small muted" style="padding:0 12px 2px;margin:0">shop-server-01 のデータベースに、サーバーから直接つないで中身を調べます。お店のサイトには出ません。侵入されたりDBが流出したとき、攻撃者が目にするものです。</p>
+    <div class="term"><div class="term-h">shop-server-01 — ターミナル（SSH）</div><div class="term-b">${body}</div></div>
     <div class="capanel" style="margin:10px 12px 12px"><p class="small" style="margin:0 0 8px">${esc(o.hint)}</p>
-    <button class="btn" data-act="storeRead">攻撃者のつもりで中身を読む</button>`;
-  if(r){
-    if(hashed)h+=`<div class="box" style="margin:10px 0 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">どれも <code>$2b$…</code> の形。元のパスワードは取り出せません（総当たりにも現実的でない時間がかかります）。</p></div>`;
+    <button class="btn" data-act="storeRead">${ran?'もう一度実行する':'このSQLを実行する（Enter）'}</button>`;
+  if(ran){
+    if(hashed)h+=`<div class="box" style="margin:10px 0 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">password 列はどれも <code>$2b$…</code> のハッシュ。元のパスワードは取り出せません（総当たりにも現実的でない時間がかかります）。</p></div>`;
     else h+=`<div class="leak" style="margin:10px 0 0"><div class="leakhd">全員分のパスワードが、そのまま読めてしまった</div><p class="small" style="margin:6px 0 0">他のサイトで使い回していれば、そちらにも次々ログインされます。</p></div>`;
   }
   h+=`</div></div>`;return h;
