@@ -351,7 +351,7 @@ input[type="text"]:disabled{opacity:.6}
 
 <nav class="tabs" role="tablist" aria-label="画面の切り替え">
   <button role="tab" data-tab="shop">サイト</button>
-  <button role="tab" data-tab="voice">お客さんの声</button>
+  <button role="tab" data-tab="voice">お知らせ</button>
   <button role="tab" data-tab="net">通信</button>
   <button role="tab" data-tab="console">管理</button>
 </nav>
@@ -377,8 +377,8 @@ function sprG(rows,x,y,px,id){return `<g ${id?`id="${id}"`:''} transform="transl
 /* 待機2コマ目：体を1ドット下げる（名鑑と同じ） */
 function frameRows(rows,f){return f?['.'.repeat(16)].concat(rows.slice(0,13),rows.slice(14,16)):rows;}
 const castSpr=(id,px,label)=>spr(CAST[id].rows,px,label===undefined?CAST[id].name:label);
-const CUST_ID={'たなか':'tanaka','すずき':'suzuki','やまだ':'yamada','法人のお客さま':'houjin'};
-function voiceIcon(v){if(v.sys)return spr(IC.srv,4,'監視');if(v.who===SHIRO)return castSpr('shiro',3,'シロ');if(v.who===YOU)return castSpr('tencho',3,'店長');if(v.mail)return spr(IC.mail,4,'メール');return castSpr(CUST_ID[v.who]||'tomo',3,v.who);}
+const CUST_ID={'たなか':'tanaka','すずき':'suzuki','やまだ':'yamada','法人のお客さま':'houjin','友達':'tomo','セキュリティ研究者':'kenkyu'};
+function voiceIcon(v){if(v.sys)return spr(IC.monitor,4,'監視');if(v.who===SHIRO)return castSpr('shiro',3,'シロ');if(v.who===YOU)return castSpr('tencho',3,'店長');const id=CUST_ID[v.who];if(id)return castSpr(id,3,v.who);if(v.mail)return spr(IC.mail,4,'メール');return castSpr('tomo',3,v.who);}
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- ステージ定義（days.js） ---------- */
@@ -456,7 +456,6 @@ function renderShop(){
   if(S.phase==='setup')h+=`<div class="box"><p>お店はまだきみのパソコンの中にあるだけ。「管理」タブでドメインを取得して、リリースしよう。</p><button class="btn primary" data-act="goConsole">管理タブを開く</button></div>`;
   else if(!live)h+=`<div class="box"><p class="muted">まだ公開されていません。</p></div>`;
   else h+=browserHTML();
-  h+=tasksHTML();
   h+=`<p style="margin-top:18px"><button class="link" data-act="toTitle">タイトルへ戻る</button></p>`;
   $('p-shop').innerHTML=h;
 }
@@ -953,7 +952,7 @@ function demoSearch(q){
 }
 function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「ピクセルハブ」で直そう'}]);}}
 function renderVoices(){
-  let h=`<h2>お客さんの声</h2><p class="muted small">問い合わせやSNSの投稿が届きます</p>`;
+  let h=`<h2>お知らせ</h2><p class="muted small">お客さんの声や、監視からのアラートが届きます</p>`;
   if(!S.voices.length)h+=`<div class="box"><p class="muted">まだ声は届いていません。</p></div>`;
   else h+=`<div class="box">${S.voices.map(v=>`<div class="voice${v.unread?' new':''}">${voiceIcon(v)}<div><div class="vn">${esc(v.who)}${v.unread?'<span class="tag newtag">新着</span>':''}<span class="tag">${v.sys?'アラート':v.mail?'メール':'投稿'}</span><span class="tag">${v.day}日目</span></div><div>${esc(v.t)}</div></div></div>`).join('')}</div>`;
   $('p-voice').innerHTML=h;
@@ -1179,19 +1178,6 @@ function appHTML(){
   });
   return h+'</div>';
 }
-/* --- サイトタブ「お店の対応」：後始末のチェックリスト --- */
-function tasksHTML(){
-  const d=DAYS[S.day];
-  if(!d||!d.tasks||!d.tasks.length)return '';
-  if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0'||S.phase==='incident')return '';
-  let h=`<div class="sec"><h3>お店の対応</h3><p class="small" style="padding:8px 12px 0;margin:0">攻撃のあとに、お店としてやることです。</p>`;
-  d.tasks.forEach(t=>{const on=!!S.cfg.tasks[t.id];
-    h+=`<div class="row"><div class="desc">${esc(t.l)}<span class="note">${t.kind==='report'?'個人情報保護委員会へ':'お客さまへ'}</span></div>`;
-    h+= on?'<span class="msg-ok small">対応済み</span>':`<button class="btn" data-act="task" data-id="${t.id}" data-kind="${t.kind}">${t.kind==='report'?'報告する':'お知らせを出す'}</button>`;
-    h+='</div>';
-  });
-  return h+'</div>';
-}
 
 function renderConsole(){
   const c=S.cfg;
@@ -1283,7 +1269,8 @@ function startDay(n){
       S.voices.unshift(Object.assign({day:n,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);
     },RM?0:i*1200));
     setTimeout(()=>{S.badge.net=S.tab!=='net';save();render();
-      say(advice.concat([{who:SHIRO,t:'報告は「お客さんの声」タブに届いてる。原因は「通信」タブで見てみよう'}]));
+      const mon=reports.some(v=>v.sys);
+      say(advice.concat([{who:SHIRO,t:mon?'監視からアラートが出てる。「通信」タブで何が起きてるか見てみよう':'お客さんから声が届いてる。原因は「通信」タブで見てみよう'}]));
     },RM?0:reports.length*1200+300);
   });
 }
@@ -1302,7 +1289,7 @@ function verify(){
     else{
       save();render();
       (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*1200));
-      say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':r.todo?'攻撃は防げた。あとは後始末だ':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
+      say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
     }
   });
 }
@@ -1531,7 +1518,7 @@ function showTitle(confirm){
   const chars=TITLE_CAST.map(([id,x,y,cls])=>`<span class="ch${cls?' '+cls:''}" data-cast="${id}" data-s="${sc}" style="left:${x*sc}px;top:${y*sc}px">${spr(frameRows(CAST[id].rows,tick),sc,'')}</span>`).join('');
   title.innerHTML=`<div class="tbox"><h1 class="tname"><small>よろず屋ピクセル堂を守れ</small>Getting<br>Secure It</h1>
     <div class="scene" style="width:${180*sc}px;height:${110*sc}px" aria-label="夜の商店街に立つよろず屋ピクセル堂" role="img"><img src="title.png" alt="" width="${180*sc}" height="${110*sc}">${chars}</div><p class="tsub">ネットショップを、1日ずつ守っていこう</p>
-    <div class="menu" role="menu" aria-label="メニュー">${menu}</div><p class="tver">デモ版（第1章 通信編：0〜3日目）</p></div>`;
+    <div class="menu" role="menu" aria-label="メニュー">${menu}</div><p class="tver">全4章・22日（通信／アプリ／防壁／運用）</p></div>`;
   title.hidden=false;
   const f=title.querySelector('button');if(f)f.focus();
 }

@@ -129,6 +129,24 @@ cast: {
     "....KNNKKNNK....",
     "....KKK..KKK...."
   ]},
+  kenkyu: {name:"セキュリティ研究者", role:"外部の報告者", group:"friend", rows:[
+    "................",
+    ".....KKKKKK.....",
+    "....KLLLLLLK....",
+    "...KLnnnnnnLK...",
+    "...KLSSSSSSLK...",
+    "...KKSSKSSKKK...",
+    "...KSSKSSKSSK...",
+    "...KsSSSSSSsK...",
+    "....KsSSSSsK....",
+    "....KKWWWWKK....",
+    "...KWWLbLWWWK...",
+    "..KSKWLbLWWKSK..",
+    "..KKKWWbWWKKK...",
+    "....KWWWWWWK....",
+    "....KNNKKNNK....",
+    "....KKK..KKK...."
+  ]},
   tochou: {name:"カフェの盗聴者", role:"1日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
@@ -476,6 +494,7 @@ icons: {
   shop: ["RRWWRRWWRRWWRRWW","RRWWRRWWRRWWRRWW",".TTTTTTTTTTTTTT.",".TbbbbTTTTbbbbT.",".TbbbbTHHTbbbbT.",".TbbbbTHHTbbbbT.",".TTTTTTHHTTTTTT.",".TTTTTTHHTTTTTT.","NNNNNNNNNNNNNNNN"],
   lock: ["..YYYY..",".Y....Y.",".Y....Y.","YYYYYYYY","YYYKKYYY","YYYKKYYY","YYYYYYYY"],
   srv: ["NNNNNNNNNN","NLLLLLLLLN","NLgLLLLLWN","NNNNNNNNNN","NLLLLLLLLN","NLgLLLLLWN","NNNNNNNNNN","NLLLLLLLLN","NLgLLLLLWN","NNNNNNNNNN",".KK....KK."],
+  monitor: ["........","..KKKK..",".KWWWWK.","KWKbbKWK","KWKbbKWK",".KWWWWK.","..KKKK..","........"],
   mail: ["KKKKKKKKKK","KKWWWWWWKK","KWKWWWWKWK","KWWKWWKWWK","KWWWKKWWWK","KWWWWWWWWK","KKKKKKKKKK"],
   logo_registrar: ["..KKKK..",".KYYYYK.","KYyKKyYK","KYyyyyYK","KYYYYYYK","KYYYYYYK",".KYYYYK.","..KKKK.."],
   router: ["................","....K......K....","....K......K....","....K......K....","..KKKKKKKKKKKK..","..KnnnnnnnnnnK..","..KnLLLLLLLLnK..","..KngLLLLLLynK..","..KnLLLLLLLLnK..","..KnLLLLLLLLnK..","..KnLLLLLLLLnK..","..KKKKKKKKKKKK..","...K........K...","...K........K...","................","................"],
