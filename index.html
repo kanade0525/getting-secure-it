@@ -396,7 +396,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -578,19 +578,22 @@ function reviewDemoHTML(){
     <div class="rvlist">`;
   h+=o.reviews.map(x=>rv(x.who,x.stars,esc(x.t))).join('');
   if(r){
-    if(r.xss){
-      h+=rv('名無し',5,'<span class="rv-ran">（このレビューに仕込まれた命令が動きました）</span>','rv-bad');
+    if(r.plain){
+      h+=rv('店長（あなた）',5,esc(r.text||''));
+      h+=`<div class="box" style="margin:10px 0 2px"><p class="small muted" style="margin:0">ふつうの文字として表示された。シロの言うとおり、画面を動かす記号を書いて試してみよう。</p></div>`;
+    }else if(r.xss){
+      h+=rv('店長（あなた）',5,'<span class="rv-ran">（このレビューに仕込まれた命令が動きました）</span>','rv-bad');
       h+=`<div class="leak" style="margin:10px 0 2px"><div class="leakhd">このレビューを開いた人の画面で、勝手に処理が走った</div><p class="small" style="margin:6px 0 0">・知らないサイトへ飛ばされた<br>・ログイン状態（クッキー）が盗まれた</p>
         <div class="acts" style="margin:8px 0 0"><button class="btn" data-act="xssPlay">開いた人の画面で何が起きるか見る</button></div></div>`;
     }else{
-      h+=rv('名無し',5,esc(o.payload));
+      h+=rv('店長（あなた）',5,esc(r.text||''));
       h+=`<div class="box" style="margin:10px 0 2px;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">記号もそのまま、ただの文字として表示されました。画面は動きません。</p></div>`;
     }
   }
   h+=`</div>`;
-  h+=`<div class="capanel" style="margin:10px 12px 12px"><p class="small" style="margin:0 0 6px">${esc(o.hint)}</p>
-    <div class="acts" style="align-items:center"><code class="optc" style="margin:0">${esc(o.payload)}</code><button class="btn" data-act="postReview">このレビューを投稿する</button></div>
-    ${safe?'<p class="dt-ok" style="margin:6px 0 0">対策済み。投稿しても、ただの文字として表示されます。</p>':''}</div>`;
+  h+=`<div class="capanel" style="margin:10px 12px 12px">
+    <div class="store-search"><input type="text" id="reviewQ" placeholder="レビューを書いて投稿" value="${esc(S.reviewQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn" data-act="postReview">投稿する</button></div>
+    ${safe?'<p class="dt-ok" style="margin:6px 0 0">対策済み。記号を書いて投稿しても、ただの文字として表示されます。</p>':''}</div>`;
   h+=`</div>`;
   return h;
 }
@@ -706,7 +709,7 @@ function idorBrowserHTML(){
     </div></div>
     <div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
-function resetDemoRes(){S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;}
+function resetDemoRes(){S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;}
 /* --- 第3章 防壁編のデモ（店長の監視視点で再現） --- */
 function signupDemoHTML(){
   if(demoOff())return '';
@@ -959,6 +962,12 @@ function demoSearch(q){
   }
   const base=(demo&&demo.products&&demo.products.length)?demo.products.map((p,i)=>Object.assign({icon:CATALOG[i%CATALOG.length].icon},p)):CATALOG;
   return {rows:q?base.filter(p=>p.name.includes(q)):base};
+}
+function demoReview(t){
+  t=(t||'').trim();
+  if(!/<[^>]+>/.test(t))return {plain:true,text:t};
+  const safe=S.cfg.code.review==='escape';
+  return safe?{safe:true,text:t}:{xss:true,redir:false,text:t};
 }
 function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「ピクセルハブ」で直そう'}]);}}
 function renderVoices(){
@@ -1277,7 +1286,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewQ='';S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;
   if(d.svc)S.svc=d.svc;
   if(d.sub){if(!d.svc)S.svc='cloud';S.sub=d.sub;}
   save();render();
@@ -1439,8 +1448,8 @@ document.addEventListener('click',e=>{
   else if(a==='sub'){S.sub=b.dataset.sub;save();render();}
   else if(a.indexOf('app-')===0){const k=a.slice(4);c.app[k]=!c.app[k];save();render();}
   else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
-  else if(a==='postReview'){const safe=S.cfg.code.review==='escape';S.reviewRes=safe?{safe:true}:{xss:true,redir:false};save();render();
-    if(!safe){const day=S.day;setTimeout(()=>{xssNav(day);},850);
+  else if(a==='postReview'){const el=$('reviewQ');S.reviewQ=el?el.value:'';S.reviewRes=demoReview(S.reviewQ);save();render();
+    if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
       if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのピクセルハブで直そう'}]);}}}
   else if(a==='xssPlay'){xssNav(S.day);}
   else if(a==='xssBack'){if(S.reviewRes){S.reviewRes.redir=false;save();render();}}
@@ -1498,6 +1507,7 @@ document.addEventListener('input',e=>{
   if(e.target.id==='nrName')nr.name=e.target.value;
   else if(e.target.id==='nrVal')nr.val=e.target.value;
   else if(e.target.id==='shopQ')S.shopQ=e.target.value;
+  else if(e.target.id==='reviewQ')S.reviewQ=e.target.value;
   else if(e.target.id==='ordPrice')S.orderPrice=e.target.value===''?null:Number(e.target.value);
   else if(e.target.id==='ordQty')S.orderQty=e.target.value===''?null:Number(e.target.value);
 });
@@ -1505,6 +1515,9 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'||e.isComposing)return;
   if(e.target.id==='domName'){e.preventDefault();$('domSearch').click();}
   else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
+  else if(e.target.id==='reviewQ'){e.preventDefault();const el=$('reviewQ');S.reviewQ=el.value;S.reviewRes=demoReview(S.reviewQ);save();render();
+    if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
+      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのピクセルハブで直そう'}]);}}}
 });
 
 /* ---------- 再開 ---------- */
