@@ -32,6 +32,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:3px solid var(--line);padding:8px 14px;display:flex;align-items:center;gap:10px}
 .chap{font-size:12px;color:var(--muted);line-height:1.3}
 .dayl{font-size:18px;line-height:1.4}
+.logbtn{margin-left:auto;font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:3px solid var(--line);padding:6px 10px;cursor:pointer;line-height:1.3;white-space:nowrap}
+.logbtn:focus-visible{outline:2px dashed var(--ink);outline-offset:2px}
+.loghd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.logbody{max-height:60vh;overflow:auto}
+.logln{margin:0 0 14px;line-height:1.7}
+.logwho{display:block;font-size:12px;color:var(--muted);margin:0 0 2px}
+.logtx{overflow-wrap:anywhere;white-space:pre-wrap}
+.copyrow{display:flex;gap:8px;align-items:center;margin:6px 0 0;flex-wrap:wrap}
+.copyrow code{flex:1;min-width:140px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:var(--win-bg);color:#c9cff5;border:2px solid var(--line);padding:4px 8px;overflow-wrap:anywhere}
+.copybtn{font:inherit;font-size:12px;color:var(--ink);background:var(--surface);border:2px solid var(--line);padding:5px 12px;cursor:pointer;white-space:nowrap}
 main{max-width:720px;margin:0 auto;padding:16px 14px 110px}
 body.talking main{padding-bottom:250px}
 h2{font-size:20px;font-weight:400;margin:4px 0 4px}
@@ -342,6 +352,7 @@ input[type="text"]:disabled{opacity:.6}
 <header class="top">
   <span id="shopIcon"></span>
   <div><div class="chap" id="chapLabel"></div><div class="dayl" id="dayLabel"></div></div>
+  <button id="logBtn" class="logbtn" data-act="log" aria-label="シロとの会話ログを開く">会話ログ</button>
 </header>
 
 <main>
@@ -396,7 +407,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -420,6 +431,7 @@ function nextMsg(){
   if(!m){showing=false;win.hidden=true;document.body.classList.remove('talking');return;}
   if(m.fn){showing=true;m.fn();nextMsg();return;}
   showing=true;win.hidden=false;document.body.classList.add('talking');
+  if(!S.chatLog)S.chatLog=[];S.chatLog.push({who:m.who||'',t:m.t});if(S.chatLog.length>400)S.chatLog.splice(0,S.chatLog.length-400);save();
   winWho.textContent=m.who||'';full=m.t;
   winFace.innerHTML=m.who===SHIRO?castSpr('shiro',3,''):m.who===YOU?castSpr('tencho',3,''):'';
   if(RM){winText.textContent=full;return;}
@@ -1322,6 +1334,24 @@ function verify(){
 }
 function showModal(html){$('sheet').innerHTML=html;$('modal').hidden=false;const b=$('sheet').querySelector('button');if(b)b.focus();}
 function hideModal(){$('modal').hidden=true;}
+function copyText(s){
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s);return true;}}catch(e){}
+  try{const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');document.body.removeChild(ta);return ok;}catch(e){}
+  return false;
+}
+function chatLogSheet(){
+  const L=S.chatLog||[],codeRe=/[<']|--|=/;
+  let h=`<div class="loghd"><h2 id="mTitle" style="margin:0">会話ログ</h2><button class="btn" data-act="close">閉じる</button></div>`;
+  if(!L.length){return h+'<p class="muted small">まだ会話はありません。</p>';}
+  h+='<div class="logbody">';
+  L.forEach(m=>{
+    h+=`<div class="logln"><span class="logwho">${esc(m.who||'（ナレーション）')}</span><span class="logtx">${esc(m.t)}</span>`;
+    const re=/「([^」]*)」/g;let mm;
+    while((mm=re.exec(m.t))){if(codeRe.test(mm[1]))h+=`<div class="copyrow"><code>${esc(mm[1])}</code><button class="copybtn" data-act="copy" data-copy="${esc(mm[1])}">コピー</button></div>`;}
+    h+='</div>';
+  });
+  return h+'</div>';
+}
 const toast=$('toast');let toastT=null;
 function showToast(v){
   $('toastIcon').innerHTML=voiceIcon(v);
@@ -1383,6 +1413,8 @@ document.addEventListener('click',e=>{
   else if(a==='cart'){S.cart++;save();render();}
   else if(a==='reset'){reset();}
   else if(a==='close'){hideModal();}
+  else if(a==='log'){showModal(chatLogSheet());}
+  else if(a==='copy'){const s=b.dataset.copy||'',ok=copyText(s),o=b.textContent;b.textContent=ok?'コピーしました':'選んでコピーしてね';setTimeout(()=>{b.textContent=o;},1400);}
   else if(a==='verify'){verify();}
   else if(a==='nextDay'){hideModal();if(S.day<LAST_DAY)startDay(S.day+1);else showEnd();}
   else if(a==='ca'){c.ca=b.dataset.ca;save();render();if(c.ca!=='self')say([{who:SHIRO,t:CAS[c.ca].n+'の画面が、上のメニューに増えたよ。まずはこのサーバーで秘密鍵とCSRを作ろう'}]);}
