@@ -505,8 +505,7 @@ function browserHTML(){
       <div class="hero"><span class="hero-t">レトロ雑貨、あつめました。</span><span class="hero-s">昭和のブリキからホーロー看板まで。</span></div>
       <div class="store-search"><input type="text" id="shopQ" placeholder="商品名で検索" value="${esc(S.shopQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn" data-act="doSearch">検索</button></div>`;
   if(demo&&demo.payload&&!demo.kind&&(S.cfg.code.search!=='param')){
-    h+=`<div class="capanel" style="margin:0 12px 10px"><p class="small" style="margin:0 0 6px">${esc(demo.hint)}</p>
-      <p class="small" style="margin:0">上の検索窓に <code class="optc">${esc(demo.payload)}</code> と入力して、「検索」を押してみよう。</p></div>`;
+    h+=`<div class="capanel" style="margin:0 12px 10px"><p class="small" style="margin:0">入力する文字列　<code class="optc">${esc(demo.payload)}</code></p></div>`;
   }
   h+=`<div class="store-body">${searchResultHTML()}</div>`;
   if(demo&&demo.kind==='order')h+=orderDemoHTML();
