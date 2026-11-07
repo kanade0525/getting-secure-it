@@ -513,6 +513,7 @@ function browserHTML(){
   if(demo&&demo.kind==='review'&&S.cfg.code.review!=='escape'&&S.reviewRes&&S.reviewRes.xss&&S.reviewRes.redir)return hijackHTML(S.reviewRes.redir);
   if(demo&&demo.kind==='csrf'&&S.csrfRes&&S.csrfRes.open)return csrfBrowserHTML();
   if(demo&&demo.kind==='idor'&&S.idorRes&&S.idorRes.open)return idorBrowserHTML();
+  if(demo&&demo.kind==='session'&&S.sessionRes&&S.sessionRes.open)return sessionBrowserHTML();
   const sec=S.cfg.https&&S.cfg.redirect;
   const url=(sec?'https://':'http://')+esc(S.domain);
   let h=`<div class="browser">
@@ -529,7 +530,7 @@ function browserHTML(){
   if(demo&&demo.kind==='coupon')h+=couponDemoHTML();
   if(demo&&demo.kind==='csrf')h+=csrfIntroHTML();
   if(demo&&demo.kind==='idor')h+=idorIntroHTML();
-  if(demo&&demo.kind==='session')h+=sessionDemoHTML();
+  if(demo&&demo.kind==='session')h+=sessionIntroHTML();
   if(demo&&demo.kind==='signup')h+=signupDemoHTML();
   if(demo&&demo.kind==='login')h+=loginDemoHTML();
   if(demo&&demo.kind==='cert')h+=certDemoHTML();
@@ -611,19 +612,44 @@ function reviewDemoHTML(){
   return h;
 }
 function demoOff(){return S.phase==='intro'||S.phase==='setup'||S.phase==='day0';}
-function sessionDemoHTML(){
+const SESS_SID='a1b2c3d4e5f6';
+function mypageView(url,extraChrome){
+  return `<div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="urlbar">${spr(IC.lock,2.5,'保護された通信')}<span class="u">${esc(url)}</span></span>
+      <span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>
+    <div class="viewport"><div class="store-head">${spr(IC.shop,2.5,'')}<span class="sh-name"><span class="nm">マイページ</span><span class="tag">ようこそ、店長さん</span></span></div>
+      <div class="ordpage"><div class="orow"><span>登録メール</span><b>tencho@pixeldo.shop</b></div><div class="orow"><span>最近の注文</span><b>ブリキのロボット ×1</b></div></div>
+    </div></div>`;
+}
+function sessionIntroHTML(){
   if(demoOff())return '';
-  const onCookie=S.cfg.code.session==='secure';const r=S.sessionRes;
-  const url=onCookie?'https://pixeldo.shop/mypage':'https://pixeldo.shop/mypage?sid=a1b2c3d4e5f6';
-  let h=`<div class="leakwrap"><div class="co-head">いまのログイン用ページのURL</div>
-    <div class="dbdump" style="padding:10px 12px"><code class="dbval">${esc(url)}</code></div>
-    <div class="capanel" style="margin:10px 12px 12px"><p class="small" style="margin:0 0 8px">このURLを、別の人（攻撃者）に渡したらどうなる？</p>
-    <button class="btn" data-act="sessShare">このURLをコピーして別の人に渡す</button>`;
-  if(r){
-    if(onCookie)h+=`<div class="box" style="margin:10px 0 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">URLに合言葉が入っていないので、受け取った人が開いても<b>ログインできません</b>。合言葉はCookieの中にあり、URLには出ません。</p></div>`;
-    else h+=`<div class="leak" style="margin:10px 0 0"><div class="leakhd">受け取った人が、あなたとしてログインできてしまった</div><p class="small" style="margin:6px 0 0">URLの <code>sid=…</code> がログインの合言葉です。URLは履歴・共有・紹介元に残るので、そこから乗っ取られます。</p></div>`;
+  return `<div class="box" style="margin:12px"><p style="margin:0 0 10px">あなたは今、ピクセル堂に<b>ログイン中</b>です。ログイン中の「マイページ」を開いて、ブラウザのアドレス欄を見てみましょう。</p>
+    <button class="btn primary" data-act="sessOpen">マイページを開く</button></div>`;
+}
+function sessionBrowserHTML(){
+  if(demoOff())return '';
+  const onCookie=S.cfg.code.session==='secure';
+  const shared=!!(S.sessionRes&&S.sessionRes.shared);
+  const myUrl='https://pixeldo.shop/mypage'+(onCookie?'':'?sid='+SESS_SID);
+  let h=`<div class="hj-meta"><span class="hj-meta-h">解説：ログイン中の「マイページ」を開いたところ</span><p>下はお客さんのブラウザです。<b>アドレス欄</b>に注目してください。</p></div>
+    ${mypageView(myUrl)}`;
+  if(onCookie){
+    h+=`<div class="hj-meta"><span class="hj-meta-h">解説：対策後</span><p>アドレス欄に合言葉がありません。ログインの合言葉は<b>Cookieの中</b>にあり、URLには出ません。だからこのページのリンクを誰かに渡しても、その人はログインできません。</p></div>
+      <div class="hj-back"><button class="btn" data-act="sessBack">サイトに戻る</button></div>`;
+    return h;
   }
-  h+=`</div></div>`;return h;
+  h+=`<div class="hj-meta danger"><span class="hj-meta-h">解説：ここが危ない</span><p>アドレス欄の末尾 <code>sid=${SESS_SID}</code> が、ログインの合言葉そのものです。URLは<b>ブラウザの履歴・共有したリンク・リファラ（紹介元）</b>に残ります。たとえばブラウザの履歴にはこう残ります。</p>
+      <code class="hj-steal-c">履歴  https://pixeldo.shop/mypage?sid=${SESS_SID}</code>
+      <p style="margin:6px 0 0">この合言葉入りのリンクを手に入れた人が、そのまま開くと…</p></div>`;
+  if(!shared){
+    h+=`<div class="hj-back"><button class="btn" data-act="sessShare">そのリンクを別の人が開いた画面を見る</button> <button class="btn" data-act="sessBack">サイトに戻る</button></div>`;
+  }else{
+    h+=`<div class="hj-meta danger"><span class="hj-meta-h">解説：そのリンクを受け取った別の人のブラウザ</span><p>別の端末で同じリンクを開いただけ。パスワードは入力していません。</p>
+      ${mypageView('https://pixeldo.shop/mypage?sid='+SESS_SID)}
+      <p style="margin:8px 0 0">URLの合言葉だけで、<b>あなたとしてログインできてしまいました</b>。</p></div>
+      <div class="hj-back"><button class="btn" data-act="sessBack">サイトに戻る</button></div>`;
+  }
+  return h;
 }
 function storeDemoHTML(){
   const o=DAYS[S.day].demo;if(demoOff())return '';
@@ -1497,8 +1523,10 @@ document.addEventListener('click',e=>{
   else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
   else if(a==='idorStep'){const o=DAYS[S.day].demo;S.idorId=Math.max(1000,Math.min(1004,(S.idorId||o.myId)+Number(b.dataset.d)));save();render();idorSeen();}
   else if(a==='idorSet'){S.idorId=Number(b.dataset.v);save();render();idorSeen();}
-  else if(a==='sessShare'){S.sessionRes={shared:true};save();render();
+  else if(a==='sessOpen'){S.sessionRes={open:true};save();render();}
+  else if(a==='sessShare'){S.sessionRes={open:true,shared:true};save();render();
     if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='sessBack'){S.sessionRes=null;save();render();}
   else if(a==='couponFire'){const atomic=S.cfg.code.coupon==='atomic';S.couponRes=atomic?{safe:true}:{times:10};save();render();
     if(!atomic&&!S.seenCoupon){S.seenCoupon=true;save();say([{who:SHIRO,t:'ほら、1回限りのはずのクーポンが、連打で何回も効いちゃった'},{who:SHIRO,t:'確認と記録が別々だから隙間ができる。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();}
