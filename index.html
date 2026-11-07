@@ -699,24 +699,24 @@ function couponDemoHTML(){
 }
 function csrfIntroHTML(){
   const o=DAYS[S.day].demo;if(demoOff())return '';
-  return `<div class="box" style="margin:12px"><p style="margin:0 0 4px">あなたは今、ピクセル堂に<b>ログイン中</b>です。</p>
-    <p class="small muted" style="margin:0 0 10px">この状態のまま、まったく別の「${esc(o.trap.name)}」というサイトを開いてみましょう。</p>
-    <button class="btn primary" data-act="csrfOpen">ワナのサイトを開く（ログインしたまま）</button></div>`;
+  return `<div class="box" style="margin:12px"><p style="margin:0 0 4px"><b>再現：</b>ピクセル堂に<b>ログインしたままの</b>お客さんが、まったく別の「${esc(o.trap.name)}」というサイトを開くと何が起きるか。</p>
+    <p class="small muted" style="margin:0 0 10px">ふつうに見えるページですが、裏に仕掛けがあります。お客さんのブラウザで何が起きるか見てみましょう。</p>
+    <button class="btn primary" data-act="csrfOpen">お客さんが別サイトを開いた様子を見る</button></div>`;
 }
 function csrfBrowserHTML(){
   const o=DAYS[S.day].demo;const token=S.cfg.code.csrf==='token';
-  return `<div class="hj-meta"><span class="hj-meta-h">解説：いま起きていること</span><p>開いたのは猫の動画サイト。でもこのページには<b>見えない仕掛け</b>があり、あなたのログインを使って、裏でピクセル堂に操作を送ります。</p></div>
+  return `<div class="hj-meta"><span class="hj-meta-h">解説：いま起きていること</span><p>お客さんが開いたのは猫の動画サイト。でもこのページには<b>見えない仕掛け</b>があり、そのお客さんのログインを使って、裏でピクセル堂に操作を送ります。</p></div>
     <div class="browser evil"><div class="chrome danger"><span class="dots"><i></i><i></i><i></i></span><span class="urlbar danger"><span class="tri">!</span><span class="u">${esc(o.trap.url)}</span></span><span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>
       <div class="viewport"><div class="evil-head"><span class="evil-logo">◆</span><span>${esc(o.trap.name)}</span></div>
         <div class="phish"><p style="margin:0">かわいい猫の動画まとめ 第1位〜第50位！（ふつうに見えるページ）</p></div>
       </div></div>
     <div class="hj-meta danger"><span class="hj-meta-h">解説：裏でピクセル堂に送られた操作</span>
-      <code class="hj-steal-c">POST pixeldo.shop/order（あなたとして）
+      <code class="hj-steal-c">POST pixeldo.shop/order（ログイン中のお客さんとして）
 ・ホーローの看板 ×1 を注文
 ・届け先を攻撃者の住所に変更</code>
       ${token?`<div class="box" style="margin:8px 0 0;border-color:var(--safe)"><p class="msg-ok small" style="margin:0">お店が合言葉（トークン）を確認。別サイトからで合言葉がないので<b>拒否</b>されました。</p></div>`:`<p style="margin:8px 0 0">お店は「ログイン済みの本人」と信じて<b>受理</b>。注文が入り、届け先まで書き換わりました。</p>`}
     </div>
-    <div class="hj-back"><button class="btn" data-act="csrfBack">ピクセル堂に戻る</button></div>`;
+    <div class="hj-back"><button class="btn" data-act="csrfBack">サイトに戻る</button></div>`;
 }
 function idorIntroHTML(){
   if(demoOff())return '';
