@@ -35,6 +35,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .logbtn{margin-left:auto;font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:3px solid var(--line);padding:6px 10px;cursor:pointer;line-height:1.3;white-space:nowrap}
 .logbtn:focus-visible{outline:2px dashed var(--ink);outline-offset:2px}
 .loghd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.logsec{font-size:12px;color:var(--muted);font-weight:bold;margin:16px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--line)}
 .logbody{max-height:60vh;overflow:auto}
 .logln{margin:0 0 14px;line-height:1.7}
 .logwho{display:block;font-size:12px;color:var(--muted);margin:0 0 2px}
@@ -1339,18 +1340,25 @@ function copyText(s){
   try{const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');document.body.removeChild(ta);return ok;}catch(e){}
   return false;
 }
-function chatLogSheet(){
-  const L=S.chatLog||[],codeRe=/[<']|--|=/;
-  let h=`<div class="loghd"><h2 id="mTitle" style="margin:0">会話ログ</h2><button class="btn" data-act="close">閉じる</button></div>`;
-  if(!L.length){return h+'<p class="muted small">まだ会話はありません。</p>';}
-  h+='<div class="logbody">';
-  L.forEach(m=>{
-    h+=`<div class="logln"><span class="logwho">${esc(m.who||'（ナレーション）')}</span><span class="logtx">${esc(m.t)}</span>`;
-    const re=/「([^」]*)」/g;let mm;
-    while((mm=re.exec(m.t))){if(codeRe.test(mm[1]))h+=`<div class="copyrow"><code>${esc(mm[1])}</code><button class="copybtn" data-act="copy" data-copy="${esc(mm[1])}">コピー</button></div>`;}
-    h+='</div>';
-  });
+function logLine(who,t){
+  const codeRe=/[<']|--|=/;
+  let h=`<div class="logln"><span class="logwho">${esc(who||'（ナレーション）')}</span><span class="logtx">${esc(t)}</span>`;
+  const re=/「([^」]*)」/g;let mm;
+  while((mm=re.exec(t))){if(codeRe.test(mm[1]))h+=`<div class="copyrow"><code>${esc(mm[1])}</code><button class="copybtn" data-act="copy" data-copy="${esc(mm[1])}">コピー</button></div>`;}
   return h+'</div>';
+}
+function chatLogSheet(){
+  let h=`<div class="loghd"><h2 id="mTitle" style="margin:0">会話ログ</h2><button class="btn" data-act="close">閉じる</button></div>`;
+  const d=DAYS[S.day],active=d&&(S.phase==='fix'||S.phase==='clear');
+  if(active&&d.alert&&d.alert.length){
+    h+=`<p class="logsec">この日のシロの説明（いつでも見返せます）</p>`;
+    d.alert.forEach(m=>{h+=logLine(m.who,m.t);});
+  }
+  const L=S.chatLog||[];
+  h+=`<p class="logsec">これまでの会話</p>`;
+  if(!L.length)h+='<p class="muted small">まだ会話はありません。</p>';
+  else L.forEach(m=>{h+=logLine(m.who,m.t);});
+  return h;
 }
 const toast=$('toast');let toastT=null;
 function showToast(v){
