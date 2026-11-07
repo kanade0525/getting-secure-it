@@ -2,14 +2,12 @@
    学習用の防御シミュレーション。各日は「症状→原因確認→対策を入れる→もう一度確かめる→解説」。
    データの形：
      fix:{key,value,label,done}   ピクセルハブの「対策を入れる」ボタン一発で c.code[key]=value を適用
-     app:[{key,l,note,type:'sw'|'sel',opts?}]              ピクセルクラウド「アプリ設定」（c.app[key]）
      tasks:[{id,l,kind}]                                   サイトタブ「お店の対応」（c.tasks[id]）
      check(c)→{ok,lines,why,blocked,todo,voices}
    verify の流れは第1章と同じ（通信タブで再生→ok ならクリア）。*/
 (function(){
 const G=window.GSI_DAYS,SHIRO=G.SHIRO,YOU=G.YOU;
 const code=(c,k)=>(c.code||{})[k];
-const app=(c,k)=>(c.app||{})[k];
 const task=(c,k)=>!!(c.tasks||{})[k];
 
 const D={
@@ -81,7 +79,6 @@ const D={
     ]
   },
   fix:{key:'hash',value:'bcrypt',label:"パスワードを安全に保存する対策を入れる",done:"bcryptで、戻せない・一人ずつ違う・時間のかかる保存にした。"},
-  app:[{key:'forceChange',l:'90日ごとにパスワード強制変更',note:'今は推奨されていない。かえって弱いパスワードを招く',type:'sw'}],
   success:()=>[{who:SHIRO,t:'保存方法はこれで安心だ。万一流出しても元に戻せない。5日目クリア！'}],
   check(c){
     const f=code(c,'hash');
@@ -92,9 +89,6 @@ const D={
         :'読める形のままだと、流出した瞬間に全員分がバレる。元に戻せない形にしよう';
       return {ok:false,why,lines:[{k:'info',t:'流出したパスワードの保存データを調べる'},{k:'bad',t:'短時間で中身を復元された'}]};
     }
-    if(app(c,'forceChange'))return {ok:false,blocked:true,why:'90日ごとの強制変更は、かえって「Password1→Password2」のような弱い変更を招く。今は推奨されていない。オフにしよう',
-      voices:[{who:'やまだ',t:'3か月ごとに変更を求められて、もう思い出せません……'}],
-      lines:[{k:'ok',t:'保存方法は安全になった'},{k:'bad',t:'頻繁な変更で、お客さんが弱いパスワードや使い回しに走る'}]};
     return {ok:true,lines:[{k:'info',t:'万一流出しても'},{k:'ok',t:'一人ずつ違う重い値で保存されている'},{k:'ok',t:'簡単には元に戻せない'}]};
   },
   learn:{title:'パスワードの保存とハッシュ',

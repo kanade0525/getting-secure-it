@@ -415,7 +415,7 @@ let S=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg)S=Object.assign(fresh(),s);}catch(e){}
 delete S.trust;delete S.victims;
 if(!S.sub)S.sub='server';
-if(!S.cfg.code)S.cfg.code={};if(!S.cfg.app)S.cfg.app={};if(!S.cfg.tasks)S.cfg.tasks={};
+if(!S.cfg.code)S.cfg.code={};if(!S.cfg.tasks)S.cfg.tasks={};
 if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
 if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
@@ -998,7 +998,12 @@ function renderVoices(){
 }
 const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
 // 攻撃の種類で、通信図のどこを狙うか変える：wifi=お客さんの通信を盗聴 / dns=ドメイン乗っ取り / server=お店のサーバーへ
-function atkKind(d){const a=d&&d.attacker;if(a==='tochou'||a==='downgrade'||a==='sslstrip')return 'wifi';if(a==='domain')return 'dns';return 'server';}
+function atkKind(d){const a=d&&d.attacker;
+  if(a==='tochou'||a==='downgrade'||a==='sslstrip')return 'wifi';
+  if(a==='domain')return 'dns';
+  if(a==='xss'||a==='session'||a==='csrf'||a==='skimmer')return 'client';
+  if(d&&d.fix&&d.fix.key==='apikey')return 'client';
+  return 'server';}
 let NET={cx:116,ax:90,ay:150,tx:116,ty:68};
 function renderNet(){
   const c=S.cfg,atk=attackerOf(),d=DAYS[S.day]||{};
@@ -1006,6 +1011,7 @@ function renderNet(){
   const defended=!!(S.last&&S.last.ok);
   const kind=atkKind(d);
   if(kind==='wifi')NET={cx:85,ax:58,ay:150,tx:85,ty:68};
+  else if(kind==='client')NET={cx:42,ax:16,ay:150,tx:70,ty:68};
   else if(kind==='dns')NET={cx:206,ax:180,ay:152,tx:206,ty:84};
   else NET={cx:206,ax:180,ay:152,tx:300,ty:80};
   const lx1=NET.tx,ly1=NET.ty+16,lx2=NET.cx,ly2=NET.ay+4,mX=Math.round((lx1+lx2)/2),mY=Math.round((ly1+ly2)/2);
@@ -1015,7 +1021,8 @@ function renderNet(){
     <g id="steal" opacity="0"><rect width="12" height="9" fill="var(--danger)"/></g>
     ${sprG(frameRows(atk.rows,tick),NET.ax,NET.ay,3.3,'atk')}
     <text x="${NET.cx}" y="${NET.ay+68}" text-anchor="middle" class="lbl ${defended?'okT':'warnT'}">攻撃者</text>`:'';
-  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、ルーター、インターネット、ショップのサーバーの通信図${atkOn?'。攻撃者が通信を盗み見ている':''}">
+  const ariaAtk=kind==='wifi'?'。攻撃者がカフェのWi-Fiで通信を盗み見ている':kind==='client'?'。攻撃者がお客さんのブラウザや端末を狙っている':kind==='dns'?'。攻撃者がドメインを狙っている':'。攻撃者がショップのサーバーを狙っている';
+  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、ルーター、インターネット、ショップのサーバーの通信図${atkOn?ariaAtk:''}">
     <rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
     <text x="12" y="20" class="lbl">カフェのWi-Fi</text>
     <line x1="70" y1="68" x2="100" y2="68" stroke="var(--line)" stroke-width="3"/>
@@ -1186,11 +1193,9 @@ function verifyBox(){
 function cloudHTML(){
   const live=isLive(),subs=[['server','サーバー']];
   if(live&&S.day>=1)subs.push(['cert','証明書'],['net','通信設定']);
-  const dd=DAYS[S.day];
-  if(live&&dd&&dd.app)subs.push(['app','アプリ設定']);
   if(!subs.some(s=>s[0]===S.sub))S.sub='server';
   let h=`<div class="subs" role="tablist" aria-label="ピクセルクラウドのメニュー">${subs.map(s=>`<button role="tab" class="sub" data-act="sub" data-sub="${s[0]}" aria-selected="${s[0]===S.sub}">${s[1]}</button>`).join('')}</div>`;
-  h+=S.sub==='cert'?certCloudHTML():S.sub==='net'?cloudNetHTML():S.sub==='app'?appHTML():cloudServerHTML();
+  h+=S.sub==='cert'?certCloudHTML():S.sub==='net'?cloudNetHTML():cloudServerHTML();
   if(live&&S.day>=1)h+=verifyBox();
   return h;
 }
@@ -1210,22 +1215,6 @@ function hubHTML(){
   h+='</div>';
   return h+verifyBox();
 }
-/* --- ピクセルクラウド「アプリ設定」 --- */
-function appHTML(){
-  const d=DAYS[S.day];
-  if(!d||!d.app)return '<div class="sec"><h3>アプリ設定</h3><p class="small" style="padding:10px 12px">今日はここで変える設定はありません。</p></div>';
-  let h='<div class="sec"><h3>アプリ設定</h3>';
-  d.app.forEach(it=>{
-    if(it.type==='sw'){const on=!!S.cfg.app[it.key];
-      h+=`<div class="row"><div class="desc">${esc(it.l)}${it.note?`<span class="note">${esc(it.note)}</span>`:''}</div>${sw('app-'+it.key,on,false)}</div>`;
-    }else{
-      h+=`<div class="row"><label class="desc" for="app-${it.key}">${esc(it.l)}${it.note?`<span class="note">${esc(it.note)}</span>`:''}</label>
-        <select id="app-${it.key}" data-app="${it.key}"><option value="">—</option>${it.opts.map(([v,n])=>`<option value="${v}" ${S.cfg.app[it.key]===v?'selected':''}>${esc(n)}</option>`).join('')}</select></div>`;
-    }
-  });
-  return h+'</div>';
-}
-
 function renderConsole(){
   const c=S.cfg;
   const tabs=[['registrar','ネームヤ','ドメイン会社'],['cloud','ピクセルクラウド','サーバー']];
@@ -1527,7 +1516,6 @@ document.addEventListener('click',e=>{
   else if(a==='domTry'){const locked=S.cfg.code.registrar==='lock';S.domRes={hijacked:!locked};save();render();if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'ピクセルハブで、移管ロックと2段階認証をかけよう'}]);}}
   else if(a==='exfilRun'){const guarded=S.cfg.code.egress==='monitor';S.exfilRes={leaked:!guarded};save();render();if(!guarded&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルハブで、出口を制限して異常を検知しよう'}]);}}
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;const go=()=>{c.code[key]=v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);};if(RM)go();else playCodeAnim(key,go);}
-  else if(a.indexOf('app-')===0){const k=a.slice(4);c.app[k]=!c.app[k];save();render();}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();
@@ -1537,7 +1525,6 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target,c=S.cfg;
   if(t.dataset.fix){c.code[t.dataset.fix]=t.dataset.v;}
-  else if(t.dataset.app){c.app[t.dataset.app]=t.value;}
   else if(t.dataset.task){c.tasks[t.dataset.task]=t.checked;}
   else if('buyqty' in t.dataset){S.buyQty=Number(t.value);}
   else if(t.dataset.act==='tlsMin')c.tlsMin=t.value;
