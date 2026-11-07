@@ -613,7 +613,7 @@ function reviewDemoHTML(){
 function demoOff(){return S.phase==='intro'||S.phase==='setup'||S.phase==='day0';}
 function sessionDemoHTML(){
   if(demoOff())return '';
-  const onCookie=!!(S.cfg.app&&S.cfg.app.store==='cookie');const r=S.sessionRes;
+  const onCookie=S.cfg.code.session==='secure';const r=S.sessionRes;
   const url=onCookie?'https://pixeldo.shop/mypage':'https://pixeldo.shop/mypage?sid=a1b2c3d4e5f6';
   let h=`<div class="leakwrap"><div class="co-head">いまのログイン用ページのURL</div>
     <div class="dbdump" style="padding:10px 12px"><code class="dbval">${esc(url)}</code></div>
@@ -884,6 +884,13 @@ const SNIP={
     ['def login(req):','def login(req):'],
     ['    check(req.pw)      # 何回でも','    if fails(req.user) >= 5: lock()'],
     ['    return ok','    throttle(); check(req.pw)']]},
+  session:{file:'config/session.py',lines:[
+    ['SESSION_STORE       = "url"     # URLに付ける','SESSION_STORE       = "cookie"  # Cookieに入れる'],
+    ['COOKIE_SECURE       = False','COOKIE_SECURE       = True      # HTTPSのときだけ送る'],
+    ['COOKIE_HTTPONLY     = False','COOKIE_HTTPONLY     = True      # スクリプトから読めない'],
+    ['COOKIE_SAMESITE     = None','COOKIE_SAMESITE     = "Lax"     # 別サイトからの送信を防ぐ'],
+    ['SESSION_MAX_AGE     = None      # 無期限','SESSION_MAX_AGE     = 1209600   # 2週間'],
+    ['LOGOUT_ON_PW_CHANGE = False','LOGOUT_ON_PW_CHANGE = True      # 変更時は他端末もログアウト']]},
   dos:{file:'infra.yml',lines:[
     ['edge:   none        # 直接受ける','edge:   cdn + waf   # 前段で吸収'],
     ['limit:  none','limit:  100/min     # レート制限'],
@@ -1486,7 +1493,6 @@ document.addEventListener('click',e=>{
   }
   else if(a==='svc'){S.svc=b.dataset.s;if(b.dataset.sub)S.sub=b.dataset.sub;save();render();window.scrollTo(0,0);}
   else if(a==='sub'){S.sub=b.dataset.sub;save();render();}
-  else if(a.indexOf('app-')===0){const k=a.slice(4);c.app[k]=!c.app[k];save();render();}
   else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(a==='postReview'){const el=$('reviewQ');S.reviewQ=el?el.value:'';S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
@@ -1503,7 +1509,7 @@ document.addEventListener('click',e=>{
   else if(a==='idorStep'){const o=DAYS[S.day].demo;S.idorId=Math.max(1000,Math.min(1004,(S.idorId||o.myId)+Number(b.dataset.d)));save();render();idorSeen();}
   else if(a==='idorSet'){S.idorId=Number(b.dataset.v);save();render();idorSeen();}
   else if(a==='sessShare'){S.sessionRes={shared:true};save();render();
-    if(!(S.cfg.app&&S.cfg.app.store==='cookie')&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのアプリ設定でCookieに移そう'}]);}}
+    if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='couponFire'){const atomic=S.cfg.code.coupon==='atomic';S.couponRes=atomic?{safe:true}:{times:10};save();render();
     if(!atomic&&!S.seenCoupon){S.seenCoupon=true;save();say([{who:SHIRO,t:'ほら、1回限りのはずのクーポンが、連打で何回も効いちゃった'},{who:SHIRO,t:'確認と記録が別々だから隙間ができる。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();}
@@ -1521,6 +1527,7 @@ document.addEventListener('click',e=>{
   else if(a==='domTry'){const locked=S.cfg.code.registrar==='lock';S.domRes={hijacked:!locked};save();render();if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'ピクセルハブで、移管ロックと2段階認証をかけよう'}]);}}
   else if(a==='exfilRun'){const guarded=S.cfg.code.egress==='monitor';S.exfilRes={leaked:!guarded};save();render();if(!guarded&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルハブで、出口を制限して異常を検知しよう'}]);}}
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;const go=()=>{c.code[key]=v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。「防げたか確かめる」で試してみよう'}]);};if(RM)go();else playCodeAnim(key,go);}
+  else if(a.indexOf('app-')===0){const k=a.slice(4);c.app[k]=!c.app[k];save();render();}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();
@@ -1530,8 +1537,8 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target,c=S.cfg;
   if(t.dataset.fix){c.code[t.dataset.fix]=t.dataset.v;}
-  else if(t.dataset.task){c.tasks[t.dataset.task]=t.checked;}
   else if(t.dataset.app){c.app[t.dataset.app]=t.value;}
+  else if(t.dataset.task){c.tasks[t.dataset.task]=t.checked;}
   else if('buyqty' in t.dataset){S.buyQty=Number(t.value);}
   else if(t.dataset.act==='tlsMin')c.tlsMin=t.value;
   else if(t.dataset.act==='hstsAge')c.hstsAge=t.value;

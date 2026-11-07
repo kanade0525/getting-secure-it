@@ -177,7 +177,7 @@ const D={
 },
 /* ===== 8日目 セッション ===== */
 8:{
-  title:'8日目　ログイン状態の持ち方',attacker:'session',svc:'cloud',sub:'app',
+  title:'8日目　ログイン状態の持ち方',attacker:'session',svc:'hub',
   start:[{who:SHIRO,t:'ログインの仕組みそのものを見てみよう。今は状態をどう持ってる？'}],
   voices:[
     {who:'友達',t:'きみのログイン用URLを自分のスマホで開いたら、そのままきみとしてログインできたよ。URLに合言葉が入ってるみたい'},
@@ -187,36 +187,14 @@ const D={
     {who:SHIRO,t:'ログイン状態の合言葉が、URLに入って持ち歩かれてる'},
     {who:SHIRO,t:'サイトタブで、ログイン用URLを別の人に渡すとどうなるか試してみて。そのままログインされちゃう'},
     {who:SHIRO,t:'URLは共有や履歴に残る。合言葉はCookieにしてURLから外そう'},
-    {who:SHIRO,t:'ピクセルクラウドの「アプリ設定」で、Cookieの持ち方を整えよう'}
+    {who:SHIRO,t:'ピクセルハブで、セッション（ログイン状態）の設定を直そう。保存先・保護属性・有効期限をまとめて整える'}
   ],
   demo:{kind:'session'},
-  app:[
-    {key:'store',l:'ログイン状態の保存先',type:'sel',opts:[['url','URLに付ける'],['cookie','Cookie']]},
-    {key:'secure',l:'Secure（HTTPSのときだけ送る）',type:'sw'},
-    {key:'httponly',l:'HttpOnly（スクリプトから読めない）',type:'sw'},
-    {key:'samesite',l:'SameSite',type:'sel',opts:[['none','なし'],['lax','Lax'],['strict','Strict']]},
-    {key:'expiry',l:'有効期限',type:'sel',opts:[['never','無期限'],['10min','10分'],['2weeks','2週間']]},
-    {key:'logout',l:'パスワード変更時に他の端末からログアウト',type:'sw'}
-  ],
+  fix:{key:'session',value:'secure',label:"セッションの設定を直す（Cookie＋保護属性）",done:"合言葉をURLからCookieへ移し、Secure / HttpOnly / SameSite=Lax / 有効期限（2週間）/ 変更時の他端末ログアウトを設定した。"},
   success:()=>[{who:SHIRO,t:'合言葉はCookieに入り、正しく守られるようになった。8日目クリア！'}],
   check(c){
-    const a=c.app||{};
-    if(a.store!=='cookie')return {ok:false,pkt:'sid=…（URL内）',why:'合言葉がURLに入っている。URLは共有や履歴に残る。Cookieに移そう',lines:[
-      {k:'info',t:'URLをコピーして別の人に渡す'},{k:'bad',t:'URL内の合言葉でそのままログインできた'}]};
-    if(!a.secure||!a.httponly||!a.samesite||a.samesite==='none'||!a.expiry||a.expiry==='never'){
-      const why=!a.secure?'Secure がないと、HTTPの隙に合言葉が漏れる。オンにしよう'
-        :!a.httponly?'HttpOnly がないと、スクリプトから合言葉を読まれる。オンにしよう'
-        :(!a.samesite||a.samesite==='none')?'SameSite がないと、別サイトからの操作で合言葉が付いて送られる。Lax にしよう'
-        :'有効期限がないと、盗まれた合言葉がいつまでも使える。期限を決めよう';
-      return {ok:false,pkt:'session=…',why,lines:[{k:'info',t:'Cookieの合言葉を狙う'},{k:'bad',t:'守りが足りず、合言葉を使われた'}]};
-    }
-    if(a.samesite==='strict'||a.expiry==='10min'){
-      const why=a.samesite==='strict'?'SameSite=Strict だと、他サイトのリンクから来たお客さんが毎回ログアウト状態になる。Lax にしよう':'10分で切れると、少し席を外しただけでログインし直しになる。2週間くらいにしよう';
-      return {ok:false,blocked:true,why,voices:[{who:'やまだ',t:a.samesite==='strict'?'メールのリンクから開くと、毎回ログインし直しです。':'少し離れただけでログアウトされて、買い物が進みません。'}],
-        lines:[{k:'ok',t:'乗っ取りは防げた'},{k:'bad',t:'お客さんが頻繁にログインし直しになった'}]};
-    }
-    if(!c.app.logout)return {ok:false,why:'仕上げに、パスワード変更時は他の端末からもログアウトさせよう。もし合言葉が盗まれても断てる',lines:[
-      {k:'ok',t:'これからのCookieは安全'},{k:'bad',t:'変更しても他端末の合言葉が生き続ける'}]};
+    if(code(c,'session')!=='secure')return {ok:false,pkt:'sid=…（URL内）',why:'合言葉がURLに入っていて、Cookieの保護属性も付いていない。ピクセルハブでセッションの設定を直そう',lines:[
+      {k:'info',t:'ログイン用URLをコピーして別の人に渡す'},{k:'bad',t:'URL内の合言葉で、そのままログインされた'}]};
     return {ok:true,lines:[{k:'info',t:'URLやスクリプトから合言葉を狙う'},{k:'ok',t:'合言葉はCookie内で保護され、取り出せない'},{k:'ok',t:'変更時は他端末からもログアウトされる'}]};
   },
   learn:{title:'セッションCookieの属性',
