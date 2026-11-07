@@ -129,6 +129,9 @@ select:disabled{opacity:.45}
 .dots i{display:block;width:10px;height:10px;border:2px solid var(--line);border-radius:50%;background:var(--surface)}
 .urlbar{flex:1 1 auto;display:flex;align-items:center;gap:6px;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:3px 10px;font-size:13px;min-width:0}
 .urlbar .u{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urlbar.edit:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.urlinp{flex:1 1 auto;min-width:0;border:0;background:transparent;font:inherit;color:inherit;padding:2px 0;outline:none}
+.chrome-go{flex:none;padding:3px 10px}
 .reload{flex:none;cursor:pointer;display:flex;padding:2px}
 .viewport{background:var(--surface)}
 .store-head{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:2px solid var(--soft)}
@@ -721,7 +724,7 @@ function csrfBrowserHTML(){
 }
 function idorIntroHTML(){
   if(demoOff())return '';
-  return `<div class="box" style="margin:12px"><p style="margin:0 0 10px">あなたの注文確認ページを開いてみましょう。URLの番号を変えると、何が見えるでしょう？</p>
+  return `<div class="box" style="margin:12px"><p style="margin:0 0 10px">あなたの注文確認ページを開きます。開いたら、<b>アドレス欄の番号</b>を自分で変えて、何が見えるか試してみましょう。</p>
     <button class="btn primary" data-act="idorOpen">注文確認ページを開く</button></div>`;
 }
 function idorBrowserHTML(){
@@ -741,11 +744,10 @@ function idorBrowserHTML(){
   }else{
     body=`<div class="ordpage"><div class="box" style="margin:12px"><p class="muted small" style="margin:0">その番号の注文はありません。</p></div></div>`;
   }
-  return `<div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span>
-      <span class="urlbar"><span class="u">${esc(url)}</span></span><span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>
+  return `<div class="hj-meta"><span class="hj-meta-h">やってみよう</span><p>この<b>アドレス欄は編集できます</b>（本物のブラウザと同じ）。末尾の番号を変えて <b>Enter</b> か「開く」で移動し、他人の注文が見えてしまわないか試します。</p></div>
+    <div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="urlbar edit"><input id="idorUrl" class="urlinp" value="${esc(url)}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="アドレス欄（編集できます）"></span><button class="btn mini chrome-go" data-act="idorGo">開く</button></div>
     <div class="viewport">
-      <div class="idor-ctl"><button class="btn mini" data-act="idorStep" data-d="-1">− 1</button><span class="idor-id">id=${id}</span><button class="btn mini" data-act="idorStep" data-d="1">+ 1</button></div>
-      <div class="idor-ctl"><button class="btn mini" data-act="idorSet" data-v="${o.myId}">自分の注文(${o.myId})</button><button class="btn mini" data-act="idorSet" data-v="1002">他人の注文(1002)にする</button></div>
       ${body}
     </div></div>
     <div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
@@ -1531,8 +1533,7 @@ document.addEventListener('click',e=>{
   else if(a==='csrfBack'){if(S.csrfRes)S.csrfRes.open=false;save();render();}
   else if(a==='idorOpen'){S.idorRes={open:true};S.idorId=DAYS[S.day].demo.myId;save();render();}
   else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
-  else if(a==='idorStep'){const o=DAYS[S.day].demo;S.idorId=Math.max(1000,Math.min(1004,(S.idorId||o.myId)+Number(b.dataset.d)));save();render();idorSeen();}
-  else if(a==='idorSet'){S.idorId=Number(b.dataset.v);save();render();idorSeen();}
+  else if(a==='idorGo'){const el=$('idorUrl');const m=(el?el.value:'').match(/id=(\d+)/);S.idorId=m?Number(m[1]):0;save();render();idorSeen();}
   else if(a==='sessOpen'){S.sessionRes={open:true};save();render();}
   else if(a==='sessShare'){S.sessionRes={open:true,shared:true};save();render();
     if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのピクセルハブで直そう'}]);}}
@@ -1586,6 +1587,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'||e.isComposing)return;
   if(e.target.id==='domName'){e.preventDefault();$('domSearch').click();}
+  else if(e.target.id==='idorUrl'){e.preventDefault();const m=e.target.value.match(/id=(\d+)/);S.idorId=m?Number(m[1]):0;save();render();idorSeen();}
   else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(e.target.id==='reviewQ'){e.preventDefault();const el=$('reviewQ');S.reviewQ=el.value;S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
