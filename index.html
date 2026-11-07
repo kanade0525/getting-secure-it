@@ -700,22 +700,22 @@ function couponDemoHTML(){
 }
 function csrfIntroHTML(){
   const o=DAYS[S.day].demo;if(demoOff())return '';
-  return `<div class="box" style="margin:12px"><p style="margin:0 0 4px"><b>再現：</b>ピクセル堂に<b>ログインしたままの</b>お客さんが、まったく別の「${esc(o.trap.name)}」というサイトを開くと何が起きるか。</p>
-    <p class="small muted" style="margin:0 0 10px">ふつうに見えるページですが、裏に仕掛けがあります。お客さんのブラウザで何が起きるか見てみましょう。</p>
-    <button class="btn primary" data-act="csrfOpen">お客さんが別サイトを開いた様子を見る</button></div>`;
+  return `<div class="box" style="margin:12px"><p style="margin:0 0 4px"><b>再現：</b>ピクセル堂に<b>ログインしたままの</b>お客さんが、まったく別の「${esc(o.trap.name)}」というページを開くと何が起きるか。</p>
+    <p class="small muted" style="margin:0 0 10px">これはピクセル堂専用のワナではなく、ふつうに見えるページです。でも裏に仕掛けがあり、開いた人がピクセル堂にログイン中だと発動します。</p>
+    <button class="btn primary" data-act="csrfOpen">お客さんが別のページを開いた様子を見る</button></div>`;
 }
 function csrfBrowserHTML(){
   const o=DAYS[S.day].demo;const token=S.cfg.code.csrf==='token';
-  return `<div class="hj-meta"><span class="hj-meta-h">解説：いま起きていること</span><p>お客さんが開いたのは猫の動画サイト。でもこのページには<b>見えない仕掛け</b>があり、そのお客さんのログインを使って、裏でピクセル堂に操作を送ります。</p></div>
+  return `<div class="hj-meta"><span class="hj-meta-h">解説：いま起きていること</span><p>お客さんが開いたのは、ごくふつうに見えるページ。でもこのページには<b>見えない仕掛け</b>があり、そのお客さんのログインを使って、裏でピクセル堂に操作を送ります。<b>このページ自体はピクセル堂を名指ししていません</b>——同じ仕掛けは広告やメールのリンクにも隠せ、たまたまログイン中の人にだけ当たります。</p></div>
     <div class="browser evil"><div class="chrome danger"><span class="dots"><i></i><i></i><i></i></span><span class="urlbar danger"><span class="tri">!</span><span class="u">${esc(o.trap.url)}</span></span><span class="reload">${spr(IC.reload,2.5,'再読み込み')}</span></div>
       <div class="viewport"><div class="evil-head"><span class="evil-logo">◆</span><span>${esc(o.trap.name)}</span></div>
-        <div class="phish"><p style="margin:0">かわいい猫の動画まとめ 第1位〜第50位！（ふつうに見えるページ）</p></div>
+        <div class="phish"><p style="margin:0">人気の無料ゲームまとめ 第1位〜第50位！（ふつうに見えるページ）</p></div>
       </div></div>
     <div class="hj-meta danger"><span class="hj-meta-h">解説：裏でピクセル堂に送られた操作</span>
-      <code class="hj-steal-c">POST pixeldo.shop/order（ログイン中のお客さんとして）
-・ホーローの看板 ×1 を注文
-・届け先を攻撃者の住所に変更</code>
-      ${token?`<div class="box" style="margin:8px 0 0;border-color:var(--safe)"><p class="msg-ok small" style="margin:0">お店が合言葉（トークン）を確認。別サイトからで合言葉がないので<b>拒否</b>されました。</p></div>`:`<p style="margin:8px 0 0">お店は「ログイン済みの本人」と信じて<b>受理</b>。注文が入り、届け先まで書き換わりました。</p>`}
+      <code class="hj-steal-c">POST pixeldo.shop/account/address
+（ログイン中のお客さんとして）
+・お届け先の住所を、攻撃者の住所に書き換え</code>
+      ${token?`<div class="box" style="margin:8px 0 0;border-color:var(--safe)"><p class="msg-ok small" style="margin:0">お店が合言葉（トークン）を確認。別サイトからで合言葉がないので<b>拒否</b>されました。</p></div>`:`<p style="margin:8px 0 0">お店は「ログイン済みの本人」と信じて<b>受理</b>。支払い操作もないまま、お届け先の住所だけが静かに書き換わりました。次の注文は攻撃者の住所に届いてしまいます。</p>`}
     </div>
     <div class="hj-back"><button class="btn" data-act="csrfBack">サイトに戻る</button></div>`;
 }
@@ -892,9 +892,9 @@ const SNIP={
   review:{file:'review.py',lines:[
     ['html = "<p>" + review + "</p>"','html = "<p>" + escape(review) + "</p>"'],
     ['render(html)','render(html)']]},
-  csrf:{file:'order.py',lines:[
+  csrf:{file:'account.py',lines:[
     ['if (user.loggedIn) {','if (user.loggedIn && tokenOK(body)) {'],
-    ['  createOrder(body)   // 無条件で受理','  createOrder(body)'],
+    ['  updateAddress(body)  // 無条件で受理','  updateAddress(body)'],
     ['}','}']]},
   access:{file:'order.py',lines:[
     ['order = Order.get(body.id)','order = Order.get(body.id)'],
@@ -1527,7 +1527,7 @@ document.addEventListener('click',e=>{
   else if(a==='storeRead'){S.storeRes={read:true};save();render();
     if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、保存ファイルを開いただけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='csrfOpen'){S.csrfRes={open:true};save();render();
-    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のサイトを開いただけなのに、裏でこのお店に勝手な注文が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのピクセルハブで直そう'}]);}}
+    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、裏でこのお店にお届け先の変更が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='csrfBack'){if(S.csrfRes)S.csrfRes.open=false;save();render();}
   else if(a==='idorOpen'){S.idorRes={open:true};S.idorId=DAYS[S.day].demo.myId;save();render();}
   else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
