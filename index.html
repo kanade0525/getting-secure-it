@@ -1146,9 +1146,17 @@ function caHTML(){
 }
 
 /* --- サーバー（ピクセルクラウド） --- */
+function osInfo(){
+  const upd=S.cfg.code.os==='update';
+  return {name:upd?'Ubuntu 24.04 LTS':'Ubuntu 14.04 LTS',
+    pkg:upd?'OpenSSL 3.0.13 ／ OpenSSH 9.6 ／ nginx 1.26':'OpenSSL 1.0.1f ／ OpenSSH 6.6 ／ nginx 1.10',
+    upd};
+}
 function cloudServerHTML(){
-  const live=isLive();
-  let h=`<div class="sec"><h3>サーバー</h3><div class="row"><div class="desc">shop-server-01<span class="note">IPアドレス ${SERVER_IP}</span></div><span class="small ${live?'msg-ok':'muted'}">${live?'公開中':'準備中'}</span></div>`;
+  const live=isLive(),os=osInfo();
+  let h=`<div class="sec"><h3>サーバー</h3><div class="row"><div class="desc">shop-server-01<span class="note">IPアドレス ${SERVER_IP}</span></div><span class="small ${live?'msg-ok':'muted'}">${live?'公開中':'準備中'}</span></div>
+    <div class="row"><div class="desc">OS<span class="note">${os.name}</span></div><span class="small ${os.upd?'msg-ok':'muted'}">${os.upd?'最新':'稼働中'}</span></div>
+    <div class="row"><div class="desc">主なソフトウェア<span class="note">${os.pkg}</span></div></div>`;
   if(!live)h+=`<div class="row"><div class="desc">サイトを公開する<span class="note">${S.domain?'ドメインがこのサーバーを指していれば公開できます':'先にドメインを取得してください'}</span></div><button class="btn primary" data-act="publish" ${S.domain&&!relBusy?'':'disabled'}>リリースする</button></div>
     ${S.relMsg?`<p class="res small ${relBusy?'muted':'msg-err'}">${S.relMsg}</p>`:''}`;
   h+='</div>';
