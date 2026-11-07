@@ -414,6 +414,7 @@ const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:
 let S=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg)S=Object.assign(fresh(),s);}catch(e){}
 delete S.trust;delete S.victims;
+if(S.cfg&&S.cfg.ca==='paid')S.cfg.ca='free';
 if(!S.sub)S.sub='server';
 if(!S.cfg.code)S.cfg.code={};if(!S.cfg.tasks)S.cfg.tasks={};
 if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];

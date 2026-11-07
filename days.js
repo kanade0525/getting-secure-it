@@ -145,7 +145,6 @@ const CHAPTERS=[
 ];
 const CAS={
   free:{n:'フリーSSL認証局',p:'無料',v:'90日',d:'ドメインの持ち主かを自動で確認して発行。90日ごとの更新が前提',ica:'FreeSSL R1'},
-  paid:{n:'ピクセルトラスト',p:'¥3,300／年',v:'200日',d:'ドメインの持ち主かを確認して発行（DV）。サポート窓口つき',ica:'PixelTrust DV CA'},
   self:{n:'自分で署名する（自己署名）',p:'無料',v:'自由に決められる',d:'認証局を通さず、自分で証明書を作る'}
 };
 window.GSI_DAYS={SHIRO,YOU,days:DAYS,chapters:CHAPTERS,cas:CAS,lastDay:3};
