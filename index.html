@@ -690,7 +690,8 @@ function couponDemoHTML(){
     <div class="co-item">${spr(IC[o.product.icon],3,o.product.name)}<span class="co-name">${esc(o.product.name)}</span><span class="co-price">${yen(o.product.price)}</span></div>
     <div class="co-row"><label for="cpn">クーポン</label><input type="text" id="cpn" value="${esc(o.coupon.code)}" readonly style="max-width:180px"></div>
     <p class="small" style="padding:0 12px;margin:2px 0 0;color:var(--muted)">「${esc(o.coupon.code)}」＝${yen(o.coupon.off)}引き・お一人さま1回まで</p>
-    <button class="btn primary" data-act="couponFire" style="margin:10px 12px 12px">このクーポンで、ほぼ同時に10回注文する</button>`;
+    <div class="hj-meta danger" style="margin:10px 12px 0"><span class="hj-meta-h">再現：同時注文</span><p>1回ずつなら2回目から「使用済み」で止まります。でも攻撃者が<b>ほぼ同時</b>に10件の注文を送ると、「確認」と「使用済みの記録」の<b>すき間</b>を突けます。その様子を再現します。</p></div>
+    <button class="btn primary" data-act="couponFire" style="margin:10px 12px 12px">ほぼ同時に10件の注文を送って再現する</button>`;
   if(r){
     if(r.safe)h+=`<div class="res" style="padding:0 12px 12px"><div class="box" style="margin:4px 0;border-color:var(--safe)"><p class="small msg-ok" style="margin:0">適用できたのは <b>1回だけ</b>。残り9回は「使用済み」で失敗しました。合計 ${yen(o.product.price-o.coupon.off)}。</p></div></div>`;
     else h+=`<div class="res" style="padding:0 12px 12px"><div class="leak" style="margin:4px 0"><div class="leakhd">1回限りのはずが、${r.times}回も適用された</div><p class="small" style="margin:6px 0 0">割引 −${yen(o.coupon.off*r.times)}、合計 ${yen(o.product.price-o.coupon.off*r.times)}（マイナス！）。その分お店が損をします。</p></div></div>`;
@@ -857,7 +858,7 @@ function domainDemoHTML(){
   const locked=S.cfg.code.registrar==='lock',r=S.domRes;
   let h=`<div class="sec"><h3>ドメイン会社からの通知</h3><div class="monitor"><div class="mon-h">登録者変更・移管の申請</div>
     <div class="dbdump"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：pixeldo.shop を別の管理者へ移管</div><div class="${locked?'':'warnT'}">本人確認：${locked?'移管ロック＋2段階認証':'確認メールのみ'}</div></div>
-    <button class="btn primary" data-act="domTry">攻撃者として移管を申請する</button>`;
+    <button class="btn primary" data-act="domTry">なりすましの移管申請が来た場合を再現する</button>`;
   if(r)h+= r.hijacked
     ?`<div class="mon-res bad"><b>受理されかけた</b><span>本人確認が甘く、ドメインごと乗っ取られる寸前</span></div>`
     :`<div class="mon-res ok"><b>拒否された</b><span>移管ロックと2段階認証で、なりすまし申請を止めた</span></div>`;
