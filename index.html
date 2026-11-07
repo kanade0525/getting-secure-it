@@ -1040,10 +1040,10 @@ function renderNet(){
   const atkOn=busy||(S.last&&S.last.lines.length>0);
   const defended=!!(S.last&&S.last.ok);
   const kind=atkKind(d);
-  if(kind==='wifi')NET={cx:85,ax:58,ay:150,tx:85,ty:68};
-  else if(kind==='client')NET={cx:42,ax:16,ay:150,tx:70,ty:68};
-  else if(kind==='dns')NET={cx:206,ax:180,ay:152,tx:206,ty:84};
-  else NET={cx:206,ax:180,ay:152,tx:300,ty:80};
+  if(kind==='wifi')NET={cx:85,ax:58,ay:150,tx:85,ty:68,sx:62,sy:62,ex:288,ey:62};
+  else if(kind==='client')NET={cx:42,ax:16,ay:150,tx:70,ty:68,sx:62,sy:62,ex:288,ey:62};
+  else if(kind==='dns')NET={cx:206,ax:180,ay:152,tx:206,ty:84,sx:62,sy:62,ex:288,ey:62};
+  else NET={cx:206,ax:180,ay:152,tx:300,ty:80,sx:190,sy:150,ex:296,ey:74};
   const lx1=NET.tx,ly1=NET.ty+16,lx2=NET.cx,ly2=NET.ay+4,mX=Math.round((lx1+lx2)/2),mY=Math.round((ly1+ly2)/2);
   const atkG=atkOn?`
     <line id="tap" class="${defended?'':'tapline'}" x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${defended?'var(--muted)':'var(--danger)'}" stroke-width="2" stroke-dasharray="4 4"/>
@@ -1053,8 +1053,8 @@ function renderNet(){
     <text x="${NET.cx}" y="${NET.ay+68}" text-anchor="middle" class="lbl ${defended?'okT':'warnT'}">攻撃者</text>`:'';
   const ariaAtk=kind==='wifi'?'。攻撃者がカフェのWi-Fiで通信を盗み見ている':kind==='client'?'。攻撃者がお客さんのブラウザや端末を狙っている':kind==='dns'?'。攻撃者がドメインを狙っている':'。攻撃者がショップのサーバーを狙っている';
   const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、ルーター、インターネット、ショップのサーバーの通信図${atkOn?ariaAtk:''}">
-    <rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
-    <text x="12" y="20" class="lbl">カフェのWi-Fi</text>
+    ${kind==='wifi'?`<rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="12" y="20" class="lbl">カフェのWi-Fi</text>`:''}
     <line x1="70" y1="68" x2="100" y2="68" stroke="var(--line)" stroke-width="3"/>
     <line x1="134" y1="68" x2="178" y2="68" stroke="var(--line)" stroke-width="3"/>
     <line x1="234" y1="68" x2="288" y2="68" stroke="var(--line)" stroke-width="3"/>
@@ -1074,7 +1074,8 @@ function renderNet(){
   let hint='';
   if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')hint='リリースすると、ここに通信のようすが表示されます。';
   else if(S.phase==='incident')hint='このタブを開くと、攻撃のようすが再生されます。';
-  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint||'お客さんとお店の間を流れるデータと、攻撃者に見えているもの'}</p>${svg}
+  const sub=kind==='wifi'?'カフェのWi-Fiなどで、お客さんの通信を盗み見るようす':kind==='dns'?'ドメインの向き先を乗っ取り、お客さんを偽サイトへ誘導するようす':kind==='client'?'お客さんのブラウザ側で起き、攻撃者にデータが送られるようす':'攻撃者がお店のサーバーへ、細工した要求を送るようす';
+  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint||sub}</p>${svg}
     <div class="loghead">${atkOn?castSpr(atk.id||'tochou',2,'')+'<span>攻撃者の画面</span>':'<span>通信ログ</span>'}</div><div class="log" id="log" aria-live="polite">${lines}</div>
     ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify">防げたか確かめる</button>':''}`;
 }
@@ -1277,10 +1278,11 @@ function animatePacket(line,r,cb){
   g.querySelector('rect').setAttribute('fill',col);
   $('pktL').textContent=line.k==='ok'?'#%&@!?':bad?(r.pkt||''):'';
   g.setAttribute('opacity','1');
+  const sx=NET.sx!=null?NET.sx:62,sy=NET.sy!=null?NET.sy:62,ex=NET.ex!=null?NET.ex:288,ey=NET.ey!=null?NET.ey:62;
   const tap=$('tap'),t0=performance.now(),dur=1600;let fired=false;
   function step(t){
-    const p=Math.min(1,(t-t0)/dur),x=62+p*226;
-    g.setAttribute('transform',`translate(${x},62)`);
+    const p=Math.min(1,(t-t0)/dur),x=sx+p*(ex-sx),y=sy+p*(ey-sy);
+    g.setAttribute('transform',`translate(${x},${y})`);
     const near=NET.tx>=290?(x>=278):Math.abs(x+8-NET.tx)<16;
     if(tap)tap.setAttribute('stroke-width',near?'4':'2');
     if(near&&!fired){fired=true;bad?exfil():defendPulse();}
