@@ -88,6 +88,9 @@ p{margin:0 0 10px}
 .pe-ctl #peSpeed{padding:4px 6px;font-size:12px}
 .pe-count{font-family:ui-monospace,Menlo,monospace;font-size:13px;margin-left:auto;color:var(--muted)}
 .pe-cap{font-size:13px;min-height:1.3em;margin:0 0 8px;padding:7px 9px;background:var(--soft);border-left:4px solid var(--accent);border-radius:4px}
+.pe-detail{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+.pe-cap.bad{border-left-color:var(--danger)}
+.pe-cap.ok{border-left-color:var(--safe)}
 .pe-wrap{overflow-x:auto;border:2px solid var(--line);border-radius:8px;margin-bottom:4px}
 .pe-tbl{width:100%;border-collapse:collapse;font-size:11px;font-family:ui-monospace,Menlo,monospace}
 .pe-tbl th,.pe-tbl td{padding:4px 6px;text-align:left;border-bottom:1px solid var(--soft);white-space:nowrap}
@@ -408,7 +411,7 @@ input[type="text"]:disabled{opacity:.6}
 const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- ピクセルスプライト（sprites.js） ---------- */
-const SPR=window.GSI_SPRITES,PAL=SPR.palette,CAST=SPR.cast,IC=SPR.icons;
+const SPR=window.GSI_SPRITES,PAL=SPR.palette,CAST=SPR.cast,IC=SPR.icons,ISO=SPR.iso;
 function rects(rows){let r='';rows.forEach((row,y)=>{[...row].forEach((ch,x)=>{if(ch!=='.'&&PAL[ch])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[ch]}"/>`;});});return r;}
 function spr(rows,px,label){const w=rows[0].length,h=rows.length;return `<svg class="spr" viewBox="0 0 ${w} ${h}" width="${w*px}" height="${h*px}" shape-rendering="crispEdges" ${label?`role="img" aria-label="${label}"`:'aria-hidden="true"'}>${rects(rows)}</svg>`;}
 function sprG(rows,x,y,px,id){return `<g ${id?`id="${id}"`:''} transform="translate(${x},${y}) scale(${px})" shape-rendering="crispEdges">${rects(rows)}</g>`;}
@@ -1113,29 +1116,32 @@ function renderNet(){
   let flow=null,cur=null,n=0;
   if(showExpl){flow=buildFlow(d,c);n=flow.events.length;if(S.ev==null||S.ev<0)S.ev=0;if(S.ev>n-1)S.ev=n-1;cur=flow.events[S.ev];}
   const atk=attackerOf();
-  const hl=k=>(cur&&(cur.src===k||cur.dst===k))?' hi':'';
-  const hlNet=(cur&&(cur.src==='net'||cur.dst==='net'||cur.src==='dns'||cur.dst==='dns'))?' hi':'';
+  const sc=1.4;
+  const LAY={client:{o:[24,150],p:[46,180],lbl:[46,198]},router:{o:[92,122],p:[116,156],lbl:[116,176]},net:{o:[158,92],p:[183,104],lbl:[185,126]},server:{o:[240,62],p:[264,112],lbl:[266,140]}};
+  const ATK=({server:{o:[248,148],p:[272,180],t:'server'},client:{o:[14,186],p:[40,214],t:'client'},wifi:{o:[64,160],p:[88,190],t:'router'},dns:{o:[150,150],p:[176,182],t:'net'}})[kind];
+  const PORT={client:LAY.client.p,router:LAY.router.p,net:LAY.net.p,dns:LAY.net.p,server:LAY.server.p,attacker:ATK?ATK.p:[180,190]};
+  const col=cur?(cur.k==='bad'?['r','R']:cur.k==='ok'?['g','G']:['y','O']):['y','O'];
+  const isoCube=(x,y,ck)=>{const hw=7,hh=4,H=6,T=PAL[ck[0]],F=PAL[ck[1]];return `<polygon points="${x},${y-hh} ${x+hw},${y} ${x},${y+hh} ${x-hw},${y}" fill="${T}" stroke="#1a1426" stroke-width="0.6"/><polygon points="${x-hw},${y} ${x},${y+hh} ${x},${y+hh+H} ${x-hw},${y+H}" fill="${F}"/><polygon points="${x},${y+hh} ${x+hw},${y} ${x+hw},${y+H} ${x},${y+hh+H}" fill="${F}"/>`;};
+  const tile=p=>sprG(ISO.iso_tile,Math.round(p[0]-22),Math.round(p[1]-6),sc);
+  const node=(rows,L)=>sprG(rows,L.o[0],L.o[1],sc);
+  const isCur=k=>cur&&(cur.src===k||cur.dst===k);
+  const lbl=(k,L,txt)=>`<text x="${L.lbl[0]}" y="${L.lbl[1]}" text-anchor="middle" class="lbl${isCur(k)?' hi':''}">${txt}</text>`;
+  const ring=k=>{if(!isCur(k))return '';const p=PORT[k];return `<ellipse cx="${p[0]}" cy="${p[1]+2}" rx="24" ry="10" fill="var(--accent)" opacity="0.22"/>`;};
+  const path=`<polyline points="${LAY.client.p.join(',')} ${LAY.router.p.join(',')} ${LAY.net.p.join(',')} ${LAY.server.p.join(',')}" fill="none" stroke="var(--line)" stroke-width="3" opacity="0.85"/>`;
+  const atkLine=(showExpl&&ATK)?`<line x1="${ATK.p[0]}" y1="${ATK.p[1]}" x2="${PORT[ATK.t][0]}" y2="${PORT[ATK.t][1]}" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 4" opacity="0.75"/>`:'';
   let pktSvg='';
-  if(cur){const a=nodeXY(cur.src),b=nodeXY(cur.dst);const px=Math.round(a.x+(b.x-a.x)*0.62),py=Math.round(a.y+(b.y-a.y)*0.62);
-    const col=cur.k==='bad'?'var(--danger)':cur.k==='ok'?'var(--safe)':'var(--accent)';
-    pktSvg=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${col}" stroke-width="2" stroke-dasharray="3 3" opacity="0.65"/><g transform="translate(${px-8},${py-6})"><rect width="16" height="12" rx="2" fill="${col}"/></g>`;}
-  const atkG=showExpl?`${sprG(frameRows(atk.rows,tick),NET.ax,NET.ay,3.3,'atk')}<text x="${NET.cx}" y="${NET.ay+68}" text-anchor="middle" class="lbl warnT${hl('attacker')}">攻撃者</text>`:'';
-  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="通信図：お客さん・ルーター・インターネット・ショップのサーバー${showExpl?'・攻撃者':''}">
-    ${kind==='wifi'?`<rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/><text x="12" y="20" class="lbl">カフェのWi-Fi</text>`:''}
-    <line x1="70" y1="68" x2="100" y2="68" stroke="var(--line)" stroke-width="3"/>
-    <line x1="134" y1="68" x2="178" y2="68" stroke="var(--line)" stroke-width="3"/>
-    <line x1="234" y1="68" x2="288" y2="68" stroke="var(--line)" stroke-width="3"/>
+  if(cur){const a=PORT[cur.src]||LAY.client.p,b=PORT[cur.dst]||LAY.server.p;const px=Math.round(a[0]+(b[0]-a[0])*0.6),py=Math.round(a[1]+(b[1]-a[1])*0.6);pktSvg=isoCube(px,py-12,col);}
+  const atkNode=(showExpl&&ATK)?`${sprG(frameRows(atk.rows,tick),ATK.o[0],ATK.o[1],sc,'atk')}<text x="${ATK.p[0]}" y="${ATK.p[1]+16}" text-anchor="middle" class="lbl warnT${isCur('attacker')?' hi':''}">攻撃者</text>`:'';
+  const svg=`<svg viewBox="0 0 360 240" class="netsvg" role="img" aria-label="アイソメトリックな通信図：お客さん・ルーター・インターネット・ショップ${showExpl?'・攻撃者':''}">
+    ${tile(LAY.client.p)}${tile(LAY.router.p)}${tile(LAY.server.p)}${showExpl&&ATK?tile(ATK.p):''}
+    ${path}${atkLine}
+    ${ring('client')}${ring('router')}${ring('net')}${ring('server')}${ring('attacker')}
+    ${node(ISO.iso_server,LAY.server)}${c.https?sprG(IC.lock,LAY.server.o[0]+42,LAY.server.o[1]-4,2.2):''}${lbl('server',LAY.server,'ショップ')}
+    ${node(ISO.iso_cloud,LAY.net)}${lbl('net',LAY.net,'インターネット')}
+    ${node(ISO.iso_router,LAY.router)}${lbl('router',LAY.router,'ルーター')}
+    ${atkNode}
+    ${node(ISO.iso_client,LAY.client)}${lbl('client',LAY.client,'お客さん')}
     ${pktSvg}
-    ${sprG(CAST.tanaka.rows,16,34,3.3)}
-    <text x="42" y="104" text-anchor="middle" class="lbl${hl('client')}">お客さん</text>
-    ${sprG(IC.router,100,52,2)}
-    <text x="116" y="104" text-anchor="middle" class="lbl${hl('router')}">ルーター</text>
-    ${sprG(IC.cloud,179,46,3)}
-    <text x="206" y="104" text-anchor="middle" class="lbl${hlNet}">インターネット</text>
-    ${sprG(IC.srv,288,44,4)}
-    <text x="316" y="104" text-anchor="middle" class="lbl${hl('server')}">ショップ</text>
-    ${c.https?sprG(IC.lock,320,6,3):'<text x="316" y="24" text-anchor="middle" class="lbl warnT">HTTP</text>'}
-    ${atkG}
   </svg>`;
   if(!showExpl){
     const hint=(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')?'リリースすると、ここに通信のようすが表示されます。':sub;
@@ -1149,10 +1155,8 @@ function renderNet(){
     <button class="btn mini" data-act="netReset" aria-label="最初から">${PEI.reset}</button>
     <select id="peSpeed" aria-label="再生速度">${spd}</select>
     <span class="pe-count">${String(S.ev+1).padStart(2,'0')} / ${String(n).padStart(2,'0')}</span></div>`;
-  const cap=`<div class="pe-cap">${esc(cur.cap||'')}</div>`;
-  const rows=flow.events.map((e,i)=>`<tr class="${i===S.ev?'cur ':''}${e.k==='bad'?'bad':e.k==='ok'?'ok':''}" data-act="netEv" data-i="${i}"><td>${String(e.no).padStart(2,'0')}</td><td>${e.t}</td><td>${nShort(e.src)}</td><td>${nShort(e.dst)}</td><td>${esc(e.proto)}</td><td class="pe-msg">${esc(e.msg)}</td><td>${esc(e.size)}</td></tr>`).join('');
-  const tbl=`<div class="pe-wrap"><table class="pe-tbl"><thead><tr><th>No</th><th>時刻</th><th>送信元</th><th>宛先</th><th>Proto</th><th>内容</th><th>サイズ</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}${ctl}${cap}${tbl}
+  const cap=`<div class="pe-cap${cur.k==='bad'?' bad':cur.k==='ok'?' ok':''}">${esc(cur.cap||'')}<span class="pe-detail">（${nShort(cur.src)}→${nShort(cur.dst)}／${esc(cur.proto)}：${esc(cur.msg)}）</span></div>`;
+  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}${ctl}${cap}
     ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify" style="margin-top:10px">防げたか確かめる</button>':''}`;
 }
 function netStop(){if(evTimer){clearTimeout(evTimer);evTimer=null;}evPlaying=false;busy=false;evOnEnd=null;}
