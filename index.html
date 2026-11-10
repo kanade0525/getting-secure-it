@@ -112,6 +112,8 @@ p{margin:0 0 10px}
 .log .bad{color:#ff8a94}
 .log .ok{color:#7ee59a}
 .log .info{color:#c9cff5}
+.log .cur{background:rgba(151,173,255,0.16);border-radius:4px;font-weight:700}
+.log .logd{color:var(--muted);font-size:12px;margin-left:4px}
 .loghead{font-size:13px;color:var(--muted);margin-top:14px;display:flex;align-items:center;gap:8px}
 .sec{border:3px solid var(--line);background:var(--surface);margin:12px 0 14px}
 .sec h3{margin:0;padding:8px 12px;background:var(--soft);font-size:16px;border-bottom:3px solid var(--line)}
@@ -1165,16 +1167,9 @@ function renderNet(){
     const hint=(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')?'リリースすると、ここに通信のようすが表示されます。':sub;
     $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint}</p>${svg}`;return;
   }
-  const spd=[0.5,1,2].map(s=>`<option value="${s}"${s===evSpeed?' selected':''}>${s}x</option>`).join('');
-  const ctl=`<div class="pe-ctl">
-    <button class="btn mini" data-act="${evPlaying?'netPause':'netPlay'}" aria-label="${evPlaying?'一時停止':'再生'}">${evPlaying?PEI.pause:PEI.play}</button>
-    <button class="btn mini" data-act="netPrev" aria-label="前のパケット">${PEI.prev}</button>
-    <button class="btn mini" data-act="netStep" aria-label="次のパケット">${PEI.step}</button>
-    <button class="btn mini" data-act="netReset" aria-label="最初から">${PEI.reset}</button>
-    <select id="peSpeed" aria-label="再生速度">${spd}</select>
-    <span class="pe-count">${String(S.ev+1).padStart(2,'0')} / ${String(n).padStart(2,'0')}</span></div>`;
-  const cap=`<div class="pe-cap${cur.k==='bad'?' bad':cur.k==='ok'?' ok':''}">${esc(cur.cap||'')}<span class="pe-detail">（${nShort(cur.src)}→${nShort(cur.dst)}／${esc(cur.proto)}：${esc(cur.msg)}）</span></div>`;
-  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}${ctl}${cap}
+  const lines=flow.events.map((e,i)=>`<div class="${e.k==='bad'?'bad':e.k==='ok'?'ok':'info'}${i===S.ev?' cur':''}">› ${esc(e.cap||'')}<span class="logd">（${nShort(e.src)}→${nShort(e.dst)}／${esc(e.proto)}：${esc(e.msg)}）</span></div>`).join('');
+  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}
+    <div class="loghead"><span>通信ログ</span></div><div class="log" id="log" aria-live="polite">${lines}</div>
     ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify" style="margin-top:10px">防げたか確かめる</button>':''}`;
   if(evPlaying&&!RM){const m=$('pktMotion');if(m&&m.beginElement){try{m.beginElement();}catch(e){}}}
 }
