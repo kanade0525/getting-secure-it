@@ -1156,7 +1156,7 @@ function renderNet(){
   // パケット：再生中は区間を移動、停止中は到達点に静止
   let pktSvg='';
   if(cur){const tp=k=>{const p=PORT[k]||NODE.client;return[p[0],p[1]-18];};const a=tp(cur.src),b=tp(cur.dst);
-    if(evPlaying&&!RM){const dur=(Math.round(850/evSpeed)/1000).toFixed(3);pktSvg=`<g>${isoCube(0,0,col)}<animateMotion id="pktMotion" path="M ${a[0]} ${a[1]} L ${b[0]} ${b[1]}" dur="${dur}s" begin="indefinite" fill="freeze" calcMode="linear"/></g>`;}
+    if(evPlaying&&!RM){const dur=(Math.round(850/evSpeed)/1000).toFixed(3);pktSvg=`<g>${isoCube(a[0],a[1],col)}<animateMotion id="pktMotion" path="M 0 0 L ${(b[0]-a[0]).toFixed(1)} ${(b[1]-a[1]).toFixed(1)}" dur="${dur}s" begin="indefinite" fill="freeze" calcMode="linear"/></g>`;}
     else pktSvg=isoCube(b[0],b[1],col);}
   const svg=`<svg viewBox="0 0 360 240" class="netsvg" role="img" aria-label="アイソメトリックな通信図：お客さん・ルーター・インターネット・ショップ${showExpl?'・攻撃者':''}">
     ${floor}${cable}${atkLine}${ringsSvg}${nodesSvg}${labelsSvg}${pktSvg}
