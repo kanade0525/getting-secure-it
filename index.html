@@ -81,6 +81,23 @@ p{margin:0 0 10px}
 .pl{font-size:10px;fill:var(--ink);font-family:inherit}
 .warnT{fill:var(--danger)}
 .okT{fill:var(--safe)}
+.lbl.hi{font-weight:900;fill:var(--accent)}
+.pe-ctl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0 8px}
+.pe-ctl .btn.mini{padding:5px 9px;line-height:0}
+.pe-ico{width:16px;height:16px;display:block}
+.pe-ctl #peSpeed{padding:4px 6px;font-size:12px}
+.pe-count{font-family:ui-monospace,Menlo,monospace;font-size:13px;margin-left:auto;color:var(--muted)}
+.pe-cap{font-size:13px;min-height:1.3em;margin:0 0 8px;padding:7px 9px;background:var(--soft);border-left:4px solid var(--accent);border-radius:4px}
+.pe-wrap{overflow-x:auto;border:2px solid var(--line);border-radius:8px;margin-bottom:4px}
+.pe-tbl{width:100%;border-collapse:collapse;font-size:11px;font-family:ui-monospace,Menlo,monospace}
+.pe-tbl th,.pe-tbl td{padding:4px 6px;text-align:left;border-bottom:1px solid var(--soft);white-space:nowrap}
+.pe-tbl th{color:var(--muted);font-weight:700;position:sticky;top:0;background:var(--surface)}
+.pe-tbl td.pe-msg{white-space:normal;word-break:break-word;font-family:inherit;max-width:120px}
+.pe-tbl tbody tr{cursor:pointer}
+.pe-tbl tbody tr.bad td{color:var(--danger)}
+.pe-tbl tbody tr.ok td{color:var(--safe)}
+.pe-tbl tbody tr.cur td{background:var(--accent);color:var(--on-accent)}
+.pe-tbl tbody tr.cur.bad td,.pe-tbl tbody tr.cur.ok td{color:var(--on-accent)}
 .tapline{animation:tapflow .9s linear infinite}
 @keyframes tapflow{to{stroke-dashoffset:-16}}
 .atk-hit{animation:atkpulse .45s ease}
@@ -411,7 +428,7 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,ev:0,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
@@ -1035,50 +1052,120 @@ function atkKind(d){const a=d&&d.attacker;
   if(d&&d.fix&&d.fix.key==='apikey')return 'client';
   return 'server';}
 let NET={cx:116,ax:90,ay:150,tx:116,ty:68};
+let evPlaying=false,evSpeed=1,evTimer=null,evOnEnd=null;
+const PEI={
+  play:'<svg class="pe-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3l9 5-9 5z" fill="currentColor"/></svg>',
+  pause:'<svg class="pe-ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="3" width="3" height="10" fill="currentColor"/><rect x="9" y="3" width="3" height="10" fill="currentColor"/></svg>',
+  step:'<svg class="pe-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l7 5-7 5z" fill="currentColor"/><rect x="11" y="3" width="2" height="10" fill="currentColor"/></svg>',
+  prev:'<svg class="pe-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 3l-7 5 7 5z" fill="currentColor"/><rect x="3" y="3" width="2" height="10" fill="currentColor"/></svg>',
+  reset:'<svg class="pe-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.4a4.6 4.6 0 1 1-4.3 3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.1 2v3.2h3.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
+};
+function nodeXY(k){if(k==='client')return{x:42,y:68};if(k==='router')return{x:116,y:68};if(k==='dns'||k==='net')return{x:206,y:68};if(k==='server')return{x:304,y:68};if(k==='attacker')return{x:NET.cx,y:NET.ay+8};return{x:206,y:68};}
+function nShort(k){return{client:'お客さん',router:'ルータ',dns:'DNS',net:'ネット',server:'ショップ',attacker:'攻撃者'}[k]||k;}
+function buildFlow(d,c){
+  const kind=atkKind(d),https=!!c.https,dom=(S.domain||'pixeldo.shop');
+  const r=d.check?d.check(c):{ok:false};const ok=!!r.ok;const sc=https?'HTTPS':'HTTP';
+  const ev=[];let t=0;
+  const P=(src,dst,proto,msg,size,cap,k)=>{ev.push({no:ev.length+1,t:(t/1000).toFixed(3),src,dst,proto,msg,size,cap,k:k||'normal'});t+=11+((ev.length*7)%9);};
+  P('client','dns','DNS','A? '+dom,'64 B','ドメイン名を住所(IP)に変換する');
+  P('dns','client','DNS','A 203.0.113.24','80 B','IPアドレスが分かった');
+  P('client','server','TCP','SYN','60 B','サーバーに接続を開く (1/3)');
+  P('server','client','TCP','SYN, ACK','60 B','サーバーが応じる (2/3)');
+  P('client','server','TCP','ACK','52 B','接続が確立した (3/3)');
+  if(https){
+    P('client','server','TLS','ClientHello','200 B','暗号化の相談を始める');
+    P('server','client','TLS','ServerHello ＋ 証明書','1.4 KB','お店の証明書を受け取って確認する');
+    P('client','server','TLS','鍵交換','120 B','二人だけの共通鍵を作る');
+  }
+  P('client','server',sc,'GET /','340 B','ページを要求する');
+  P('server','client',sc,'200 OK','5 KB','ページが返ってくる');
+  if(kind==='wifi'){
+    if(https&&ok)P('client','attacker','TLS','（暗号化され読めない）','—','攻撃者が配線上で覗いても、暗号化で中身が読めない','ok');
+    else P('client','attacker','盗聴',(r.pkt||'ID・パスワード等が平文'),'—','攻撃者が配線上で通信を盗み見て、中身を読み取る','bad');
+  }else if(kind==='dns'){
+    if(ok)P('attacker','net','DNS','乗っ取り申請（拒否）','—','ロックで、ドメインの乗っ取り申請がはじかれる','ok');
+    else{P('attacker','net','DNS','A 198.51.100.9（攻撃者）','80 B','攻撃者がドメインの向き先を書き換える','bad');P('client','attacker',sc,'GET /','340 B','お客さんが気づかず偽サイトへ誘導される','bad');}
+  }else if(kind==='client'){
+    if(d.attacker==='csrf'){
+      P('attacker','client','HTTP','ワナのページ（隠しフォーム）','2 KB','ふつうに見えるページを開く','bad');
+      if(ok)P('client','server',sc,'POST /account/address（トークン無し）','200 B','お店が合言葉を確認し、はじく','ok');
+      else{P('client','server',sc,'POST /account/address','200 B','ブラウザがログイン付きで勝手な操作を送る','bad');P('server','client',sc,'200 OK','90 B','お店が本人の操作と信じて受理','bad');}
+    }else{
+      P('attacker','client','HTTP','ワナのコード／ページ','2 KB','攻撃者のコードがお客さんのブラウザで動く','bad');
+      if(ok)P('client','attacker','—','（送信されない／拒否）','—','対策により、勝手な持ち出しが止まる','ok');
+      else P('client','attacker',sc,(r.pkt||'Cookie・入力データ'),'200 B','お客さんのブラウザから攻撃者へデータが渡る','bad');
+    }
+  }else{
+    P('attacker','server',sc,(r.pkt||'細工した要求'),'300 B','攻撃者がサーバーへ細工した要求を送る','bad');
+    if(ok)P('server','attacker',sc,'403 拒否','90 B','本人確認・検証ではじかれる','ok');
+    else P('server','attacker',sc,'200 OK（本来出ない情報）','3 KB','サーバーが誤って応じてしまう','bad');
+  }
+  return {events:ev,ok};
+}
 function renderNet(){
-  const c=S.cfg,atk=attackerOf(),d=DAYS[S.day]||{};
-  const atkOn=busy||(S.last&&S.last.lines.length>0);
-  const defended=!!(S.last&&S.last.ok);
-  const kind=atkKind(d);
-  if(kind==='wifi')NET={cx:85,ax:58,ay:150,tx:85,ty:68,sx:62,sy:62,ex:288,ey:62};
-  else if(kind==='client')NET={cx:42,ax:16,ay:150,tx:70,ty:68,sx:62,sy:62,ex:288,ey:62};
-  else if(kind==='dns')NET={cx:206,ax:180,ay:152,tx:206,ty:84,sx:62,sy:62,ex:288,ey:62};
-  else NET={cx:206,ax:180,ay:152,tx:300,ty:80,sx:190,sy:150,ex:296,ey:74};
-  const lx1=NET.tx,ly1=NET.ty+16,lx2=NET.cx,ly2=NET.ay+4,mX=Math.round((lx1+lx2)/2),mY=Math.round((ly1+ly2)/2);
-  const atkG=atkOn?`
-    <line id="tap" class="${defended?'':'tapline'}" x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${defended?'var(--muted)':'var(--danger)'}" stroke-width="2" stroke-dasharray="4 4"/>
-    ${defended?`<g id="shield"><circle cx="${NET.tx}" cy="${NET.ty}" r="13" fill="var(--safe)" opacity="0.18"/>${sprG(IC.lock,Math.round(NET.tx-8),Math.round(NET.ty-7),2.1)}</g><text x="${mX}" y="${mY}" text-anchor="middle" class="lbl okT">防いだ</text>`:''}
-    <g id="steal" opacity="0"><rect width="12" height="9" fill="var(--danger)"/></g>
-    ${sprG(frameRows(atk.rows,tick),NET.ax,NET.ay,3.3,'atk')}
-    <text x="${NET.cx}" y="${NET.ay+68}" text-anchor="middle" class="lbl ${defended?'okT':'warnT'}">攻撃者</text>`:'';
-  const ariaAtk=kind==='wifi'?'。攻撃者がカフェのWi-Fiで通信を盗み見ている':kind==='client'?'。攻撃者がお客さんのブラウザや端末を狙っている':kind==='dns'?'。攻撃者がドメインを狙っている':'。攻撃者がショップのサーバーを狙っている';
-  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="お客さん、ルーター、インターネット、ショップのサーバーの通信図${atkOn?ariaAtk:''}">
-    ${kind==='wifi'?`<rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/>
-    <text x="12" y="20" class="lbl">カフェのWi-Fi</text>`:''}
+  const c=S.cfg,d=DAYS[S.day]||{},kind=atkKind(d);
+  if(kind==='wifi')NET={cx:85,ax:58,ay:150,tx:85,ty:68};
+  else if(kind==='client')NET={cx:42,ax:16,ay:150,tx:70,ty:68};
+  else if(kind==='dns')NET={cx:206,ax:180,ay:152,tx:206,ty:84};
+  else NET={cx:206,ax:180,ay:152,tx:300,ty:80};
+  const showExpl=(S.phase==='incident'||S.phase==='fix'||S.phase==='clear')&&!!d.check;
+  const sub=kind==='wifi'?'カフェのWi-Fiなどで、お客さんの通信を盗み見るようす':kind==='dns'?'ドメインの向き先を乗っ取り、お客さんを偽サイトへ誘導するようす':kind==='client'?'お客さんのブラウザ側で起き、攻撃者にデータが送られるようす':'攻撃者がお店のサーバーへ、細工した要求を送るようす';
+  let flow=null,cur=null,n=0;
+  if(showExpl){flow=buildFlow(d,c);n=flow.events.length;if(S.ev==null||S.ev<0)S.ev=0;if(S.ev>n-1)S.ev=n-1;cur=flow.events[S.ev];}
+  const atk=attackerOf();
+  const hl=k=>(cur&&(cur.src===k||cur.dst===k))?' hi':'';
+  const hlNet=(cur&&(cur.src==='net'||cur.dst==='net'||cur.src==='dns'||cur.dst==='dns'))?' hi':'';
+  let pktSvg='';
+  if(cur){const a=nodeXY(cur.src),b=nodeXY(cur.dst);const px=Math.round(a.x+(b.x-a.x)*0.62),py=Math.round(a.y+(b.y-a.y)*0.62);
+    const col=cur.k==='bad'?'var(--danger)':cur.k==='ok'?'var(--safe)':'var(--accent)';
+    pktSvg=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${col}" stroke-width="2" stroke-dasharray="3 3" opacity="0.65"/><g transform="translate(${px-8},${py-6})"><rect width="16" height="12" rx="2" fill="${col}"/></g>`;}
+  const atkG=showExpl?`${sprG(frameRows(atk.rows,tick),NET.ax,NET.ay,3.3,'atk')}<text x="${NET.cx}" y="${NET.ay+68}" text-anchor="middle" class="lbl warnT${hl('attacker')}">攻撃者</text>`:'';
+  const svg=`<svg viewBox="0 0 360 230" class="netsvg" role="img" aria-label="通信図：お客さん・ルーター・インターネット・ショップのサーバー${showExpl?'・攻撃者':''}">
+    ${kind==='wifi'?`<rect x="6" y="26" width="156" height="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 5"/><text x="12" y="20" class="lbl">カフェのWi-Fi</text>`:''}
     <line x1="70" y1="68" x2="100" y2="68" stroke="var(--line)" stroke-width="3"/>
     <line x1="134" y1="68" x2="178" y2="68" stroke="var(--line)" stroke-width="3"/>
     <line x1="234" y1="68" x2="288" y2="68" stroke="var(--line)" stroke-width="3"/>
+    ${pktSvg}
     ${sprG(CAST.tanaka.rows,16,34,3.3)}
-    <text x="42" y="104" text-anchor="middle" class="lbl">お客さん</text>
+    <text x="42" y="104" text-anchor="middle" class="lbl${hl('client')}">お客さん</text>
     ${sprG(IC.router,100,52,2)}
-    <text x="116" y="104" text-anchor="middle" class="lbl">ルーター</text>
+    <text x="116" y="104" text-anchor="middle" class="lbl${hl('router')}">ルーター</text>
     ${sprG(IC.cloud,179,46,3)}
-    <text x="206" y="104" text-anchor="middle" class="lbl">インターネット</text>
+    <text x="206" y="104" text-anchor="middle" class="lbl${hlNet}">インターネット</text>
     ${sprG(IC.srv,288,44,4)}
-    <text x="316" y="104" text-anchor="middle" class="lbl">ショップ</text>
+    <text x="316" y="104" text-anchor="middle" class="lbl${hl('server')}">ショップ</text>
     ${c.https?sprG(IC.lock,320,6,3):'<text x="316" y="24" text-anchor="middle" class="lbl warnT">HTTP</text>'}
     ${atkG}
-    <g id="pkt" transform="translate(62,62)" opacity="0"><rect width="16" height="12" fill="var(--danger)"/><text id="pktL" x="8" y="-5" text-anchor="middle" class="pl"></text></g>
   </svg>`;
-  const lines=S.last&&S.last.lines.length?S.last.lines.map(l=>`<div class="${l.k}">› ${esc(l.t)}</div>`).join(''):'<div class="info">まだ何も記録されていません</div>';
-  let hint='';
-  if(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')hint='リリースすると、ここに通信のようすが表示されます。';
-  else if(S.phase==='incident')hint='このタブを開くと、攻撃のようすが再生されます。';
-  const sub=kind==='wifi'?'カフェのWi-Fiなどで、お客さんの通信を盗み見るようす':kind==='dns'?'ドメインの向き先を乗っ取り、お客さんを偽サイトへ誘導するようす':kind==='client'?'お客さんのブラウザ側で起き、攻撃者にデータが送られるようす':'攻撃者がお店のサーバーへ、細工した要求を送るようす';
-  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint||sub}</p>${svg}
-    <div class="loghead">${atkOn?castSpr(atk.id||'tochou',2,'')+'<span>攻撃者の画面</span>':'<span>通信ログ</span>'}</div><div class="log" id="log" aria-live="polite">${lines}</div>
-    ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify">防げたか確かめる</button>':''}`;
+  if(!showExpl){
+    const hint=(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')?'リリースすると、ここに通信のようすが表示されます。':sub;
+    $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${hint}</p>${svg}`;return;
+  }
+  const spd=[0.5,1,2].map(s=>`<option value="${s}"${s===evSpeed?' selected':''}>${s}x</option>`).join('');
+  const ctl=`<div class="pe-ctl">
+    <button class="btn mini" data-act="${evPlaying?'netPause':'netPlay'}" aria-label="${evPlaying?'一時停止':'再生'}">${evPlaying?PEI.pause:PEI.play}</button>
+    <button class="btn mini" data-act="netPrev" aria-label="前のパケット">${PEI.prev}</button>
+    <button class="btn mini" data-act="netStep" aria-label="次のパケット">${PEI.step}</button>
+    <button class="btn mini" data-act="netReset" aria-label="最初から">${PEI.reset}</button>
+    <select id="peSpeed" aria-label="再生速度">${spd}</select>
+    <span class="pe-count">${String(S.ev+1).padStart(2,'0')} / ${String(n).padStart(2,'0')}</span></div>`;
+  const cap=`<div class="pe-cap">${esc(cur.cap||'')}</div>`;
+  const rows=flow.events.map((e,i)=>`<tr class="${i===S.ev?'cur ':''}${e.k==='bad'?'bad':e.k==='ok'?'ok':''}" data-act="netEv" data-i="${i}"><td>${String(e.no).padStart(2,'0')}</td><td>${e.t}</td><td>${nShort(e.src)}</td><td>${nShort(e.dst)}</td><td>${esc(e.proto)}</td><td class="pe-msg">${esc(e.msg)}</td><td>${esc(e.size)}</td></tr>`).join('');
+  const tbl=`<div class="pe-wrap"><table class="pe-tbl"><thead><tr><th>No</th><th>時刻</th><th>送信元</th><th>宛先</th><th>Proto</th><th>内容</th><th>サイズ</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}${ctl}${cap}${tbl}
+    ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify" style="margin-top:10px">防げたか確かめる</button>':''}`;
 }
+function netStop(){if(evTimer){clearTimeout(evTimer);evTimer=null;}evPlaying=false;busy=false;evOnEnd=null;}
+function netSchedule(){
+  const flow=buildFlow(DAYS[S.day]||{},S.cfg),n=flow.events.length;
+  if(S.ev>=n-1){const cb=evOnEnd;netStop();renderNet();if(cb)cb();return;}
+  evTimer=setTimeout(()=>{S.ev++;save();renderNet();netSchedule();},RM?0:Math.round(850/evSpeed));
+}
+function netPlay(onEnd){if(onEnd!==undefined)evOnEnd=onEnd;if(evPlaying)return;evPlaying=true;busy=true;renderNet();netSchedule();}
+function netStep(){netStop();const flow=buildFlow(DAYS[S.day]||{},S.cfg);if(S.ev<flow.events.length-1)S.ev++;save();renderNet();}
+function netPrev(){netStop();if(S.ev>0)S.ev--;save();renderNet();}
+function netReset(){netStop();S.ev=0;save();renderNet();}
+function netSetEv(i){netStop();S.ev=i;save();renderNet();}
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
 let tick=0;
 if(!RM)setInterval(()=>{tick^=1;const g=$('atk');if(g&&S.tab==='net')g.innerHTML=rects(frameRows(attackerOf().rows,tick));
@@ -1319,10 +1406,11 @@ function runAttack(r,done){
 
 /* ---------- 進行 ---------- */
 function setTab(t){
+  if(S.tab==='net'&&t!=='net')netStop();
   if(S.tab==='voice'&&t!=='voice')S.voices.forEach(v=>{v.unread=false;});
   if(t==='voice')hideToast();
   S.tab=t;S.badge[t]=false;save();render();
-  if(t==='net'&&S.phase==='incident'&&!busy)firstAttack();
+  if(t==='net'&&S.phase==='incident'&&!evPlaying)firstAttack();
 }
 function startIntro(){
   say([
@@ -1333,7 +1421,7 @@ function startIntro(){
   ],()=>{S.phase='setup';S.badge.console=true;save();render();});
 }
 function startDay(n){
-  S.day=n;S.phase='incident';S.last=null;
+  S.day=n;S.phase='incident';S.last=null;S.ev=0;netStop();
   const d=DAYS[n];
   S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewQ='';S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;
   if(d.svc)S.svc=d.svc;
@@ -1351,19 +1439,18 @@ function startDay(n){
   });
 }
 function firstAttack(){
-  const d=DAYS[S.day];
-  runAttack(d.check(S.cfg),()=>{
-    S.phase='fix';S.badge.console=true;save();render();say(d.alert);
-  });
+  const d=DAYS[S.day];S.ev=0;save();renderNet();
+  netPlay(()=>{S.phase='fix';S.badge.console=true;save();render();say(d.alert);});
 }
 function verify(){
-  if(busy||S.phase!=='fix')return;
-  S.tab='net';S.badge.net=false;render();
+  if(evPlaying||S.phase!=='fix')return;
+  S.tab='net';S.badge.net=false;
   const d=DAYS[S.day],r=d.check(S.cfg);
-  runAttack(r,()=>{
+  S.ev=0;save();renderNet();
+  netPlay(()=>{
     if(r.ok){S.phase='clear';save();render();say(d.success(S.cfg),showLearn);}
     else{
-      save();render();
+      render();
       (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*1200));
       say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
     }
@@ -1444,7 +1531,7 @@ function showEnd(){
 }
 function reset(){
   try{localStorage.removeItem(KEY);}catch(e){}
-  S=fresh();Q=[];showing=false;win.hidden=true;document.body.classList.remove('talking');busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.name='';nr.val='';
+  netStop();S=fresh();Q=[];showing=false;win.hidden=true;document.body.classList.remove('talking');busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.name='';nr.val='';
   hideToast();hideModal();render();startIntro();
 }
 
@@ -1460,6 +1547,12 @@ document.addEventListener('click',e=>{
   else if(a==='log'){showModal(chatLogSheet());}
   else if(a==='copy'){const s=b.dataset.copy||'',ok=copyText(s),o=b.textContent;b.textContent=ok?'コピーしました':'選んでコピーしてね';setTimeout(()=>{b.textContent=o;},1400);}
   else if(a==='verify'){verify();}
+  else if(a==='netPlay'){netPlay();}
+  else if(a==='netPause'){netStop();renderNet();}
+  else if(a==='netStep'){netStep();}
+  else if(a==='netPrev'){netPrev();}
+  else if(a==='netReset'){netReset();}
+  else if(a==='netEv'){netSetEv(Number(b.dataset.i));}
   else if(a==='nextDay'){hideModal();if(S.day<LAST_DAY)startDay(S.day+1);else showEnd();}
   else if(a==='ca'){c.ca=b.dataset.ca;save();render();if(c.ca!=='self')say([{who:SHIRO,t:CAS[c.ca].n+'の画面が、上のメニューに増えたよ。まずはこのサーバーで秘密鍵とCSRを作ろう'}]);}
   else if(a==='certRedo'||a==='reinstall'){
@@ -1574,6 +1667,7 @@ document.addEventListener('change',e=>{
   else if('whois' in t.dataset)S.whois=t.checked;
   else if(t.id==='nrType'){nr.type=t.value;return;}
   else if(t.id==='domTld')S.ds=Object.assign({},S.ds,{name:$('domName').value,tld:t.value,status:null});
+  else if(t.id==='peSpeed'){evSpeed=Number(t.value);renderNet();return;}
   else return;
   save();render();
 });
