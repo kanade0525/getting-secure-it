@@ -13,6 +13,7 @@
   --bg:#07080d;--surface:#14161f;--ink:#eef0ff;--muted:#a6abd4;--line:#8d93cc;--soft:#20233a;
   --gold:#f2c14e;--danger:#ff6d7a;--safe:#6fd38a;--accent:#97adff;--on-accent:#07080d;
   --win-bg:#000000;--win-ink:#ffffff;--win-line:#ffffff;
+  --iso-sky:#0c0f1d;--iso-floor:#232a40;--iso-floor2:#1c2234;--iso-grid:#3a4463;--iso-cable:#6872a6;
   color-scheme:dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -22,6 +23,7 @@
   --bg:#dfe6f1;--surface:#ffffff;--ink:#1d2042;--muted:#555b7e;--line:#1d2042;--soft:#cdd6e8;
   --gold:#a86e00;--danger:#c42f3c;--safe:#23793a;--accent:#3552c4;--on-accent:#ffffff;
   --win-bg:#10123a;--win-ink:#ffffff;--win-line:#ffffff;
+  --iso-sky:#eef2fb;--iso-floor:#dde4f2;--iso-floor2:#cfd8ec;--iso-grid:#b3bfdc;--iso-cable:#8d97c4;
   color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -76,8 +78,8 @@ p{margin:0 0 10px}
 .voice:last-child{border-bottom:0}
 .voice .vn{font-size:13px;color:var(--muted)}
 .tag{display:inline-block;font-size:12px;border:2px solid var(--muted);padding:0 6px;margin-left:6px}
-.netsvg{width:100%;height:auto;display:block;background:var(--surface);border:3px solid var(--line)}
-.lbl{font-size:12px;fill:var(--ink);font-family:inherit}
+.netsvg{width:100%;height:auto;display:block;background:var(--iso-sky);border:3px solid var(--line);border-radius:6px}
+.lbl{font-size:11px;fill:var(--ink);font-family:inherit;paint-order:stroke;stroke:var(--iso-sky);stroke-width:2.4px;stroke-linejoin:round}
 .pl{font-size:10px;fill:var(--ink);font-family:inherit}
 .warnT{fill:var(--danger)}
 .okT{fill:var(--safe)}
@@ -1116,32 +1118,48 @@ function renderNet(){
   let flow=null,cur=null,n=0;
   if(showExpl){flow=buildFlow(d,c);n=flow.events.length;if(S.ev==null||S.ev<0)S.ev=0;if(S.ev>n-1)S.ev=n-1;cur=flow.events[S.ev];}
   const atk=attackerOf();
-  const sc=1.4;
-  const LAY={client:{o:[24,150],p:[46,180],lbl:[46,198]},router:{o:[92,122],p:[116,156],lbl:[116,176]},net:{o:[158,92],p:[183,104],lbl:[185,126]},server:{o:[240,62],p:[264,112],lbl:[266,140]}};
-  const ATK=({server:{o:[248,148],p:[272,180],t:'server'},client:{o:[14,186],p:[40,214],t:'client'},wifi:{o:[64,160],p:[88,190],t:'router'},dns:{o:[150,150],p:[176,182],t:'net'}})[kind];
-  const PORT={client:LAY.client.p,router:LAY.router.p,net:LAY.net.p,dns:LAY.net.p,server:LAY.server.p,attacker:ATK?ATK.p:[180,190]};
+  const sc=1.3;
+  // --- 等角グリッド（床） ---
+  const HW=22,QH=11,B=[70,150];            // タイル半幅・1/4高さ・原点(a=0,b=0)
+  const P=(a,b)=>[B[0]+(a+b)*HW, B[1]+(a-b)*QH];
+  const NODE={client:P(0,0),router:P(0,2),net:P(0,4),server:P(0,6)};
+  const mid=(p,q)=>[(p[0]+q[0])/2,(p[1]+q[1])/2];
+  let atkPos=null,atkTarget=null;
+  if(kind==='server'){atkPos=P(1,7);atkTarget=NODE.server;}
+  else if(kind==='dns'){atkPos=P(-1,4);atkTarget=NODE.net;}
+  else if(kind==='client'){atkPos=P(-1,-1);atkTarget=NODE.client;}
+  else if(kind==='wifi'){atkPos=P(1,0);atkTarget=mid(NODE.client,NODE.router);}
+  const PORT={client:NODE.client,router:NODE.router,net:NODE.net,dns:NODE.net,server:NODE.server,attacker:atkPos||[0,0]};
   const col=cur?(cur.k==='bad'?['r','R']:cur.k==='ok'?['g','G']:['y','O']):['y','O'];
-  const isoCube=(x,y,ck)=>{const hw=7,hh=4,H=6,T=PAL[ck[0]],F=PAL[ck[1]];return `<polygon points="${x},${y-hh} ${x+hw},${y} ${x},${y+hh} ${x-hw},${y}" fill="${T}" stroke="#1a1426" stroke-width="0.6"/><polygon points="${x-hw},${y} ${x},${y+hh} ${x},${y+hh+H} ${x-hw},${y+H}" fill="${F}"/><polygon points="${x},${y+hh} ${x+hw},${y} ${x+hw},${y+H} ${x},${y+hh+H}" fill="${F}"/>`;};
-  const tile=p=>sprG(ISO.iso_tile,Math.round(p[0]-22),Math.round(p[1]-6),sc);
-  const node=(rows,L)=>sprG(rows,L.o[0],L.o[1],sc);
+  const isoCube=(x,y,ck)=>{const hw=8,hh=4,H=9,T=PAL[ck[0]],F=PAL[ck[1]];return `<polygon points="${x},${y-hh} ${x+hw},${y} ${x},${y+hh} ${x-hw},${y}" fill="${T}" stroke="#141022" stroke-width="0.7"/><polygon points="${x-hw},${y} ${x},${y+hh} ${x},${y+hh+H} ${x-hw},${y+H}" fill="${F}" stroke="#141022" stroke-width="0.3"/><polygon points="${x},${y+hh} ${x+hw},${y} ${x+hw},${y+H} ${x},${y+hh+H}" fill="${F}" stroke="#141022" stroke-width="0.3"/>`;};
+  // 床タイルを一枚ずつ菱形ポリゴンで敷く（a=通路の左右幅, b=奥行き）
+  const AR=[-1,0,1,2],BR=[-1,0,1,2,3,4,5,6,7];
+  let floor='';
+  for(const b of BR)for(const a of AR){const[cx,cy]=P(a,b);const f=((a+b)&1)?'var(--iso-floor2)':'var(--iso-floor)';
+    floor+=`<polygon points="${cx},${cy-QH} ${cx+HW},${cy} ${cx},${cy+QH} ${cx-HW},${cy}" fill="${f}" stroke="var(--iso-grid)" stroke-width="0.6"/>`;}
+  // 正規の通信経路（床の上の配線）
+  const route=[NODE.client,NODE.router,NODE.net,NODE.server];
+  let cable='';for(let i=0;i<route.length-1;i++)cable+=`<line x1="${route[i][0]}" y1="${route[i][1]}" x2="${route[i+1][0]}" y2="${route[i+1][1]}" stroke="var(--iso-cable)" stroke-width="3.5" stroke-linecap="round"/>`;
+  const atkLine=(showExpl&&atkPos)?`<line x1="${atkPos[0]}" y1="${atkPos[1]}" x2="${atkTarget[0]}" y2="${atkTarget[1]}" stroke="var(--danger)" stroke-width="2.5" stroke-dasharray="5 4" stroke-linecap="round" opacity="0.9"/>`:'';
   const isCur=k=>cur&&(cur.src===k||cur.dst===k);
-  const lbl=(k,L,txt)=>`<text x="${L.lbl[0]}" y="${L.lbl[1]}" text-anchor="middle" class="lbl${isCur(k)?' hi':''}">${txt}</text>`;
-  const ring=k=>{if(!isCur(k))return '';const p=PORT[k];return `<ellipse cx="${p[0]}" cy="${p[1]+2}" rx="24" ry="10" fill="var(--accent)" opacity="0.22"/>`;};
-  const path=`<polyline points="${LAY.client.p.join(',')} ${LAY.router.p.join(',')} ${LAY.net.p.join(',')} ${LAY.server.p.join(',')}" fill="none" stroke="var(--line)" stroke-width="3" opacity="0.85"/>`;
-  const atkLine=(showExpl&&ATK)?`<line x1="${ATK.p[0]}" y1="${ATK.p[1]}" x2="${PORT[ATK.t][0]}" y2="${PORT[ATK.t][1]}" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 4" opacity="0.75"/>`:'';
+  const ring=k=>{if(!isCur(k)||!PORT[k])return '';const[cx,cy]=PORT[k];return `<polygon points="${cx},${cy-QH-4} ${cx+HW+7},${cy} ${cx},${cy+QH+4} ${cx-HW-7},${cy}" fill="var(--accent)" opacity="0.28"/>`;};
+  let ringsSvg=['client','router','net','server','attacker'].map(ring).join('');
+  // ノードを格子に接地（底中央を格子点へ）
+  const dim=r=>[r[0].length,r.length];
+  const place=(r,lx,ly,lift,id)=>{const[w,h]=dim(r);return sprG(r,Math.round(lx-w*sc/2),Math.round(ly-h*sc+QH+2-(lift||0)),sc,id);};
+  const lbl=(k,txt,warn)=>{const p=PORT[k];if(!p)return '';return `<text x="${p[0]}" y="${p[1]+QH+13}" text-anchor="middle" class="lbl${warn?' warnT':''}${isCur(k)?' hi':''}">${txt}</text>`;};
+  const draws=[{k:'server',r:ISO.iso_server,lift:0,txt:'ショップ'},{k:'net',r:ISO.iso_cloud,lift:16,txt:'インターネット'},{k:'router',r:ISO.iso_router,lift:0,txt:'ルーター'},{k:'client',r:ISO.iso_client,lift:0,txt:'お客さん'}];
+  if(showExpl&&atkPos)draws.push({k:'attacker',r:ISO.iso_attacker,lift:0,txt:'攻撃者',warn:true});
+  draws.sort((m,n)=>PORT[m.k][1]-PORT[n.k][1]);
+  let nodesSvg='';for(const o of draws){const[cx,cy]=PORT[o.k];nodesSvg+=place(o.r,cx,cy,o.lift,o.k==='attacker'?'atk':null);if(o.k==='server'&&c.https)nodesSvg+=sprG(IC.lock,Math.round(cx+12),Math.round(cy-48),2);}
+  let labelsSvg=draws.map(o=>lbl(o.k,o.txt,o.warn)).join('');
+  // パケット：再生中は区間を移動、停止中は到達点に静止
   let pktSvg='';
-  if(cur){const a=PORT[cur.src]||LAY.client.p,b=PORT[cur.dst]||LAY.server.p;const px=Math.round(a[0]+(b[0]-a[0])*0.6),py=Math.round(a[1]+(b[1]-a[1])*0.6);pktSvg=isoCube(px,py-12,col);}
-  const atkNode=(showExpl&&ATK)?`${sprG(frameRows(atk.rows,tick),ATK.o[0],ATK.o[1],sc,'atk')}<text x="${ATK.p[0]}" y="${ATK.p[1]+16}" text-anchor="middle" class="lbl warnT${isCur('attacker')?' hi':''}">攻撃者</text>`:'';
+  if(cur){const tp=k=>{const p=PORT[k]||NODE.client;return[p[0],p[1]-18];};const a=tp(cur.src),b=tp(cur.dst);
+    if(evPlaying&&!RM){const dur=(Math.round(850/evSpeed)/1000).toFixed(3);pktSvg=`<g>${isoCube(0,0,col)}<animateMotion id="pktMotion" path="M ${a[0]} ${a[1]} L ${b[0]} ${b[1]}" dur="${dur}s" begin="indefinite" fill="freeze" calcMode="linear"/></g>`;}
+    else pktSvg=isoCube(b[0],b[1],col);}
   const svg=`<svg viewBox="0 0 360 240" class="netsvg" role="img" aria-label="アイソメトリックな通信図：お客さん・ルーター・インターネット・ショップ${showExpl?'・攻撃者':''}">
-    ${tile(LAY.client.p)}${tile(LAY.router.p)}${tile(LAY.server.p)}${showExpl&&ATK?tile(ATK.p):''}
-    ${path}${atkLine}
-    ${ring('client')}${ring('router')}${ring('net')}${ring('server')}${ring('attacker')}
-    ${node(ISO.iso_server,LAY.server)}${c.https?sprG(IC.lock,LAY.server.o[0]+42,LAY.server.o[1]-4,2.2):''}${lbl('server',LAY.server,'ショップ')}
-    ${node(ISO.iso_cloud,LAY.net)}${lbl('net',LAY.net,'インターネット')}
-    ${node(ISO.iso_router,LAY.router)}${lbl('router',LAY.router,'ルーター')}
-    ${atkNode}
-    ${node(ISO.iso_client,LAY.client)}${lbl('client',LAY.client,'お客さん')}
-    ${pktSvg}
+    ${floor}${cable}${atkLine}${ringsSvg}${nodesSvg}${labelsSvg}${pktSvg}
   </svg>`;
   if(!showExpl){
     const hint=(S.phase==='intro'||S.phase==='setup'||S.phase==='day0')?'リリースすると、ここに通信のようすが表示されます。':sub;
@@ -1158,6 +1176,7 @@ function renderNet(){
   const cap=`<div class="pe-cap${cur.k==='bad'?' bad':cur.k==='ok'?' ok':''}">${esc(cur.cap||'')}<span class="pe-detail">（${nShort(cur.src)}→${nShort(cur.dst)}／${esc(cur.proto)}：${esc(cur.msg)}）</span></div>`;
   $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}${ctl}${cap}
     ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify" style="margin-top:10px">防げたか確かめる</button>':''}`;
+  if(evPlaying&&!RM){const m=$('pktMotion');if(m&&m.beginElement){try{m.beginElement();}catch(e){}}}
 }
 function netStop(){if(evTimer){clearTimeout(evTimer);evTimer=null;}evPlaying=false;busy=false;evOnEnd=null;}
 function netSchedule(){
