@@ -35,8 +35,8 @@ const seed = (day, phase, c, last) => ({ day, phase, tab: 'shop', voices: [], ba
     page.on('console', m => { if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push(day + '日目: ' + m.text()); });
     const state = () => page.evaluate(() => JSON.parse(localStorage.getItem('gsi-demo-v2') || 'null'));
     const winUp = () => page.locator('#win').isVisible();
-    const settle = async ph => { for (let i = 0; i < 120; i++) { const s = await state(); if (s && s.phase === ph) return true; if (await winUp()) await page.click('#win'); await page.waitForTimeout(60); } return false; };
-    const clearWin = async () => { for (let i = 0; i < 40; i++) { if (!(await winUp())) return; await page.click('#win'); await page.waitForTimeout(40); } };
+    const settle = async ph => { for (let i = 0; i < 120; i++) { const s = await state(); if (s && s.phase === ph) return true; if (await winUp()) await page.click('#win', { position: { x: 24, y: 16 } }); await page.waitForTimeout(60); } return false; };
+    const clearWin = async () => { for (let i = 0; i < 40; i++) { if (!(await winUp())) return; await page.click('#win', { position: { x: 24, y: 16 } }); await page.waitForTimeout(40); } };
     const boot = async s => { await page.goto(URL); await page.evaluate(x => localStorage.setItem('gsi-demo-v2', x), JSON.stringify(s)); await page.reload(); await page.click('.menu button[data-t="cont"]'); await page.waitForTimeout(60); };
     const view = () => page.evaluate(() => {
       const vis = id => { const e = document.getElementById(id); return !!e && !e.classList.contains('off'); };
@@ -65,7 +65,7 @@ const seed = (day, phase, c, last) => ({ day, phase, tab: 'shop', voices: [], ba
     await clearWin();
     const before = await (async () => { await page.click('.tabs button[data-tab="net"]'); await page.waitForTimeout(60); return view(); })();
     check(day, '確かめる前は、前回の結果のまま（先に答えを見せない）', before.bad >= 1 && !before.shield);
-    await page.click('#verifyNet');
+    await page.click('#verifyBtn');
     check(day, '確かめるとクリアになる', await settle('clear'));
     await page.waitForTimeout(80);
     if (await page.locator('#modal').isVisible()) await page.evaluate(() => { document.getElementById('modal').hidden = true; });
