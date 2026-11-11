@@ -42,7 +42,7 @@ const log = (...a) => console.log('[smoke]', ...a);
   log('day1 header:', await header());
   await page.waitForTimeout(400); await dismiss();
   await tab('net'); await settle('fix');
-  log('day1 attacker label:', await page.locator('.loghead span').innerText(), '/ button:', await page.locator('#verifyNet').innerText());
+  log('day1 attacker label:', await page.locator('#netLog .lh.atk').innerText(), '/ button:', await page.locator('#verifyNet').innerText());
   await shot('03-net-day1');
   // day1 fix
   await tab('console'); await svc('cloud'); await shot('04-console-cloud-cert');
@@ -63,7 +63,7 @@ const log = (...a) => console.log('[smoke]', ...a);
   await toNext(); await settle('incident');
   log('day2 header:', await header());
   await tab('net'); await settle('fix');
-  log('day2 attacker label:', await page.locator('.loghead span').innerText());
+  log('day2 attacker label:', await page.locator('#netLog .lh.atk').innerText());
   await shot('07-net-day2');
   await tab('console'); await svc('cloud', 'net');
   await page.selectOption('#tlsMin', '1.2'); await page.uncheck('#ci-rc4'); await page.uncheck('#ci-des3');
@@ -71,7 +71,7 @@ const log = (...a) => console.log('[smoke]', ...a);
   await toNext(); await settle('incident');
   log('day3 header:', await header());
   await tab('net'); await settle('fix');
-  log('day3 attacker label:', await page.locator('.loghead span').innerText());
+  log('day3 attacker label:', await page.locator('#netLog .lh.atk').innerText());
   // trap: hsts 5分（わざと失敗させる）
   await tab('console'); await svc('cloud', 'net'); await page.click('#hsts');
   await page.click('#verifyBtn'); await page.waitForTimeout(1500); await clearWin();
