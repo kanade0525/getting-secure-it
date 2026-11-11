@@ -45,7 +45,7 @@ jobs:
       - name: Collect site files
         run: |
           mkdir -p _site
-          cp index.html sprites.js days.js days-ch2.js days-ch3.js days-ch4.js title.png _site/
+          cp index.html sprites.js days.js days-ch2.js days-ch3.js days-ch4.js title.png favicon.png apple-touch-icon.png _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

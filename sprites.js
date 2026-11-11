@@ -491,7 +491,7 @@ cast: {
   ]},
 },
 icons: {
-  shop: ["RRWWRRWWRRWWRRWW","RRWWRRWWRRWWRRWW",".TTTTTTTTTTTTTT.",".TbbbbTTTTbbbbT.",".TbbbbTHHTbbbbT.",".TbbbbTHHTbbbbT.",".TTTTTTHHTTTTTT.",".TTTTTTHHTTTTTT.","NNNNNNNNNNNNNNNN"],
+  shop: ["....KKKKKKKKKKK.","...KLLLLLLLLLLKK","..KLLLLLLLLLLKhK",".KKKKKKKKKKKKhhK",".KRRWWRRWWRRKhhK",".KRRWWRRWWRRKhyK",".KrrLLrrLLrrKhyK",".KTTTTTTTTTTKhhK",".KtWyyytHHHtKhhK",".KtyyyytHyHtKhhK",".KtynyytHyHtKhhK",".KtnnnytHHHtKhHK",".KttttttHHYtKHK.",".KTTTTTTHHHTKK..",".KKKKKKKKKKKK...","................"],
   lock: ["..YYYY..",".Y....Y.",".Y....Y.","YYYYYYYY","YYYKKYYY","YYYKKYYY","YYYYYYYY"],
   server: ["................","..KKKKKKKKKKKK..","..KLLLLLLLLLLK..","..KLgLLLLnnnLK..","..KLLLLLLLLLLK..","..KNNNNNNNNNNK..","..KLLLLLLLLLLK..","..KLgLLLLnnnLK..","..KLLLLLLLLLLK..","..KNNNNNNNNNNK..","..KLLLLLLLLLLK..","..KLgLLLLnnnLK..","..KLLLLLLLLLLK..","..KKKKKKKKKKKK..","...KK......KK...","................"],
   monitor: ["........","..KKKK..",".KWWWWK.","KWKbbKWK","KWKbbKWK",".KWWWWK.","..KKKK..","........"],
