@@ -12,7 +12,7 @@ const log = (...a) => console.log('[site]', ...a);
 
 const SAFE = { ca: 'free', keyMade: true, token: 'DONE-DONE', issued: true, installed: 'fullchain', autoRenew: true, cert: true, https: true, redirect: true, tlsMin: '1.2', ciph: { aes: true, chacha: true, des3: false, rc4: false }, hsts: true, hstsAge: '31536000', code: {}, tasks: {} };
 const cfg = o => { const c = JSON.parse(JSON.stringify(SAFE)); for (const k in o) { if (k === 'code') Object.assign(c.code, o[k]); else c[k] = o[k]; } return c; };
-const seed = (day, c, D) => ({ day, phase: 'fix', tab: D.tab || 'shop', voices: [], badge: {}, cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [{ type: 'A', name: '@', value: '203.0.113.24' }], svc: D.svc || 'hub', sub: D.sub || 'server', cfg: c });
+const seed = (day, c, D) => ({ rev: 2, day, phase: 'fix', tab: D.tab || 'shop', voices: [], badge: {}, cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [{ type: 'A', name: '@', value: '203.0.113.24' }], svc: D.svc || 'hub', sub: D.sub || 'server', cfg: c });
 // 日ごとの「対策の中身」と、デモの操作。bad は未対策のときに上書きする設定
 const DAYS = {
   4: { key: 'search', val: 'param', steps: [async p => { await p.fill('#shopQ', "' OR '1'='1"); await p.click('.store-search [data-act="doSearch"]'); }] },
@@ -24,17 +24,19 @@ const DAYS = {
   11: { key: 'coupon', val: 'atomic', steps: [async p => { await p.click('[data-act="couponFire"]'); }] },
   12: { key: 'signup', val: 'verify', steps: [async p => { await p.click('[data-act="botRun"]'); }] },
   13: { key: 'login', val: 'throttle', steps: [async p => { await p.click('[data-act="bruteTry"]'); }] },
-  16: { bad: { autoRenew: false }, steps: [] },
-  19: { key: 'thirdparty', val: 'lock', steps: [async p => { await p.click('[data-act="skimPay"]'); }] },
-  20: { key: 'apikey', val: 'server', steps: [async p => { await p.click('[data-act="keyView"]'); }] },
+  18: { bad: { autoRenew: false }, steps: [] },
+  21: { key: 'thirdparty', val: 'lock', steps: [async p => { await p.click('[data-act="skimPay"]'); }] },
+  22: { key: 'apikey', val: 'server', steps: [async p => { await p.click('[data-act="keyView"]'); }] },
   // 管理タブに出るデモ（サーバーやドメイン会社の画面）。tab/svc/sub は、開いておく画面
   5: { tab: 'console', svc: 'cloud', key: 'hash', val: 'bcrypt', steps: [async p => { await p.click('[data-act="storeRead"]'); }] },
   14: { tab: 'console', svc: 'cloud', key: 'dos', val: 'shield', steps: [async p => { await p.click('[data-act="dosFire"]'); }] },
   15: { tab: 'console', svc: 'cloud', key: 'defense', val: 'layered', steps: [async p => { await p.click('[data-act="wafEnc"]'); }, async p => { await p.click('[data-act="wafSend"]'); }] },
-  17: { tab: 'console', svc: 'cloud', key: 'os', val: 'update', steps: [async p => { const b = p.locator('[data-act="vulnScan"]'); if (await b.count()) await b.click(); }] },
-  18: { tab: 'console', svc: 'cloud', key: 'deps', val: 'update', steps: [async p => { const b = p.locator('[data-act="vulnScan"]'); if (await b.count()) await b.click(); }] },
-  21: { tab: 'console', svc: 'registrar', key: 'registrar', val: 'lock', steps: [async p => { await p.click('[data-act="domTry"]'); }] },
-  22: { tab: 'console', svc: 'cloud', key: 'egress', val: 'monitor', steps: [async p => { await p.click('[data-act="exfilRun"]'); }] },
+  16: { tab: 'console', svc: 'cloud', key: 'bots', val: 'challenge', steps: [async p => { await p.click('[data-act="scrapeRun"]'); }] },
+  17: { tab: 'console', svc: 'cloud', key: 'firewall', val: 'restrict', steps: [async p => { await p.click('[data-act="fwTry"]'); }] },
+  19: { tab: 'console', svc: 'cloud', key: 'os', val: 'update', steps: [async p => { const b = p.locator('[data-act="vulnScan"]'); if (await b.count()) await b.click(); }] },
+  20: { tab: 'console', svc: 'cloud', key: 'deps', val: 'update', steps: [async p => { const b = p.locator('[data-act="vulnScan"]'); if (await b.count()) await b.click(); }] },
+  23: { tab: 'console', svc: 'registrar', key: 'registrar', val: 'lock', steps: [async p => { await p.click('[data-act="domTry"]'); }] },
+  24: { tab: 'console', svc: 'cloud', key: 'egress', val: 'monitor', steps: [async p => { await p.click('[data-act="exfilRun"]'); }] },
 };
 
 (async () => {

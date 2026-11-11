@@ -1,15 +1,15 @@
-/* Getting Secure It — 第4章 運用編（16〜22日目）
+/* Getting Secure It — 第4章 運用編（16〜24日目）
    動かし続ける中で起きること。店長が監視で気づき、悪用される前に塞ぐ。
    形は第2・3章と同じ。voices は who:'監視', sys:true。
-   16日目の対策はピクセルクラウドの「自動更新」(cfg.autoRenew)。他はピクセルハブの1ボタン。*/
+   18日目の対策はピクセルクラウドの「自動更新」(cfg.autoRenew)。他はピクセルハブの1ボタン。*/
 (function(){
 const G=window.GSI_DAYS,SHIRO=G.SHIRO,YOU=G.YOU;
 const code=(c,k)=>(c.code||{})[k];
 
 const D={
-/* ===== 16日目 証明書の期限切れ ===== */
-16:{
-  title:'16日目　切れていた鍵',attacker:'sslstrip',svc:'cloud',sub:'cert',
+/* ===== 18日目 証明書の期限切れ ===== */
+18:{
+  title:'18日目　切れていた鍵',attacker:'sslstrip',svc:'cloud',sub:'cert',
   start:[{who:SHIRO,t:'第3章、よく守りきったね。ここからは「運用」——動かし続ける中で起きることだ'},{who:SHIRO,t:'まずは証明書。設置して終わり、じゃないんだ'}],
   voices:[
     {who:'監視',sys:true,t:'TLS証明書の有効期限：本日で切れました。訪問者に「安全でない接続」の警告が出ています。'},
@@ -22,7 +22,7 @@ const D={
     {who:SHIRO,t:'ピクセルクラウドの「証明書」で自動更新をオンにして、二度と切らさないようにしよう'}
   ],
   demo:{kind:'cert'},
-  success:()=>[{who:SHIRO,t:'自動更新で、期限切れはもう起きない。16日目クリア！'}],
+  success:()=>[{who:SHIRO,t:'自動更新で、期限切れはもう起きない。18日目クリア！'}],
   check(c){
     if(!c.autoRenew)return {ok:false,pkt:'期限切れ',why:'証明書が切れると警告が出て、慣れた利用者が警告を無視→盗み見の隙になる。自動更新で切らさないようにしよう',lines:[{k:'info',t:'期限切れの証明書のまま運用',m:'-'},{k:'bad',t:'全員に警告画面が出る',m:'s>c'},{k:'bad',t:'警告を無視した通信を盗み見られる'}]};
     return {ok:true,lines:[{k:'info',t:'期限が近づくと',m:'-'},{k:'ok',t:'自動で申請・設置をやり直す',m:'-'},{k:'ok',t:'証明書が切れない'}]};
@@ -31,9 +31,9 @@ const D={
     points:['TLS証明書には期限がある。切れると全利用者に警告が出る','警告が常態化すると、本当に危険な警告も無視されるようになる','自動更新（ACME等）で、期限前に更新・設置をやり直す','更新の失敗に気づけるよう、期限の監視・通知も置く'],
     real:'Let’s Encrypt などは短期証明書＋自動更新が前提です。期限監視と通知を併用します。'}
 },
-/* ===== 17日目 サーバーOS・ミドルウェアの未更新 ===== */
-17:{
-  title:'17日目　土台の穴',attacker:'keypick',svc:'cloud',sub:'server',
+/* ===== 19日目 サーバーOS・ミドルウェアの未更新 ===== */
+19:{
+  title:'19日目　土台の穴',attacker:'keypick',svc:'cloud',sub:'server',
   start:[{who:SHIRO,t:'次はサーバーそのもの。OSや土台のソフトが古いと、公開済みの穴から入られる'}],
   voices:[
     {who:'監視',sys:true,t:'脆弱性スキャン：OpenSSL 1.0.1（Heartbleed）/ OpenSSH が旧版 / 未適用のセキュリティ更新 12件。'},
@@ -49,7 +49,7 @@ const D={
     items:[{name:'OpenSSL 1.0.1',note:'Heartbleed（CVE-2014-0160）— 鍵やメモリを抜かれる'},{name:'OpenSSH 6.6',note:'既知の脆弱性あり'},{name:'Linux kernel（未適用パッチ12件）',note:'権限昇格の恐れ'}],
     after:[{name:'OpenSSL 3.x',note:'修正済み（最新）'},{name:'OpenSSH 9.x',note:'最新'},{name:'kernel（パッチ適用済み）',note:'既知の穴なし'}]},
   fix:{key:'os',value:'update',label:'OSとミドルウェアを更新する',done:'OS・OpenSSL・OpenSSHなどを更新し、未適用のセキュリティパッチを当てた。'},
-  success:()=>[{who:SHIRO,t:'土台の既知の穴はふさがった。17日目クリア！'}],
+  success:()=>[{who:SHIRO,t:'土台の既知の穴はふさがった。19日目クリア！'}],
   check(c){
     const f=code(c,'os');
     if(!f||f==='raw'||f==='firewall'){
@@ -62,9 +62,9 @@ const D={
     points:['OSや土台のソフト（OpenSSL/SSH/Webサーバー等）にも脆弱性が出る','公開済みの穴（CVE）は、バージョンを調べれば誰でも狙える','定期的な更新（パッチ適用）と、サポート終了(EOL)前の乗り換えが要る','何が動いているか（資産）を把握し、脆弱性を継続的に監視する'],
     real:'自動アップデート、脆弱性スキャナ、構成管理（SBOM）で、既知CVEへの対応を仕組み化します。'}
 },
-/* ===== 18日目 古いライブラリ ===== */
-18:{
-  title:'18日目　借りものの部品',attacker:'scanbot',svc:'cloud',sub:'server',
+/* ===== 20日目 古いライブラリ ===== */
+20:{
+  title:'20日目　借りものの部品',attacker:'scanbot',svc:'cloud',sub:'server',
   start:[{who:SHIRO,t:'土台の次は、アプリが使ってる「部品」——ライブラリだ。これも古いと穴になる'}],
   voices:[
     {who:'監視',sys:true,t:'依存パッケージ診断：画像処理ライブラリに深刻な脆弱性（遠隔コード実行）。ほか旧版多数。'},
@@ -80,7 +80,7 @@ const D={
     items:[{name:'image-lib 1.2.0',note:'遠隔コード実行（RCE）— 細工画像で任意コード'},{name:'web-util 0.9.3',note:'既知の脆弱性あり'},{name:'ほか旧版 7件',note:'要更新'}],
     after:[{name:'image-lib 3.4.1',note:'修正済み'},{name:'web-util 2.1.0',note:'最新'},{name:'依存すべて最新',note:'既知の穴なし'}]},
   fix:{key:'deps',value:'update',label:'ライブラリを安全な版に更新する',done:'脆弱性のある依存パッケージを、修正済みの版へ更新した。'},
-  success:()=>[{who:SHIRO,t:'借りものの部品も最新になった。18日目クリア！'}],
+  success:()=>[{who:SHIRO,t:'借りものの部品も最新になった。20日目クリア！'}],
   check(c){
     const f=code(c,'deps');
     if(!f||f==='raw'||f==='pin'){
@@ -93,9 +93,9 @@ const D={
     points:['自分で書いていなくても、使う部品の穴は自分のサービスの穴になる','依存は推移的に増える。直接使っていない孫依存にも穴が出る','脆弱性データベースと連動した自動検知・更新を仕組み化する','更新を怠って版を固定し続けると、穴も固定される'],
     real:'Dependabot や npm/pip audit などで検知と更新を自動化します。構成管理（SBOM）も有効です。'}
 },
-/* ===== 19日目 外部JSスキマー ===== */
-19:{
-  title:'19日目　見えない盗み見',attacker:'skimmer',svc:'hub',
+/* ===== 21日目 外部JSスキマー ===== */
+21:{
+  title:'21日目　見えない盗み見',attacker:'skimmer',svc:'hub',
   start:[{who:SHIRO,t:'決済ページを見てたら、見覚えのない外部スクリプトが読み込まれてる'}],
   voices:[
     {who:'監視',sys:true,t:'決済ページに、許可していない外部ドメインのJavaScriptが読み込まれています。'},
@@ -109,7 +109,7 @@ const D={
   ],
   demo:{kind:'skimmer'},
   fix:{key:'thirdparty',value:'lock',label:'外部スクリプトを固定・制限する',done:'読み込むスクリプトをSRIで固定し、CSPで読み込み元・送信先を制限した。'},
-  success:()=>[{who:SHIRO,t:'差し替えられた外部スクリプトは、もう動かない。19日目クリア！'}],
+  success:()=>[{who:SHIRO,t:'差し替えられた外部スクリプトは、もう動かない。21日目クリア！'}],
   check(c){
     const f=code(c,'thirdparty');
     if(!f||f==='raw'||f==='https'){
@@ -122,9 +122,9 @@ const D={
     points:['外部から読み込むスクリプトは、配信元が乗っ取られると被害が波及する','SRI（完全性チェック）で、中身が変わったスクリプトは実行しない','CSP（読み込み・送信先の制限）で被害範囲を絞る','決済など重要ページは、外部依存を最小にする'],
     real:'Magecart などのスキマー攻撃が実例です。SRI・CSP・自前ホスト・最小依存で守ります。'}
 },
-/* ===== 20日目 APIキー漏えい ===== */
-20:{
-  title:'20日目　鍵を置き忘れる',attacker:'keypick',svc:'hub',
+/* ===== 22日目 APIキー漏えい ===== */
+22:{
+  title:'22日目　鍵を置き忘れる',attacker:'keypick',svc:'hub',
   start:[{who:SHIRO,t:'外部サービスのAPIキー、どこに置いてる？ フロントのJSに埋め込んでないよね…？'}],
   voices:[
     {who:'監視',sys:true,t:'公開中のJavaScriptに、決済／メール送信のキーらしき文字列が含まれています。'},
@@ -138,7 +138,7 @@ const D={
   ],
   demo:{kind:'apikey'},
   fix:{key:'apikey',value:'server',label:'キーをサーバー側に隠し、失効・再発行する',done:'APIキーをサーバー側だけで扱うようにし、漏れたキーは失効して再発行した。'},
-  success:()=>[{who:SHIRO,t:'キーはもうブラウザに出てこない。漏れた分も失効済みだ。20日目クリア！'}],
+  success:()=>[{who:SHIRO,t:'キーはもうブラウザに出てこない。漏れた分も失効済みだ。22日目クリア！'}],
   check(c){
     const f=code(c,'apikey');
     if(!f||f==='raw'||f==='obf'){
@@ -151,9 +151,9 @@ const D={
     points:['ブラウザに届くコードに秘密を置かない。見える＝使える','秘密はサーバー側（環境変数・秘密管理）で扱い、必要な処理もサーバーで','漏れたキーはすぐ失効・再発行し、権限は最小にする','リポジトリへの誤コミットも定番の漏洩経路。走査で検知する'],
     real:'シークレットマネージャ、環境変数、キーのローテーション、リポジトリの秘密走査（secret scanning）を使います。'}
 },
-/* ===== 21日目 ドメイン乗っ取り ===== */
-21:{
-  title:'21日目　住所を奪われる',attacker:'domain',svc:'registrar',
+/* ===== 23日目 ドメイン乗っ取り ===== */
+23:{
+  title:'23日目　住所を奪われる',attacker:'domain',svc:'registrar',
   start:[{who:SHIRO,t:'ドメイン会社から「登録者情報の変更申請を受け付けた」って確認メールが来てる。覚えある？'},{who:YOU,t:'ないよ、そんなの…'}],
   voices:[
     {who:'監視',sys:true,t:'ドメインの移管／登録者変更の申請を検知。申請元はあなたではありません。'},
@@ -167,7 +167,7 @@ const D={
   ],
   demo:{kind:'domain'},
   fix:{key:'registrar',value:'lock',label:'移管ロックと2段階認証をかける',done:'ドメインの移管ロックを有効化し、ドメイン会社アカウントに2段階認証をかけた。'},
-  success:()=>[{who:SHIRO,t:'勝手な移管はもう通らない。住所（ドメイン）は守られた。21日目クリア！'}],
+  success:()=>[{who:SHIRO,t:'勝手な移管はもう通らない。住所（ドメイン）は守られた。23日目クリア！'}],
   check(c){
     const f=code(c,'registrar');
     if(!f||f==='raw'||f==='email'){
@@ -180,9 +180,9 @@ const D={
     points:['ドメインを奪われると、サイトもメールもまとめて乗っ取られる','WHOIS公開代行で、なりすましの手がかり（氏名・住所）を減らす','移管ロック（レジストラロック）で、勝手な移管を止める','ドメイン会社アカウントに2段階認証。更新忘れでの失効も防ぐ'],
     real:'レジストラロック、Registry Lock、2FA、WHOIS代行、連絡先の最新化で守ります。'}
 },
-/* ===== 22日目 静かな情報持ち出し ===== */
-22:{
-  title:'22日目　静かな持ち出し',attacker:'midnight',svc:'cloud',sub:'server',
+/* ===== 24日目 静かな情報持ち出し ===== */
+24:{
+  title:'24日目　静かな持ち出し',attacker:'midnight',svc:'cloud',sub:'server',
   start:[{who:SHIRO,t:'最後は、派手に壊すんじゃなく「気づかれずに盗む」タイプだ。いちばん厄介かもしれない'}],
   voices:[
     {who:'監視',sys:true,t:'深夜、少量ずつの外向き通信を検知。宛先は見覚えのない外部サーバーです。'},
@@ -196,7 +196,7 @@ const D={
   ],
   demo:{kind:'exfil'},
   fix:{key:'egress',value:'monitor',label:'外向き通信を監視・制限する',done:'外向き通信を既知の宛先だけに制限し、異常な送信を検知・遮断するようにした。'},
-  success:()=>[{who:SHIRO,t:'こっそりの持ち出しも、もう素通りできない。22日目クリア！'},{who:SHIRO,t:'……ここまで全部守りきったね。きみのお店は、もう「守り方を知っている店」だ'},{who:YOU,t:'ありがとう、シロ。お店、開けておいてよかった'}],
+  success:()=>[{who:SHIRO,t:'こっそりの持ち出しも、もう素通りできない。24日目クリア！'},{who:SHIRO,t:'……ここまで全部守りきったね。きみのお店は、もう「守り方を知っている店」だ'},{who:YOU,t:'ありがとう、シロ。お店、開けておいてよかった'}],
   check(c){
     const f=code(c,'egress');
     if(!f||f==='raw'||f==='inbound'){
@@ -211,5 +211,5 @@ const D={
 }
 };
 Object.assign(G.days,D);
-G.lastDay=22;
+G.lastDay=24;
 })();

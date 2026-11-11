@@ -306,5 +306,5 @@ const D={
 };
 Object.assign(G.days,D);
 G.lastDay=11;
-G.chapters=G.chapters||[{from:0,to:3,n:'第1章 通信編'},{from:4,to:11,n:'第2章 アプリ編'},{from:12,to:15,n:'第3章 防壁編'},{from:16,to:22,n:'第4章 運用編'}];
+G.chapters=G.chapters||[{from:0,to:3,n:'第1章 通信編'},{from:4,to:11,n:'第2章 アプリ編'},{from:12,to:17,n:'第3章 防壁編'},{from:18,to:24,n:'第4章 運用編'}];
 })();

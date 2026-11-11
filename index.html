@@ -565,11 +565,12 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,scrapeRes:null,seenScrape:false,fwRes:null,seenFw:false,rev:2,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
-try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg)S=Object.assign(fresh(),s);}catch(e){}
+// rev：ステージの並びの版。rev のない保存データは、防壁編に2日（16・17日目）を足す前のものなので、運用編の日付を2日うしろへずらす
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg){S=Object.assign(fresh(),s);if(!s.rev){if(S.day>=16)S.day+=2;(S.voices||[]).forEach(v=>{if(v.day>=16)v.day+=2;});S.last=null;}S.rev=2;}}catch(e){}
 delete S.trust;delete S.victims;
 if(S.cfg&&S.cfg.ca==='paid')S.cfg.ca='free';
 if(!S.sub)S.sub='server';
@@ -959,7 +960,7 @@ function idorBrowserHTML(){
       subHead('ご注文の確認','ようこそ、店長さん')+body),'あなたのパソコン')
     +notes(n)+`<div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
-function resetDemoRes(){S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;}
+function resetDemoRes(){S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;S.scrapeRes=null;S.fwRes=null;}
 /* --- 第3章 防壁編（サイトタブに出るもの）。ページの中＝お店のフォーム／外＝再現ボタンと結果 --- */
 function signupDemo(){
   const fixed=S.cfg.code.signup==='verify',r=S.botRes;
@@ -989,7 +990,7 @@ function dosDemoHTML(){
   if(demoOff())return '';
   const r=S.dosRes,load=r?r.load:8,col=load>90?'var(--danger)':load>60?'var(--gold)':'var(--safe)';
   if(r)cNotes.push(r.down?note('結果','<p><b>サーバーダウン</b></p><p>全部そのまま受けたので、量で押し切られた。本物のお客さんも開けない</p>','danger')
-    :note('結果',`<p><b>耐えた（負荷 ${load}%）</b></p><p>前段で吸収し、異常な集中をレート制限で遮断した</p>`,'ok'));
+    :note('結果',`<p><b>耐えた（負荷 ${load}%）</b></p><p>入口で吸収し、異常な集中をレート制限で遮断した</p>`,'ok'));
   cNotes.push(note('再現：大量アクセス','<p>お店のサーバーに、大量のアクセスを一気に送ります。</p><div class="acts"><button class="btn primary" data-act="dosFire">大量アクセスを送る</button></div>'));
   return `<div class="sec" data-focus><h3>サーバーの負荷</h3><div class="pg-b"><div class="mon-h">アクセス状況</div>
     <div class="meter"><div class="meter-bar" style="width:${Math.min(100,load)}%;background:${col}"></div></div>
@@ -1008,6 +1009,38 @@ function wafDemoHTML(){
   // 管理画面に出るのは、WAF の記録（通した／止めた）だけ
   return `<div class="sec" data-focus><h3>WAF（防壁）の記録</h3>
     ${r?`<div class="wafrow ${r.pass?'pass':'block'}"><b>${r.pass?'通過':'ブロック'}</b><code>/search?q=${r.pass?ENC:esc(PLAIN)}</code></div>`:'<p class="small muted" style="padding:8px 12px;margin:0">記録はまだありません</p>'}</div>`;
+}
+// 16日目：入口（CDN／WAF）の記録。同じ相手が、商品ページを番号順に全部取っていく（スクレイピング）
+function scrapeDemoHTML(){
+  if(demoOff())return '';
+  const fixed=S.cfg.code.bots==='challenge',r=S.scrapeRes;
+  if(r)cNotes.push(r.all?note('結果','<p><b>全1,240商品を取得できた</b></p><p>写真・説明・値段を丸ごと集められる。そっくりの偽サイトも作れてしまう</p>','danger')
+    :note('結果',`<p><b>${r.got}件で止まった</b></p><p>入口がボットと判定して、ブラウザかどうかの確認を出した。お客さんと検索エンジンは、そのまま通る</p>`,'ok'));
+  cNotes.push(note('再現：商品ページを集める','<p>プログラムで、商品ページを番号順に全部取りに行きます。</p><div class="acts"><button class="btn primary" data-act="scrapeRun">全商品のページを自動で集める</button></div>'));
+  const row=(n,ok)=>`<div class="wafrow ${ok?'pass':'block'}"><b>${ok?'通過':'ブロック'}</b><code>198.51.100.77　GET /items/${n}${ok?'':'　ボットと判定'}</code></div>`;
+  const gap=t=>`<p class="small muted" style="padding:2px 12px;margin:0">${t}</p>`;
+  let rows;
+  if(r)rows=r.all?row(1,1)+row(2,1)+row(3,1)+gap('…')+row('1,240',1):row(1,1)+gap(`…ほか ${r.got-1} 件`)+row(r.got+1,0)+row(r.got+2,0);
+  else rows=fixed?gap('記録はまだありません'):row(1,1)+row(2,1)+row(3,1)+gap('…ほか 1,237 件');
+  return `<div class="sec" data-focus><h3>入口（CDN）の記録</h3>${rows}</div>`;
+}
+// 17日目：サーバーのファイアウォールと、管理用ログイン（SSH）の記録。サーバーのIPアドレスへ直接来る相手は、入口を通らない
+function fwDemoHTML(){
+  if(demoOff())return '';
+  const fixed=S.cfg.code.firewall==='restrict',r=S.fwRes;
+  if(r)cNotes.push(r.open?note('結果','<p><b>1,000回試しても止まらない</b></p><p>サーバーに直接つなげるので、入口のレート制限もボットの判定もかからない。弱いパスワードなら、いつか当たる</p><p>お店のサイトも、サーバーのIPアドレスに直接つなげば、入口を通らずに取得できた</p>','danger')
+    :note('結果','<p><b>つながらない</b></p><p>ファイアウォールが、入口と管理者以外からの接続を捨てる。ログインを試すことすらできない</p>','ok'));
+  cNotes.push(note('再現：サーバーに直接つなぐ',`<p>入口（CDN）を通らず、サーバーのIPアドレス ${SERVER_IP} に直接つないで、管理用ログイン（SSH）を試し続けます。</p><div class="acts"><button class="btn primary" data-act="fwTry">直接つないで、ログインを1,000回試す</button></div>`));
+  // ターミナルに出るのは、本物のコマンドとその出力だけ（説明はシロのメモに書く）
+  const P='<span class="tp">app@shop-server-01:~$</span> ',fail=(u,ip)=>`Failed password for ${u} from ${ip}`;
+  const tail=fixed?['Accepted publickey for app from 192.0.2.10']
+    :r?[fail('app','203.0.113.99'),fail('app','203.0.113.99'),fail('app','203.0.113.99')]
+    :[fail('root','198.51.100.23'),fail('admin','192.0.2.61'),fail('ubuntu','198.51.100.140')];
+  const log=P+'tail -3 /var/log/auth.log\n'+tail.join('\n')+'\n'+P+'grep -c "Failed password" /var/log/auth.log\n'+(fixed?'0':r?'5812':'4812')+'\n'+P+'<span class="cur">▋</span>';
+  return `<div class="sec"${r?'':' data-focus'}><h3>ファイアウォール</h3>
+    <div class="row"><div class="desc">Web（80・443番）<span class="note">お店のサイト</span></div><span class="small ${fixed?'msg-ok':'muted'}">${fixed?'入口（CDN）からだけ':'すべての相手から'}</span></div>
+    <div class="row"><div class="desc">SSH（22番）<span class="note">サーバーの管理用ログイン。${fixed?'鍵で認証':'パスワードで認証'}</span></div><span class="small ${fixed?'msg-ok':'muted'}">${fixed?'管理者のIPアドレスからだけ':'すべての相手から'}</span></div>
+    <div class="term" style="margin-bottom:10px"${r?' data-focus':''}><div class="term-h">shop-server-01 — ターミナル（SSH）</div><pre class="term-b">${log}</pre></div></div>`;
 }
 /* --- 第4章 運用編（サイトタブに出るもの） --- */
 // 16日目：証明書が期限切れ。ブラウザはお店のページの代わりに、警告のページを出す
@@ -1129,12 +1162,22 @@ const SNIP={
     ['SESSION_MAX_AGE     = None      # 無期限','SESSION_MAX_AGE     = 1209600   # 2週間'],
     ['LOGOUT_ON_PW_CHANGE = False','LOGOUT_ON_PW_CHANGE = True      # 変更時は他端末もログアウト']]},
   dos:{file:'infra.yml',lines:[
-    ['edge:   none        # 直接受ける','edge:   cdn + waf   # 前段で吸収'],
+    ['edge:   none        # 直接受ける','edge:   cdn + waf   # 入口で吸収'],
     ['limit:  none','limit:  100/min     # レート制限'],
     ['app.handle(all)','app.handle(allowed)']]},
   defense:{file:'defense.py',lines:[
     ['defense = [waf]            # WAF頼み','defense = [waf, validate, least_priv]'],
     ['run(req.raw)              # そのまま','run(validate(req.input))  # 検証してから']]},
+  bots:{file:'infra.yml',lines:[
+    ['edge:   cdn + waf','edge:   cdn + waf'],
+    ['limit:  100/min','limit:  100/min'],
+    ['bots:   allow all     # 相手を見分けない','bots:   challenge     # ブラウザか確かめる'],
+    ['crawl:  unlimited','crawl:  30 pages/min  # 相手ごとの取得量'],
+    ['allow:  -','allow:  search bots   # 確認済みの検索エンジン']]},
+  firewall:{file:'firewall.yml',lines:[
+    ['web 80,443:  from any','web 80,443:  from edge      # 入口からだけ'],
+    ['ssh 22:      from any','ssh 22:      from admin_ip  # 管理者だけ'],
+    ['ssh auth:    password','ssh auth:    key            # 鍵で認証']]},
   os:{file:'server.sh',lines:[
     ['# OpenSSL 1.0.1 (Heartbleed)','apt update && apt upgrade -y'],
     ['# OpenSSH 6.6 / 未適用12件','# OS・ミドルウェアを更新'],
@@ -1530,7 +1573,9 @@ function cloudServerHTML(){
     else if(k==='dos')h+=dosDemoHTML();
     else if(k==='waf')h+=wafDemoHTML();
     else if(k==='vuln')h+=vulnDemoHTML();
-    else if(k==='exfil')h+=exfilDemoHTML();}
+    else if(k==='exfil')h+=exfilDemoHTML();
+    else if(k==='scrape')h+=scrapeDemoHTML();
+    else if(k==='fw')h+=fwDemoHTML();}
   if(live&&S.day<1)cNotes.push(note('解説','<p>今のところ、ここで設定することはありません。</p>'));
   return h;
 }
@@ -1675,7 +1720,7 @@ function startIntro(){
 function startDay(n){
   S.day=n;S.phase='incident';S.last=null;netStop();pcScroll={};
   const d=DAYS[n];
-  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewQ='';S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;
+  S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewQ='';S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;S.scrapeRes=null;S.seenScrape=false;S.fwRes=null;S.seenFw=false;
   if(d.svc)S.svc=d.svc;
   if(d.sub){if(!d.svc)S.svc='cloud';S.sub=d.sub;}
   save();render();
@@ -1883,7 +1928,7 @@ document.addEventListener('click',e=>{
     if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='botRun'){const fixed=S.cfg.code.signup==='verify';const list=[];for(let i=0;i<4;i++)list.push('user'+(1000+Math.floor(Math.random()*8999))+'@tempmail.example');S.botRes=fixed?{blocked:true,made:3,list:[]}:{blocked:false,made:100,list};save();render();if(!fixed&&!S.seenBot){S.seenBot=true;save();say([{who:SHIRO,t:'ほら、人間確認がないから、自動で何件でも作れちゃう'},{who:SHIRO,t:'管理タブのピクセルハブで、登録に人間確認とレート制限を入れよう'}]);}}
   else if(a==='bruteTry'){const fixed=S.cfg.code.login==='throttle';if(fixed){S.bruteN=5;S.bruteRes={locked:true,at:5};}else{S.bruteN=(S.bruteN||0)+100;S.bruteRes={locked:false};}save();render();if(!fixed&&!S.seenBrute){S.seenBrute=true;save();say([{who:SHIRO,t:'何回失敗しても止まらないから、試し放題だ'},{who:SHIRO,t:'ピクセルハブで、失敗が続いたらロックする仕組みを入れよう'}]);}}
-  else if(a==='dosFire'){const fixed=S.cfg.code.dos==='shield';S.dosRes=fixed?{load:55,down:false}:{load:100,down:true};save();render();pcFocus($('p-console'));if(!fixed&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'ほら、一気に送られるとサーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルハブで、前段で受け止めてレート制限する仕組みを入れよう'}]);}}
+  else if(a==='dosFire'){const fixed=S.cfg.code.dos==='shield';S.dosRes=fixed?{load:55,down:false}:{load:100,down:true};save();render();pcFocus($('p-console'));if(!fixed&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'ほら、一気に送られるとサーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルハブで、サーバーの手前に入口（CDN）を置いて、レート制限する仕組みを入れよう'}]);}}
   else if(a==='wafEnc'){S.wafEnc=!S.wafEnc;S.wafRes=null;save();render();}
   else if(a==='wafSend'){const enc=!!S.wafEnc,layered=S.cfg.code.defense==='layered';S.wafRes={pass:enc};save();render();pcFocus($('p-console'));if(enc&&!layered&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'エンコードを変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。ピクセルハブで、根本対策を重ねて多層防御にしよう'}]);}}
   else if(a==='vulnScan'){S.vulnShown=true;save();render();pcFocus($('p-console'));if(!S.seenVuln){S.seenVuln=true;save();say([{who:SHIRO,t:'ほら、使ってるソフトのバージョンが、そのまま公開済みの穴になってる'},{who:SHIRO,t:'ピクセルハブで更新しよう'}]);}}
@@ -1891,6 +1936,8 @@ document.addEventListener('click',e=>{
   else if(a==='keyView'){const safe=S.cfg.code.apikey==='server';S.keyRes={abused:!safe};save();render();if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'ピクセルハブで、キーをサーバー側に隠して失効・再発行しよう'}]);}}
   else if(a==='domTry'){const locked=S.cfg.code.registrar==='lock';S.domRes={hijacked:!locked};save();render();pcFocus($('p-console'));if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'ピクセルハブで、移管ロックと2段階認証をかけよう'}]);}}
   else if(a==='exfilRun'){const guarded=S.cfg.code.egress==='monitor';S.exfilRes={leaked:!guarded};save();render();pcFocus($('p-console'));if(!guarded&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルハブで、出口を制限して異常を検知しよう'}]);}}
+  else if(a==='scrapeRun'){const fixed=S.cfg.code.bots==='challenge';S.scrapeRes=fixed?{all:false,got:30}:{all:true};save();render();pcFocus($('p-console'));if(!fixed&&!S.seenScrape){S.seenScrape=true;save();say([{who:SHIRO,t:'ゆっくり順番に取るだけだから、量の制限にはかからない。全部持っていかれた'},{who:SHIRO,t:'ピクセルハブで、入口に「相手を見分ける」仕組みを足そう'}]);}}
+  else if(a==='fwTry'){const fixed=S.cfg.code.firewall==='restrict';S.fwRes={open:!fixed};save();render();pcFocus($('p-console'));if(!fixed&&!S.seenFw){S.seenFw=true;save();say([{who:SHIRO,t:'サーバーに直接つなげるから、入口の対策がぜんぶ素通りだ'},{who:SHIRO,t:'ピクセルハブで、ファイアウォールの設定を直そう'}]);}}
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;const go=()=>{c.code[key]=v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。右下の「防げたか確かめる」で試してみよう'}]);};if(RM)go();else playCodeAnim(key,go);}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}

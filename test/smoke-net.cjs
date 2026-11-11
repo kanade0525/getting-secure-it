@@ -1,4 +1,4 @@
-// 通信タブの通し確認（全22日）：攻撃の再生 → 対策 → 「防げたか確かめる」→ クリア。
+// 通信タブの通し確認（全24日）：攻撃の再生 → 対策 → 「防げたか確かめる」→ クリア。
 // 各日の対策画面は通らず、設定（cfg）を直接そろえて、通信タブの表示と進行だけを確かめる。
 //   node test/smoke-net.cjs <index.html のあるフォルダ または URL> <スクショの出力先> [日,日,...]
 const { chromium } = require('playwright');
@@ -17,11 +17,12 @@ const DAYS = {
   4: { key: 'search', val: 'param' }, 5: { key: 'hash', val: 'bcrypt' }, 6: { key: 'price', val: 'server' }, 7: { key: 'review', val: 'escape' },
   8: { key: 'session', val: 'secure' }, 9: { key: 'csrf', val: 'token' }, 10: { key: 'access', val: 'owner' }, 11: { key: 'coupon', val: 'atomic' },
   12: { key: 'signup', val: 'verify' }, 13: { key: 'login', val: 'throttle' }, 14: { key: 'dos', val: 'shield' }, 15: { key: 'defense', val: 'layered' },
-  16: { bad: { autoRenew: false }, fix: {} },
-  17: { key: 'os', val: 'update' }, 18: { key: 'deps', val: 'update' }, 19: { key: 'thirdparty', val: 'lock' }, 20: { key: 'apikey', val: 'server' },
-  21: { key: 'registrar', val: 'lock' }, 22: { key: 'egress', val: 'monitor' }
+  16: { key: 'bots', val: 'challenge' }, 17: { key: 'firewall', val: 'restrict' },
+  18: { bad: { autoRenew: false }, fix: {} },
+  19: { key: 'os', val: 'update' }, 20: { key: 'deps', val: 'update' }, 21: { key: 'thirdparty', val: 'lock' }, 22: { key: 'apikey', val: 'server' },
+  23: { key: 'registrar', val: 'lock' }, 24: { key: 'egress', val: 'monitor' }
 };
-const seed = (day, phase, c, last) => ({ day, phase, tab: 'shop', voices: [], badge: {}, cart: 0, chatLog: [], last: last || null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [{ type: 'A', name: '@', value: '203.0.113.24' }], svc: 'hub', sub: 'server', cfg: c });
+const seed = (day, phase, c, last) => ({ rev: 2, day, phase, tab: 'shop', voices: [], badge: {}, cart: 0, chatLog: [], last: last || null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [{ type: 'A', name: '@', value: '203.0.113.24' }], svc: 'hub', sub: 'server', cfg: c });
 
 (async () => {
   const browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });
