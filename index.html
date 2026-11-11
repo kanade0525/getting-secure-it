@@ -108,13 +108,17 @@ p{margin:0 0 10px}
 .atk-hit{animation:atkpulse .45s ease}
 @keyframes atkpulse{0%,100%{opacity:1}50%{opacity:.3}}
 @media (prefers-reduced-motion:reduce){.tapline{animation:none}.atk-hit{animation:none}}
-.log{background:var(--win-bg);color:#c9cff5;border:3px solid var(--line);padding:10px 12px;font-size:14px;line-height:1.7;min-height:150px;margin:12px 0;overflow-wrap:anywhere}
+.log{position:relative;background:var(--win-bg);color:#c9cff5;border:3px solid var(--line);padding:8px 10px;font-size:13px;line-height:1.45;max-height:clamp(150px,30vh,300px);overflow-y:auto;margin:6px 0 10px;overflow-wrap:anywhere}
+.log>div{padding:1px 4px;border-radius:4px}
 .log .bad{color:#ff8a94}
 .log .ok{color:#7ee59a}
 .log .info{color:#c9cff5}
-.log .cur{background:rgba(151,173,255,0.16);border-radius:4px;font-weight:700}
-.log .logd{color:var(--muted);font-size:12px;margin-left:4px}
-.loghead{font-size:13px;color:var(--muted);margin-top:14px;display:flex;align-items:center;gap:8px}
+.log .cur{background:rgba(151,173,255,0.16);font-weight:700}
+.log .logd{color:var(--muted);font-size:11px;margin-left:4px}
+.loghead{font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:8px}
+#p-net h2{margin:2px 0 2px;font-size:18px}
+#p-net>p.small{margin:0 0 6px}
+.netsvg{max-height:46vh}
 .sec{border:3px solid var(--line);background:var(--surface);margin:12px 0 14px}
 .sec h3{margin:0;padding:8px 12px;background:var(--soft);font-size:16px;border-bottom:3px solid var(--line)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border-bottom:2px dashed var(--soft);flex-wrap:wrap}
@@ -1160,7 +1164,7 @@ function renderNet(){
   if(cur){const tp=k=>{const p=PORT[k]||NODE.client;return[p[0],p[1]-18];};const a=tp(cur.src),b=tp(cur.dst);
     if(evPlaying&&!RM){const dur=(Math.round(850/evSpeed)/1000).toFixed(3);pktSvg=`<g>${isoCube(a[0],a[1],col)}<animateMotion id="pktMotion" path="M 0 0 L ${(b[0]-a[0]).toFixed(1)} ${(b[1]-a[1]).toFixed(1)}" dur="${dur}s" begin="indefinite" fill="freeze" calcMode="linear"/></g>`;}
     else pktSvg=isoCube(b[0],b[1],col);}
-  const svg=`<svg viewBox="0 0 360 240" class="netsvg" role="img" aria-label="アイソメトリックな通信図：お客さん・ルーター・インターネット・ショップ${showExpl?'・攻撃者':''}">
+  const svg=`<svg viewBox="0 24 360 190" class="netsvg" role="img" aria-label="アイソメトリックな通信図：お客さん・ルーター・インターネット・ショップ${showExpl?'・攻撃者':''}">
     ${floor}${cable}${atkLine}${ringsSvg}${nodesSvg}${labelsSvg}${pktSvg}
   </svg>`;
   if(!showExpl){
@@ -1171,6 +1175,7 @@ function renderNet(){
   $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}
     <div class="loghead"><span>通信ログ</span></div><div class="log" id="log" aria-live="polite">${lines}</div>
     ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify" style="margin-top:10px">防げたか確かめる</button>':''}`;
+  {const lg=$('log'),cl=lg&&lg.querySelector('.cur');if(cl)lg.scrollTop=cl.offsetTop-lg.clientHeight/2+cl.offsetHeight;}
   if(evPlaying&&!RM)requestAnimationFrame(()=>{const m=$('pktMotion');if(m&&m.beginElement){try{m.beginElement();}catch(e){}}});
 }
 function netStop(){if(evTimer){clearTimeout(evTimer);evTimer=null;}evPlaying=false;busy=false;evOnEnd=null;}
