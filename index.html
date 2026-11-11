@@ -1153,7 +1153,7 @@ function renderNet(){
   const draws=[{k:'server',r:ISO.iso_server,lift:0,txt:'ショップ'},{k:'net',r:ISO.iso_cloud,lift:16,txt:'インターネット'},{k:'router',r:ISO.iso_router,lift:0,txt:'ルーター'},{k:'client',r:ISO.iso_client,lift:0,txt:'お客さん'}];
   if(showExpl&&atkPos)draws.push({k:'attacker',r:ISO.iso_attacker,lift:0,txt:'攻撃者',warn:true});
   draws.sort((m,n)=>PORT[m.k][1]-PORT[n.k][1]);
-  let nodesSvg='';for(const o of draws){const[cx,cy]=PORT[o.k];nodesSvg+=place(o.r,cx,cy,o.lift,o.k==='attacker'?'atk':null);if(o.k==='server'&&c.https)nodesSvg+=sprG(IC.lock,Math.round(cx+12),Math.round(cy-48),2);}
+  let nodesSvg='';for(const o of draws){const[cx,cy]=PORT[o.k];nodesSvg+=place(o.r,cx,cy,o.lift,null);if(o.k==='server'&&c.https)nodesSvg+=sprG(IC.lock,Math.round(cx+12),Math.round(cy-48),2);}
   let labelsSvg=draws.map(o=>lbl(o.k,o.txt,o.warn)).join('');
   // パケット：再生中は区間を移動、停止中は到達点に静止
   let pktSvg='';
@@ -1171,13 +1171,15 @@ function renderNet(){
   $('p-net').innerHTML=`<h2>通信のようす</h2><p class="muted small">${sub}</p>${svg}
     <div class="loghead"><span>通信ログ</span></div><div class="log" id="log" aria-live="polite">${lines}</div>
     ${S.phase==='fix'?'<button class="btn primary" id="verifyNet" data-act="verify" style="margin-top:10px">防げたか確かめる</button>':''}`;
-  if(evPlaying&&!RM){const m=$('pktMotion');if(m&&m.beginElement){try{m.beginElement();}catch(e){}}}
+  if(evPlaying&&!RM)requestAnimationFrame(()=>{const m=$('pktMotion');if(m&&m.beginElement){try{m.beginElement();}catch(e){}}});
 }
 function netStop(){if(evTimer){clearTimeout(evTimer);evTimer=null;}evPlaying=false;busy=false;evOnEnd=null;}
 function netSchedule(){
   const flow=buildFlow(DAYS[S.day]||{},S.cfg),n=flow.events.length;
-  if(S.ev>=n-1){const cb=evOnEnd;netStop();renderNet();if(cb)cb();return;}
-  evTimer=setTimeout(()=>{S.ev++;save();renderNet();netSchedule();},RM?0:Math.round(850/evSpeed));
+  evTimer=setTimeout(()=>{
+    if(S.ev>=n-1){const cb=evOnEnd;netStop();renderNet();if(cb)cb();return;}
+    S.ev++;save();renderNet();netSchedule();
+  },RM?0:Math.round(850/evSpeed));
 }
 function netPlay(onEnd){if(onEnd!==undefined)evOnEnd=onEnd;if(evPlaying)return;evPlaying=true;busy=true;renderNet();netSchedule();}
 function netStep(){netStop();const flow=buildFlow(DAYS[S.day]||{},S.cfg);if(S.ev<flow.events.length-1)S.ev++;save();renderNet();}
@@ -1186,7 +1188,7 @@ function netReset(){netStop();S.ev=0;save();renderNet();}
 function netSetEv(i){netStop();S.ev=i;save();renderNet();}
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
 let tick=0;
-if(!RM)setInterval(()=>{tick^=1;const g=$('atk');if(g&&S.tab==='net')g.innerHTML=rects(frameRows(attackerOf().rows,tick));
+if(!RM)setInterval(()=>{tick^=1;
   if(!$('title').hidden)document.querySelectorAll('.ch[data-cast]').forEach(el=>{el.innerHTML=spr(frameRows(CAST[el.dataset.cast].rows,tick),+el.dataset.s,'');});},520);
 
 let caBusy=false,relBusy=false,clip='';
