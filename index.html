@@ -37,8 +37,20 @@ html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"DotGothic16","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;font-size:16px;line-height:1.7;-webkit-text-size-adjust:100%}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:3px solid var(--line);padding:8px 14px;display:flex;align-items:center;gap:10px}
-.chap{font-size:12px;color:var(--muted);line-height:1.3}
-.dayl{font-size:18px;line-height:1.4}
+.chap{display:block;font-size:12px;color:var(--muted);line-height:1.3}
+.dayl{display:block;font-size:18px;line-height:1.4}
+/* 画面上部の日付：押すと「日を選ぶ」が開く */
+.daybtn{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;text-align:left;cursor:pointer;min-width:0}
+/* 日を選ぶ：クリアした日は選べる。まだの日は鍵つきで選べない（デバッグ中はどの日も選べる） */
+.daylist{display:flex;flex-direction:column;gap:6px;max-height:56vh;overflow:auto;margin:0 0 4px;padding:2px}
+.dayrow{display:flex;align-items:center;gap:8px;width:100%;font:inherit;font-size:15px;line-height:1.4;text-align:left;color:var(--ink);background:var(--surface);border:2px solid var(--line);padding:6px 10px;min-height:44px;cursor:pointer}
+.dayrow .dn{flex:1 1 auto;min-width:0}
+.dayrow .ds{flex:none;font-size:12px;color:var(--muted)}
+.dayrow .ds.ok{color:var(--safe)}
+.dayrow .ds.now{color:var(--on-mark);background:var(--mark);border:2px solid var(--on-mark);padding:0 6px}
+.dayrow:disabled{cursor:not-allowed;color:var(--muted);border-style:dashed;border-color:var(--muted)}
+.dbgopt{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;cursor:pointer}
+.dbgopt input{width:20px;height:20px;accent-color:var(--accent)}
 .logbtn{margin-left:auto;font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:3px solid var(--line);padding:6px 10px;cursor:pointer;line-height:1.3;white-space:nowrap}
 .logbtn:focus-visible{outline:2px dashed var(--ink);outline-offset:2px}
 .loghd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
@@ -506,7 +518,7 @@ input[type="text"]:disabled{opacity:.6}
 <body>
 <header class="top">
   <span id="shopIcon"></span>
-  <div><div class="chap" id="chapLabel"></div><div class="dayl" id="dayLabel"></div></div>
+  <button class="daybtn" data-act="days" aria-label="日を選ぶ"><span class="chap" id="chapLabel"></span><span class="dayl" id="dayLabel"></span></button>
   <button id="logBtn" class="logbtn" data-act="log" aria-label="シロとの会話ログを開く">会話ログ</button>
 </header>
 
@@ -565,12 +577,14 @@ const KEY='gsi-demo-v2';
 const SERVER_IP='203.0.113.24';
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,scrapeRes:null,seenScrape:false,fwRes:null,seenFw:false,rev:2,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,scrapeRes:null,seenScrape:false,fwRes:null,seenFw:false,rev:2,cleared:-1,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
 let S=fresh();
 // rev：ステージの並びの版。rev のない保存データは、防壁編に2日（16・17日目）を足す前のものなので、運用編の日付を2日うしろへずらす
-try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg){S=Object.assign(fresh(),s);if(!s.rev){if(S.day>=16)S.day+=2;(S.voices||[]).forEach(v=>{if(v.day>=16)v.day+=2;});S.last=null;}S.rev=2;}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg){S=Object.assign(fresh(),s);if(!s.rev){if(S.day>=16)S.day+=2;(S.voices||[]).forEach(v=>{if(v.day>=16)v.day+=2;});S.last=null;}S.rev=2;
+  // cleared：クリアした一番先の日（-1＝まだ0日目も終えていない）。記録のない保存データは、いまの日から決める
+  if(s.cleared==null)S.cleared=S.phase==='end'?LAST_DAY:S.phase==='clear'?S.day:S.day>=1?S.day-1:S.phase==='day0'?0:-1;}}catch(e){}
 delete S.trust;delete S.victims;
 if(S.cfg&&S.cfg.ca==='paid')S.cfg.ca='free';
 if(!S.sub)S.sub='server';
@@ -1717,12 +1731,17 @@ function startIntro(){
     {who:SHIRO,t:'「管理」タブのドメイン会社「ネームヤ」で取ってみよう'}
   ],()=>{S.phase='setup';S.badge.console=true;save();render();});
 }
-function startDay(n){
+// その日の準備：前の日のデモの結果を消して、その日の管理画面を開いておく
+function initDay(n){
   S.day=n;S.phase='incident';S.last=null;netStop();pcScroll={};
   const d=DAYS[n];
   S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewQ='';S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;S.scrapeRes=null;S.seenScrape=false;S.fwRes=null;S.seenFw=false;
   if(d.svc)S.svc=d.svc;
   if(d.sub){if(!d.svc)S.svc='cloud';S.sub=d.sub;}
+}
+function startDay(n){
+  initDay(n);
+  const d=DAYS[n];
   save();render();
   say(d.start,()=>{
     const reports=d.voices.filter(v=>v.who!==SHIRO),advice=d.voices.filter(v=>v.who===SHIRO);
@@ -1745,13 +1764,61 @@ function verify(){
   S.tab='net';S.badge.net=false;save();render();   // 先に「通信」タブへ切り替えてから再生する
   const d=DAYS[S.day],r=d.check(S.cfg);
   netPlay(()=>{
-    if(r.ok){S.phase='clear';save();render();say(d.success(S.cfg),showLearn);}
+    if(r.ok){S.phase='clear';S.cleared=Math.max(S.cleared,S.day);save();render();say(d.success(S.cfg),showLearn);}
     else{
       render();
       (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*1200));
       say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
     }
   });
+}
+/* ---------- 日を選ぶ ----------
+   一般のプレイヤー：クリアした日と、その次の日（つづき）を選べる。
+   デバッグ（URLの末尾に #debug を付ける／タイトルの「全4章…」を5回押す）：どの日でも選べて、対策の場面から始めることもできる。 */
+let DEBUG=/(^|[#?&])debug\b/.test(location.hash+location.search),dbgFix=false,daysFromTitle=false;
+try{if(sessionStorage.getItem('gsi-debug')==='1')DEBUG=true;}catch(e){}
+const canPick=n=>DEBUG||n<=S.cleared+1;
+// n日目の朝の設定：前の日までの対策は入っていて、その日の対策はまだ入っていない
+function cfgForDay(n){
+  const c=fresh().cfg;
+  if(n>1)Object.assign(c,{ca:'free',keyMade:true,token:S.cfg.token||'DONE-DONE',issued:true,installed:'fullchain',cert:true,https:true,redirect:true});
+  if(n>2)Object.assign(c,{tlsMin:'1.2',ciph:{aes:true,chacha:true,des3:false,rc4:false}});
+  if(n>3)Object.assign(c,{hsts:true,hstsAge:'31536000'});
+  for(let i=4;i<n;i++){const d=DAYS[i];if(d.fix)c.code[d.fix.key]=d.fix.value;if(d.demo&&d.demo.kind==='cert')c.autoRenew=true;}
+  return c;
+}
+function daySheet(){
+  const name=n=>n===0?'0日目　オープン準備':DAYS[n].title;
+  let h=`<div class="loghd"><h2 id="mTitle" style="margin:0">日を選ぶ</h2><button class="btn" data-act="${daysFromTitle?'toTitle':'close'}">${daysFromTitle?'タイトルへ戻る':'閉じる'}</button></div>
+    <p class="muted small">${DEBUG?'<b>デバッグ中</b>：どの日でも選べます。':'クリアした日は、もう一度遊べます。'}選んだ日の朝から始まり、いまの日の途中経過は残りません。</p>`;
+  if(DEBUG)h+=`<label class="dbgopt"><input type="checkbox" id="dbgFix" ${dbgFix?'checked':''}><span>対策の場面から始める（朝の会話と、攻撃の再生を飛ばす）</span></label>`;
+  h+='<div class="daylist">';
+  GD.chapters.forEach(ch=>{
+    h+=`<p class="logsec" style="margin:8px 0 2px">${esc(ch.n)}</p>`;
+    for(let n=ch.from;n<=ch.to;n++){
+      const ok=canPick(n),now=n===S.day&&S.phase!=='end',st=now?'<span class="ds now">いまここ</span>':n<=S.cleared?'<span class="ds ok">クリア</span>':n===S.cleared+1?'<span class="ds">つづき</span>':ok?'<span class="ds"></span>':`<span class="ds">${spr(IC.lock,2,'まだ選べません')}</span>`;
+      h+=`<button class="dayrow" data-act="jump" data-day="${n}" ${ok?'':'disabled'}><span class="dn">${ok?esc(name(n)):n+'日目'}</span>${st}</button>`;
+    }
+  });
+  return h+'</div>';
+}
+function showDays(fromTitle){
+  daysFromTitle=!!fromTitle;
+  if(fromTitle){title.hidden=true;render();}
+  showModal(daySheet());
+  const cur=$('sheet').querySelector('.dayrow[data-day="'+S.day+'"]');if(cur){cur.scrollIntoView({block:'center'});cur.focus({preventScroll:true});}
+}
+// 選んだ日へ移る。toFix＝朝の会話と攻撃の再生を飛ばして、対策の場面から（デバッグ用）
+function jumpDay(n,toFix){
+  if(!canPick(n)||busy)return;
+  hideModal();hideToast();netStop();Q=[];showing=false;clearInterval(typing);typing=null;setTalking(false);resetDemoRes();
+  if(n===0){S=Object.assign(fresh(),{cleared:S.cleared,chatLog:S.chatLog||[]});save();render();startIntro();return;}
+  if(!S.domain){S.domain='pixeldo.shop';S.whois=true;}
+  if(!(S.dns||[]).some(r=>r.type==='A'&&r.value===SERVER_IP))S.dns=[{type:'A',name:'@',value:SERVER_IP}].concat(S.dns||[]);
+  S.dnsOk=true;S.relMsg='';S.cfg=cfgForDay(n);
+  S.voices=(S.voices||[]).filter(v=>v.day<n);S.badge={};S.tab='shop';
+  if(toFix){initDay(n);S.phase='fix';S.badge.console=true;save();render();}
+  else startDay(n);
 }
 function showModal(html){$('sheet').innerHTML=html;$('modal').hidden=false;const b=$('sheet').querySelector('button');if(b)b.focus();}
 function hideModal(){$('modal').hidden=true;}
@@ -1810,13 +1877,13 @@ function noticeSheet(id){
 }
 function showEnd(){
   S.phase='end';save();render();
-  showModal(`<h2 id="mTitle">全22日、守りきった！</h2>
+  showModal(`<h2 id="mTitle">全${LAST_DAY}日、守りきった！</h2>
     <p>よろず屋ピクセル堂は、通信・アプリの中身・防壁・運用のすべてを守れるお店になりました。</p>
     <p class="muted small">きみが身につけた守り</p>
     <ul>
       <li>通信編：HTTPS・暗号の更新・HSTS</li>
       <li>アプリ編：SQLi・パスワード保存・価格・XSS・セッション・CSRF・IDOR・クーポン</li>
-      <li>防壁編：bot登録・総当たり・DoS・WAFと多層防御</li>
+      <li>防壁編：bot登録・総当たり・DoS・WAFと多層防御・スクレイピング・ファイアウォール</li>
       <li>運用編：証明書更新・OS/ライブラリ更新・外部JS・APIキー・ドメイン・情報持ち出し</li>
     </ul>
     <p class="small">共通していたのは「悪用される前に気づいて、根本からふさぐ」こと。おつかれさま！</p>
@@ -1838,6 +1905,8 @@ document.addEventListener('click',e=>{
   else if(a==='reset'){reset();}
   else if(a==='close'){hideModal();}
   else if(a==='log'){showModal(chatLogSheet());}
+  else if(a==='days'){if(!busy)showDays(false);}
+  else if(a==='jump'){jumpDay(Number(b.dataset.day),DEBUG&&dbgFix);}
   else if(a==='copy'){const s=b.dataset.copy||'',ok=copyText(s),o=b.textContent;if(document.activeElement===document.body&&document.contains(b))b.focus({preventScroll:true});b.textContent=ok?'コピーしました':'選んでコピーしてね';setTimeout(()=>{b.textContent=o;},1400);}
   else if(a==='verify'){verify();}
   else if(a==='nextDay'){hideModal();if(S.day<LAST_DAY)startDay(S.day+1);else showEnd();}
@@ -1895,7 +1964,7 @@ document.addEventListener('click',e=>{
       relBusy=false;const as=aRec();
       if(!as.length)S.relMsg=esc(S.domain)+' に A レコード（名前 @）がありません。ドメインを取ったサービスのDNS設定で、このサーバーのIPアドレスを登録しましょう';
       else if(!as.some(r=>r.value===SERVER_IP))S.relMsg=esc(S.domain)+' は '+esc(as[0].value)+' を指していて、このサーバー（'+SERVER_IP+'）につながりません';
-      else{S.relMsg='';S.dnsOk=true;S.phase='day0';save();render();
+      else{S.relMsg='';S.dnsOk=true;S.phase='day0';S.cleared=Math.max(S.cleared,0);save();render();
         say([{who:SHIRO,t:'リリースおめでとう！ これで誰でも '+S.domain+' からお店に来られる'},{who:SHIRO,t:'……ところで、そのお店、ちゃんと守れてる？'},{who:YOU,t:'守る？ 何から？'},{who:SHIRO,t:'まあ、すぐにわかるよ'}],()=>startDay(1));return;}
       save();render();
     },RM?200:1400);
@@ -1968,6 +2037,7 @@ document.addEventListener('input',e=>{
   else if(e.target.id==='ordPrice')S.orderPrice=e.target.value===''?null:Number(e.target.value);
   else if(e.target.id==='ordQty')S.orderQty=e.target.value===''?null:Number(e.target.value);
 });
+document.addEventListener('change',e=>{if(e.target.id==='dbgFix')dbgFix=e.target.checked;});
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'||e.isComposing)return;
   if(e.target.id==='domName'){e.preventDefault();$('domSearch').click();}
@@ -1994,21 +2064,22 @@ const title=$('title');
 const TS={w:168,h:136,ox:84,oy:40};
 // 立ち位置は地面のマス目 [キャラ, x（右下へ）, y（左下へ）, 浮く高さ, クラス]。奥にいる人から順に並べる
 const TITLE_CAST=[['tochou',38.5,5,0,'lurk'],['tencho',17.5,24.5],['shiro',26,25,4],['suzuki',30,26.5],['tanaka',13,27.5]];
-let titleConfirm=false;
+let titleConfirm=false,verTaps=0,verAt=0;
 window.addEventListener('resize',()=>{if(!title.hidden)showTitle(titleConfirm);});
 function hasSave(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');return !!(s&&s.phase&&s.phase!=='intro');}catch(e){return false;}}
 function showTitle(confirm){
   titleConfirm=confirm;
   Q=[];showing=false;clearInterval(typing);typing=null;setTalking(false);hideModal();hideToast();
   const sv=hasSave();
-  const info=(S.phase==='end'?'第1章クリア':(S.day+'日目'))+(S.domain?'　'+esc(S.domain):'');
+  const info=(S.phase==='end'?'全'+LAST_DAY+'日クリア':(S.day+'日目'))+(S.domain?'　'+esc(S.domain):'');
+  const pick=DEBUG||(sv&&S.cleared>=0),PICK=pick?'<button role="menuitem" data-t="days">日を選ぶ</button>':'';
   let menu;
   if(confirm)menu=`<p class="tq">いまの記録は消えます。はじめからにしますか？</p><button role="menuitem" data-t="yes">はい</button><button role="menuitem" data-t="no">いいえ</button>`;
-  else if(sv)menu=`<button role="menuitem" data-t="cont">つづきから<span class="sinfo">${info}</span></button><button role="menuitem" data-t="new">はじめから</button>`;
-  else menu=`<button role="menuitem" data-t="new">はじめる</button>`;
+  else if(sv)menu=`<button role="menuitem" data-t="cont">つづきから<span class="sinfo">${info}</span></button>${PICK}<button role="menuitem" data-t="new">はじめから</button>`;
+  else menu=`<button role="menuitem" data-t="new">はじめる</button>${PICK}`;
   // 横長の画面は左右に並べ、縦長は上下に積む。絵はにじまない倍率（高精細の画面は0.5刻み）で、入る最大に
   const vw=window.innerWidth,vh=window.innerHeight,two=vw>=640&&vw/vh>=1.25;
-  const aw=two?Math.min(vw-32,1440)*.5-24:Math.min(vw-32,720),ah=two?vh-56:vh-(sv||confirm?380:336);
+  const aw=two?Math.min(vw-32,1440)*.5-24:Math.min(vw-32,720),ah=two?vh-56:vh-(sv||confirm?380:336)-(pick&&!confirm?46:0);
   const st=(window.devicePixelRatio||1)>=2?2:1;
   const sc=Math.max(1,Math.min(4,Math.floor(Math.min(aw/TS.w,ah/TS.h)*st)/st));
   const chars=TITLE_CAST.map(([id,gx,gy,z,cls])=>{
@@ -2019,13 +2090,18 @@ function showTitle(confirm){
     <div class="thead"><p class="tkick">よろず屋ピクセル堂を守れ</p><h1 class="tname">Getting<br>Secure It</h1></div>
     <div class="scene" style="width:${TS.w*sc}px;height:${TS.h*sc}px" aria-label="夜の街角に建つ、よろず屋ピクセル堂" role="img"><img src="title.png" alt="" width="${TS.w*sc}" height="${TS.h*sc}">${chars}</div>
     <div class="tmenu"><p class="tsub">ネットショップを、1日ずつ守っていこう</p>
-      <div class="menu" role="menu" aria-label="メニュー">${menu}</div><p class="tver">全4章・22日（通信／アプリ／防壁／運用）</p></div></div>`;
+      <div class="menu" role="menu" aria-label="メニュー">${menu}</div><p class="tver" data-t="ver">全4章・${LAST_DAY}日（通信／アプリ／防壁／運用）${DEBUG?'　デバッグ中':''}</p></div></div>`;
   title.hidden=false;
   const f=title.querySelector('button');if(f)f.focus();
 }
 title.addEventListener('click',e=>{
   const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;
   if(t==='cont'){title.hidden=true;render();resume();}
+  else if(t==='days')showDays(true);
+  else if(t==='ver'){   // 「全4章…」を続けて5回押すと、デバッグの入・切
+    const now=Date.now();verTaps=now-verAt<600?verTaps+1:1;verAt=now;
+    if(verTaps>=5){verTaps=0;DEBUG=!DEBUG;try{sessionStorage.setItem('gsi-debug',DEBUG?'1':'0');}catch(err){}showTitle(false);}
+  }
   else if(t==='new'){if(hasSave())showTitle(true);else{title.hidden=true;reset();}}
   else if(t==='yes'){title.hidden=true;reset();}
   else if(t==='no')showTitle(false);
