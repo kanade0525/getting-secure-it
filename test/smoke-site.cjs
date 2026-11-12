@@ -21,7 +21,8 @@ const DAYS = {
   8: { key: 'session', val: 'secure', steps: [async p => { await p.click('[data-act="sessOpen"]'); }, async p => { const b = p.locator('[data-act="sessShare"]'); if (await b.count()) await b.click(); }] },
   9: { key: 'csrf', val: 'token', steps: [async p => { await p.click('[data-act="csrfOpen"]'); }] },
   10: { key: 'access', val: 'owner', steps: [async p => { await p.click('[data-act="idorOpen"]'); }, async p => { const v = await p.inputValue('#idorUrl'); await p.fill('#idorUrl', v.replace(/id=\d+/, m => 'id=' + (Number(m.slice(3)) + 1))); await p.click('[data-act="idorGo"]'); }] },
-  11: { key: 'coupon', val: 'atomic', steps: [async p => { await p.click('[data-act="couponFire"]'); }] },
+  // 連打：すき間（約1.5秒）のうちに6回押し、結果が出るのを待つ
+  11: { key: 'coupon', val: 'atomic', steps: [async p => { for (let i = 0; i < 6; i++) await p.click('[data-act="couponApply"]'); await p.waitForTimeout(2400); }] },
   12: { key: 'signup', val: 'verify', steps: [async p => { await p.click('[data-act="botRun"]'); }] },
   13: { key: 'login', val: 'throttle', steps: [async p => { await p.click('[data-act="bruteTry"]'); }] },
   18: { bad: { autoRenew: false }, steps: [] },

@@ -207,7 +207,7 @@ body[data-tab="shop"].talking main,body[data-tab="console"].talking main{padding
 .shop-hd h2{margin:0;font-size:18px}
 .shop-hd p{margin:0}
 .shop-foot{margin:auto 0 0;display:flex;align-items:flex-end}
-body.fab-on:not(.talking) .shop-foot{min-height:62px}
+body.fab-on .shop-foot{min-height:62px}   /* 会話中も空けておく（会話の開閉でディスプレイの高さが変わらないように） */
 /* ディスプレイ本体：ふち・画面・あご（電源ランプ）・首・台 */
 .pc{position:relative;display:flex;flex-direction:column;margin:8px 0 12px;min-width:0}
 #p-shop>.pc.fill,#p-console>.pc.fill{flex:1 1 auto;min-height:min(calc(var(--shop-h) - 46px),max(360px,calc(var(--shop-h) * .58)))}
@@ -298,6 +298,20 @@ button.nav:hover{background:var(--br-strip)}
 .co-item .co-name{flex:1 1 auto}
 .co-item .co-price{color:var(--gold)}
 .co-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 12px}
+.cpn .co-item{padding:4px 12px}
+.cpn-row{display:flex;gap:8px;padding:0 12px}
+.cpn-row input{flex:1 1 0;min-width:0}
+.cpn-row .btn{flex:none;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.cpn-msg{margin:0;padding:3px 12px 0;font-size:12px;line-height:16px;color:var(--muted)}
+.cpn-msg.ok{color:var(--safe)}
+.cpn-msg.ng{color:var(--danger)}
+.cpn .co-row{padding:2px 12px}
+.cpn .co-row.cpn-total{border-top:2px solid var(--soft);margin-top:2px;padding:3px 12px 6px}
+.cpn-total b{font-size:16px}
+.cpn-total .neg{color:var(--danger)}
+.cpn-hit b{animation:cpnBump .18s steps(2,end)}
+@keyframes cpnBump{0%{transform:translateY(-4px)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.cpn-hit b{animation:none}}
 .pg{margin:12px;border:2px solid var(--line)}
 .pg-b{padding:10px 12px 12px}
 .pg .signup-form{margin:0}
@@ -916,18 +930,59 @@ function storeDemoHTML(){
   return `<div class="sec" data-focus><h3>会員データベース（DB）</h3>
     <div class="term" style="margin-bottom:10px"><div class="term-h">shop-server-01 — ターミナル（SSH）</div><div class="term-b">${body}</div></div></div>`;
 }
+/* 11日目：お会計の「適用」を自分で連打する。
+   未対策は、最初の1件を「使用済み」と記録し終えるまで（CPN_GAP）、あとから届いた分も「未使用」に見えて通る。
+   対策後は、確認と記録が1回なので、2件目からは必ず止まる。押すのをやめて少し（CPN_SETTLE）たったら結果を出す */
+const CPN_GAP=1500,CPN_SETTLE=600;let cpnT=0;
+const yenS=n=>n<0?'−'+yen(-n):yen(n);
+const cpnRes=()=>{const r=S.couponRes;return r&&typeof r.n==='number'?r:null;};
+function cpnOutHTML(){
+  const o=DAYS[S.day].demo,r=cpnRes(),n=r?r.n:0,total=o.product.price-o.coupon.off*n;
+  const msg=!r?`<p class="cpn-msg">${yen(o.coupon.off)}引き・お一人さま1回まで</p>`
+    :r.last==='used'?'<p class="cpn-msg ng">このクーポンは使用済みです</p>':'<p class="cpn-msg ok">クーポンを適用しました</p>';
+  return `${msg}
+    <div class="co-row${r&&r.last==='ok'?' cpn-hit':''}"><span>クーポン割引${n>1?' ×'+n:''}</span><b>${n?'−'+yen(o.coupon.off*n):'なし'}</b></div>
+    <div class="co-row cpn-total"><span>合計</span><b${total<0?' class="neg"':''}>${yenS(total)}</b></div>`;
+}
 function couponDemo(){
-  const o=DAYS[S.day].demo,r=S.couponRes;
-  const page=`<div class="checkout" data-focus><div class="co-head">お会計</div>
-    <div class="co-item">${spr(IC[o.product.icon],3,o.product.name)}<span class="co-name">${esc(o.product.name)}</span><span class="co-price">${yen(o.product.price)}</span></div>
-    <div class="co-row"><label for="cpn">クーポン</label><input type="text" id="cpn" value="${esc(o.coupon.code)}" readonly style="max-width:180px"></div>
-    <p class="small" style="padding:0 12px 12px;margin:2px 0 0;color:var(--muted)">「${esc(o.coupon.code)}」＝${yen(o.coupon.off)}引き・お一人さま1回まで</p></div>`;
-  const how=note('再現：同時注文',`<p>1回ずつなら2回目から「使用済み」で止まります。でも攻撃者が<b>ほぼ同時</b>に10件の注文を送ると、「確認」と「使用済みの記録」の<b>すき間</b>を突けます。その様子を再現します。</p>
-    <div class="acts"><button class="btn primary" data-act="couponFire">ほぼ同時に10件の注文を送って再現する</button></div>`);
+  const o=DAYS[S.day].demo,atomic=S.cfg.code.coupon==='atomic';
+  let r=cpnRes();if(r&&!r.done&&!cpnT)r.done=true;   // 途中で読み込み直したときは、そこで打ち切る
+  const page=`<div class="checkout cpn"><div class="co-head">お会計</div>
+    <div class="co-item" data-focus>${spr(IC[o.product.icon],2,o.product.name)}<span class="co-name">${esc(o.product.name)}</span><span class="co-price">${yen(o.product.price)}</span></div>
+    <div class="cpn-row"><input type="text" id="cpn" value="${esc(o.coupon.code)}" readonly aria-label="クーポンコード"><button class="btn primary" data-act="couponApply">適用</button></div>
+    <div id="cpnOut" aria-live="polite">${cpnOutHTML()}</div></div>`;
+  const again=cls=>`<div class="acts"><button class="btn${cls}" data-act="couponReset">クーポンを未使用に戻して、もう一度</button></div>`;
   let n='';
-  if(r)n=r.safe?note('結果',`<p>適用できたのは <b>1回だけ</b>。残り9回は「使用済み」で失敗しました。合計 ${yen(o.product.price-o.coupon.off)}。</p>`,'ok')
-    :note('結果',`<p><b>1回限りのはずが、${r.times}回も適用された</b></p><p>割引 −${yen(o.coupon.off*r.times)}、合計 ${yen(o.product.price-o.coupon.off*r.times)}（マイナス！）。その分お店が損をします。</p>`,'danger');
-  return {page,notes:n+how};
+  if(!r||!r.done)n=atomic?note('やってみよう：もう一度、連打する','<p>確認と記録を、1回の更新にまとめました。画面の「適用」を、さっきと同じように<b>すばやく何回も続けて</b>押して、確かめましょう。</p>')
+    :note('やってみよう：クーポンを連打する',`<p>このクーポンは<b>お一人さま1回まで</b>。1回ずつ押すなら、2回目は「使用済み」で止まります。</p><p>では、画面の「適用」を<b>すばやく何回も続けて</b>押してみましょう。</p>`);
+  else if(atomic)n=r.rej?note('結果',`<p>適用できたのは <b>1回だけ</b>。あとの${r.rej}回は、どれだけ速く押しても「使用済み」で止まりました。合計 ${yen(o.product.price-o.coupon.off)}。</p>${again(' mini')}`,'ok')
+    :note('結果','<p>1回、適用されました。続けて何回も押して、2回目から止まるか確かめましょう。</p>');
+  else if(r.n<2)n=note('結果',`<p>適用は1回だけ。${r.rej?`あとの${r.rej}回は「使用済み」で止まりました。`:''}ここまでは正しい動きです。</p><p>今度は、1回目を押してから<b>間をあけずに</b>続けて押してみましょう。</p>${again(' primary')}`);
+  else n=note('結果',`<p><b>1回限りのはずが、${r.n}回も適用された</b></p><p>割引 −${yen(o.coupon.off*r.n)}、合計 ${yenS(o.product.price-o.coupon.off*r.n)}${o.product.price<o.coupon.off*r.n?'（マイナス！）':''}。その分お店が損をします。${r.rej?`そのあとの${r.rej}回は「使用済み」で止まりました。`:''}</p>`,'danger')
+    +note('解説：なぜ連打だと通るのか',`<p>お店は「未使用か<b>確認</b>」してから「使用済みと<b>記録</b>」します。1回目の記録が終わる前に届いた分は、確認の時点ではまだ未使用に見えるので、そのまま通りました。</p>
+      <p class="muted">本物のすき間は、1000分の数秒という一瞬です。攻撃者は道具を使って、同時に何件も送ります。ここでは手で試せるよう、約${CPN_GAP/1000}秒に広げてあります。</p>${again(' mini')}`);
+  return {page,notes:n};
+}
+function cpnPaint(){const el=$('cpnOut');if(el)el.innerHTML=cpnOutHTML();else render();}
+function cpnFinish(r){
+  if(S.couponRes!==r)return;
+  cpnT=0;r.done=true;save();render();pcFocus($('p-shop'));
+  if(S.cfg.code.coupon!=='atomic'&&r.n>1&&!S.seenCoupon){S.seenCoupon=true;save();
+    const o=DAYS[S.day].demo;
+    say([{who:SHIRO,t:`いまの連打で、1回限りのクーポンが${r.n}回も効いた。合計は${yenS(o.product.price-o.coupon.off*r.n)}だよ`},{who:SHIRO,t:'1回目を「使用済み」と記録し終える前に、次が届いたからなんだ。「管理」タブのピクセルハブで直そう'}]);}
+}
+function couponApply(){
+  const atomic=S.cfg.code.coupon==='atomic';let r=cpnRes();
+  const settle=()=>{clearTimeout(cpnT);cpnT=setTimeout(()=>cpnFinish(r),CPN_SETTLE);};
+  if(!r){   // 1件目は通る
+    r=S.couponRes={n:1,rej:0,closed:atomic,done:false,last:'ok'};
+    if(atomic)settle();
+    else{clearTimeout(cpnT);cpnT=setTimeout(()=>{if(S.couponRes!==r)return;r.closed=true;settle();},CPN_GAP);}
+    cpnPaint();return;
+  }
+  if(!r.closed){r.n++;r.last='ok';cpnPaint();return;}   // 記録が終わる前：まだ「未使用」に見える
+  r.rej++;r.last='used';
+  if(r.done){save();render();}else{settle();cpnPaint();}
 }
 function csrfIntro(){
   const o=DAYS[S.day].demo;
@@ -1989,8 +2044,8 @@ document.addEventListener('click',e=>{
   else if(a==='sessShare'){S.sessionRes={open:true,shared:true};save();render();
     if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのピクセルハブで直そう'}]);}}
   else if(a==='sessBack'){S.sessionRes=null;save();render();}
-  else if(a==='couponFire'){const atomic=S.cfg.code.coupon==='atomic';S.couponRes=atomic?{safe:true}:{times:10};save();render();
-    if(!atomic&&!S.seenCoupon){S.seenCoupon=true;save();say([{who:SHIRO,t:'ほら、1回限りのはずのクーポンが、連打で何回も効いちゃった'},{who:SHIRO,t:'確認と記録が別々だから隙間ができる。「管理」タブのピクセルハブで直そう'}]);}}
+  else if(a==='couponApply'){couponApply();}
+  else if(a==='couponReset'){clearTimeout(cpnT);cpnT=0;S.couponRes=null;save();render();window.scrollTo(0,0);pcFocus($('p-shop'));}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();pcReveal('.devtools');}
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
@@ -2096,7 +2151,7 @@ function showTitle(confirm){
 }
 title.addEventListener('click',e=>{
   const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;
-  if(t==='cont'){title.hidden=true;render();resume();}
+  if(t==='cont'){title.hidden=true;pcScroll={};render();resume();}
   else if(t==='days')showDays(true);
   else if(t==='ver'){   // 「全4章…」を続けて5回押すと、デバッグの入・切
     const now=Date.now();verTaps=now-verAt<600?verTaps+1:1;verAt=now;
