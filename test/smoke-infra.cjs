@@ -1,7 +1,7 @@
 // 12〜24日目とエンディングの通し確認：朝の会話 →「お知らせ」→「通信」→ 管理画面で設定 →「防げたか確かめる」→ クリア、を画面の操作だけで進める。
 // 確かめること：
 //   ・シロの案内どおり「お知らせ」を読んでからでないと、「通信」で再生が始まらない
-//   ・対策は、それがある場所で入れる（ピクセルクラウドの入口・WAF・ファイアウォールなど／ネームヤ／ピクセルハブ）。案内の矢印が次の場所に立つ
+//   ・対策は、それがある場所で入れる（良えWSの入口・WAF・ファイアウォールなど／おなまえや.com／キットハブ）。案内の矢印が次の場所に立つ
 //   ・まちがえた設定（ゆるすぎ・きつすぎ）ではクリアにならず、トラップとして記録される
 //   ・24日目のあとにエンディングが流れ、エンドロール（攻撃者の役名・ゲスト出演・引っかかったトラップ）が出る
 //   node test/smoke-infra.cjs <index.html のあるフォルダ または URL> <スクショの出力先> [開始日（既定12）]
@@ -30,7 +30,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   const set = async (k, v) => { await clearWin(); await page.selectOption('#inf-' + k, v); await page.waitForTimeout(40); };
   const sw = k => click('#inf-' + k);
   const shot = n => page.screenshot({ path: path.join(OUT, 'infra-' + n + '.png') });
-  // 案内の矢印が立っている場所（ブラウザのタブ＝svc-◯◯／ピクセルクラウドの小メニュー＝sub-◯◯）
+  // 案内の矢印が立っている場所（ブラウザのタブ＝svc-◯◯／良えWSの小メニュー＝sub-◯◯）
   const arrow = () => page.evaluate(() => { const g = document.querySelector('#p-console .guide'); if (!g) return ''; const b = g.closest('.btab'), s = g.closest('.sub'); return b ? b.id : s ? 'sub-' + s.dataset.sub : '?'; });
   const wide = () => page.evaluate(() => document.documentElement.scrollWidth > innerWidth || [...document.querySelectorAll('main .panel:not([hidden]) .viewport')].some(e => e.scrollWidth > e.clientWidth + 1));
   const notes = () => page.evaluate(() => [...document.querySelectorAll('main .panel:not([hidden]) .hj-meta')].map(e => (e.className.replace('hj-meta', '').trim() || 'plain') + ':' + e.querySelector('.hj-meta-h').textContent));
@@ -89,32 +89,32 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       check('伏線：お店の棚に、売りものでない「古い銀の鈴」がある', await (async () => { await tab('shop'); const t = await page.locator('#p-shop .viewport').innerText(); return /古い銀の鈴/.test(t) && /非売品/.test(t) && (await page.locator('#p-shop .item').count()) === 6 && (await page.locator('#p-shop .item [data-act="cart"]').count()) === 5; })());
       await tab('shop'); await click('[data-act="botRun"]'); check('12日目：未対策は、自動登録が通る', (await notes()).some(n => /^danger/.test(n))); await clearWin();
       await tab('console');
-      check('12日目：ピクセルハブに、今日のプルリクエストはない', await (async () => { await svc('hub'); const t = await page.locator('#p-console .viewport').innerText(); return /未対応のプルリクエストはありません/.test(t) && (await page.locator('[data-act="applyFix"]').count()) === 0; })());
-      check('12日目：矢印はピクセルクラウドへ', (await arrow()) === 'svc-cloud');
+      check('12日目：キットハブに、今日のプルリクエストはない', await (async () => { await svc('hub'); const t = await page.locator('#p-console .viewport').innerText(); return /未対応のプルリクエストはありません/.test(t) && (await page.locator('[data-act="applyFix"]').count()) === 0; })());
+      check('12日目：矢印は良えWSへ', (await arrow()) === 'svc-cloud');
       await svc('cloud');
       check('12日目：小メニューに「入口（CDN）」と「WAF」がある', /入口（CDN）/.test(await page.locator('.subs').innerText()) && /WAF/.test(await page.locator('.subs').innerText()));
       await sub('waf'); check('12日目：入口を作る前は、WAFを設定できない', (await page.locator('#inf-wafSignup').count()) === 0 && (await arrow()) === 'sub-edge');
       await sub('edge'); await shot('12-edge-before');
       await click('[data-act="edgeMake"]'); await clearWin();
-      check('12日目：入口を作ったら、矢印はネームヤ（DNS）へ', (await arrow()) === 'svc-registrar');
+      check('12日目：入口を作ったら、矢印はおなまえや.com（DNS）へ', (await arrow()) === 'svc-registrar');
       await verify(12, false, null);   // 入口を作っただけ：まだ誰も通らない
       await tab('console'); await click('[data-act="copyEdge"]'); await shot('12-edge-made');
       await svc('registrar');
       // ドメインそのもの（@）に CNAME は置けない。ALIAS で、入口の名前へ向ける
       await page.selectOption('#nrType', 'CNAME'); await page.fill('#nrName', '@'); await click('[data-act="paste"]');
-      check('12日目：コピーした入口のアドレス（名前）を貼り付けられる', (await page.inputValue('#nrVal')) === 'pixeldo-edge.pixelcdn.example');
+      check('12日目：コピーした入口のアドレス（名前）を貼り付けられる', (await page.inputValue('#nrVal')) === 'pixeldo-edge.eews-cdn.example');
       await click('[data-act="dnsAdd"]');
       check('12日目：@ に CNAME を登録しようとすると、ALIAS を使うよう言われる', /CNAME を登録できません/.test(await page.locator('#p-console .viewport').innerText()) && !(await state()).dns.some(r => r.type === 'CNAME'));
       await page.selectOption('#nrType', 'ALIAS'); await page.fill('#nrName', '@'); await click('[data-act="paste"]');
       await click('[data-act="dnsAdd"]');
-      check('12日目：ALIAS レコードが登録される', (await state()).dns.some(r => r.type === 'ALIAS' && r.name === '@' && r.value === 'pixeldo-edge.pixelcdn.example'));
+      check('12日目：ALIAS レコードが登録される', (await state()).dns.some(r => r.type === 'ALIAS' && r.name === '@' && r.value === 'pixeldo-edge.eews-cdn.example'));
       const i = (await state()).dns.findIndex(r => r.type === 'A' && r.value === '203.0.113.24');
       await shot('12-dns');
       await click(`[data-act="dnsDel"][data-i="${i}"]`);
       check('12日目：向き先を変え終えると、シロがWAFへ案内する', (await winUp()) && /入口を通るようになった/.test(await page.locator('#winText').innerText()));
       await clearWin();
       check('12日目：入口へ向けたレコードは、もう消せない', (await page.locator('[data-act="dnsDel"]').count()) === (await state()).dns.length - 1);
-      check('12日目：矢印はピクセルクラウドへ戻る', (await arrow()) === 'svc-cloud');
+      check('12日目：矢印は良えWSへ戻る', (await arrow()) === 'svc-cloud');
       await svc('cloud'); check('12日目：矢印は小メニューの「WAF」', (await arrow()) === 'sub-waf');
       await sub('waf'); await shot('12-waf');
       await set('wafSignup', 'count'); await verify(12, false, 'WAFのルールを「数えるだけ」にした');
@@ -148,10 +148,10 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
     },
     15: async () => {
       await tab('console'); await click('[data-act="wafEnc"]'); await click('[data-act="wafSend"]'); check('15日目：エンコードした攻撃は、WAFを通過する', (await notes()).some(n => /^danger/.test(n))); await clearWin();
-      check('15日目：矢印はピクセルハブ（コードを直す日）', (await arrow()) === 'svc-hub');
+      check('15日目：矢印はキットハブ（コードを直す日）', (await arrow()) === 'svc-hub');
       await sw('wafDecode'); await verify(15, false, null);   // WAFを強めるだけでは足りない
       await tab('console'); await svc('hub'); await shot('15-hub');
-      check('15日目：ピクセルハブにプルリクエストと、これまでのコミット履歴がある', /プルリクエスト/.test(await page.locator('#p-console .viewport').innerText()) && /コミット履歴/.test(await page.locator('#p-console .viewport').innerText()) && /ほか \d+ 件/.test(await page.locator('#p-console .viewport').innerText()));
+      check('15日目：キットハブにプルリクエストと、これまでのコミット履歴がある', /プルリクエスト/.test(await page.locator('#p-console .viewport').innerText()) && /コミット履歴/.test(await page.locator('#p-console .viewport').innerText()) && /ほか \d+ 件/.test(await page.locator('#p-console .viewport').innerText()));
       await click('[data-act="applyFix"]'); await clearWin();
       await verify(15, true);
     },
@@ -174,7 +174,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
     },
     18: async () => {
       await tab('shop'); await click('[data-act="goCert"]');
-      check('18日目：メモのボタンは、ピクセルクラウドの「証明書」を開くだけ', (await state()).tab === 'console' && (await state()).sub === 'cert' && !(await state()).cfg.autoRenew);
+      check('18日目：メモのボタンは、良えWSの「証明書」を開くだけ', (await state()).tab === 'console' && (await state()).sub === 'cert' && !(await state()).cfg.autoRenew);
       await click('#autorenew'); await clearWin();
       await verify(18, true);
     },
@@ -187,7 +187,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       await verify(19, true);
     },
     20: async () => {
-      await tab('console'); check('20日目：ピクセルハブにセキュリティ警告が出ている', (await state()).svc === 'hub' && /セキュリティ警告/.test(await page.locator('#p-console .viewport').innerText()) && (await notes()).some(n => /^danger/.test(n)));
+      await tab('console'); check('20日目：キットハブにセキュリティ警告が出ている', (await state()).svc === 'hub' && /セキュリティ警告/.test(await page.locator('#p-console .viewport').innerText()) && (await notes()).some(n => /^danger/.test(n)));
       await shot('20-hub'); await click('[data-act="applyFix"]'); await clearWin();
       await verify(20, true);
     },
@@ -199,10 +199,10 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       await verify(21, true);
     },
     22: async () => {
-      await tab('console'); check('22日目：矢印はピクセルハブ（今いる場所なので立たない）', (await state()).svc === 'hub' && (await arrow()) === '');
+      await tab('console'); check('22日目：矢印はキットハブ（今いる場所なので立たない）', (await state()).svc === 'hub' && (await arrow()) === '');
       await click('[data-act="applyFix"]'); await clearWin();
       check('22日目：マージしたあと、シロがシークレットへ案内する', /シークレット/.test((await state()).chatLog.slice(-1)[0].t));
-      check('22日目：矢印はピクセルクラウドへ', (await arrow()) === 'svc-cloud');
+      check('22日目：矢印は良えWSへ', (await arrow()) === 'svc-cloud');
       await verify(22, false, '漏れたキーを、使えるまま残した');
       await tab('console'); await svc('cloud'); check('22日目：矢印は小メニューの「シークレット」', (await arrow()) === 'sub-secret');
       await sub('secret'); await shot('22-secret');
@@ -253,7 +253,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   check('エンドロール：会話のあとに始まる', (await page.locator('#roll').isVisible()) && !(await page.locator('#ending').isVisible()));
   const roll = await page.locator('#roll').innerText();
   const s = await state();
-  check('エンドロール：主演・案内役・お客さん・協力・スペシャルサンクス・制作', ['主演', '案内役', 'お客さん', '協力', 'スペシャルサンクス', 'ピクセルクラウド', '毎日苦情をくれたお客さんたち', '制作', 'kanade0525'].every(t => roll.includes(t)));
+  check('エンドロール：主演・案内役・お客さん・協力・スペシャルサンクス・制作', ['主演', '案内役', 'お客さん', '協力', 'スペシャルサンクス', '良えWS', '毎日苦情をくれたお客さんたち', '制作', 'kanade0525'].every(t => roll.includes(t)));
   check('エンドロール：攻撃者の役名が、登場順に明かされる', ['カフェの盗聴者', 'ダウングレード職人', 'クーポン連打部隊', 'WAFすり抜け師', '深夜のデータ持ち出し屋'].every(t => roll.includes(t)) && roll.indexOf('カフェの盗聴者') < roll.indexOf('深夜のデータ持ち出し屋') && (await page.locator('#roll .rsp').count()) >= 20);
   check('エンドロール：ゲスト出演（困らせてしまったお客さん）が出る', FROM > 12 || (roll.includes('ゲスト出演') && roll.includes('会員になれなかった やまだ')));
   check('エンドロール：引っかかったトラップの一覧（' + s.traps.length + '件）', (await page.locator('#roll .rtraps li').count()) === s.traps.length && (FROM > 12 || s.traps.length >= 5));

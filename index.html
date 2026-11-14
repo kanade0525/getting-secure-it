@@ -263,11 +263,12 @@ button.nav:hover{background:var(--br-strip)}
 .viewport{--bg:#f3ead6;--surface:#fffaf0;--ink:#2b2236;--muted:#6d6478;--line:#2b2236;--soft:#efe3c9;--gold:#9a6500;--danger:#c42f3c;--safe:#1f7a3a;--accent:#c2373f;--on-accent:#fff8ec;
   color-scheme:light;position:relative;flex:none;min-height:170px;max-height:min(62vh,540px);overflow-y:auto;overscroll-behavior:auto;background:var(--surface);color:var(--ink);scrollbar-width:thin;scrollbar-color:#b3a68a transparent}
 .pc.fill .viewport{flex:1 1 0;min-height:0;max-height:none}
-/* 管理画面は、会社ごとに配色が違う（ネームヤ＝金／ピクセルクラウド＝青／認証局＝緑／ピクセルハブ＝暗い紫） */
-.viewport[data-site="registrar"]{--bg:#f6f0df;--surface:#fffdf6;--ink:#2b2420;--muted:#6f665c;--line:#2b2420;--soft:#f1e5c4;--accent:#9b6410;--on-accent:#fffdf6;--site:#e8b33a;--on-site:#2b2420}
-.viewport[data-site="cloud"]{--bg:#e9eef9;--surface:#fbfcff;--ink:#1c2340;--muted:#5b6485;--line:#1c2340;--soft:#dbe3f4;--accent:#2f4a9e;--on-accent:#ffffff;--site:#2f4a9e;--on-site:#ffffff}
-.viewport[data-site="ca"]{--bg:#e8f2ea;--surface:#fbfffb;--ink:#1d2b22;--muted:#58695d;--line:#1d2b22;--soft:#d8e9da;--accent:#2f7d4a;--on-accent:#ffffff;--site:#2f7d4a;--on-site:#ffffff}
-.viewport[data-site="hub"]{--bg:#11131b;--surface:#1a1d29;--ink:#e7e9f5;--muted:#9aa0bd;--line:#565c88;--soft:#262a3c;--gold:#f2c14e;--danger:#ff6d7a;--safe:#6fd38a;--accent:#a98be0;--on-accent:#11131b;--site:#2c2147;--on-site:#e7e9f5;color-scheme:dark}
+/* 管理画面は、会社ごとに配色が違う（おなまえや.com＝金／良えWS＝青／認証局＝緑／キットハブ＝暗い紫） */
+/* 会社ごとの配色は、元ネタのテーマカラーに寄せる（おなまえや.com＝青／良えWS＝紺とオレンジ／レッツ暗号＝紺と黄／キットハブ＝黒と緑）。ロゴは自作のまま */
+.viewport[data-site="registrar"]{--bg:#edf3fa;--surface:#ffffff;--ink:#17263a;--muted:#55657a;--line:#17263a;--soft:#dbe7f5;--accent:#0b5fbf;--on-accent:#ffffff;--site:#0b5fbf;--on-site:#ffffff}
+.viewport[data-site="cloud"]{--bg:#f2f3f3;--surface:#ffffff;--ink:#16191f;--muted:#5f6b7a;--line:#232f3e;--soft:#e9ebed;--accent:#ff9900;--on-accent:#16191f;--site:#232f3e;--on-site:#ffffff}
+.viewport[data-site="ca"]{--bg:#eef1f6;--surface:#ffffff;--ink:#1a2238;--muted:#57607a;--line:#1a2238;--soft:#dfe4ee;--accent:#f6a01a;--on-accent:#1a1a1a;--site:#1f3a68;--on-site:#ffffff}
+.viewport[data-site="hub"]{--bg:#0d1117;--surface:#161b22;--ink:#e6edf3;--muted:#9198a1;--line:#3d444d;--soft:#21262d;--gold:#e3b341;--danger:#f85149;--safe:#3fb950;--accent:#238636;--on-accent:#ffffff;--site:#010409;--on-site:#e6edf3;color-scheme:dark}
 .site-head{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--site);color:var(--on-site);font-size:17px;line-height:1.35}
 .site-head small{display:block;font-size:11px;opacity:.85}
 .site-head .spr{flex:none;background:var(--surface);box-shadow:0 0 0 3px var(--surface)}
@@ -534,7 +535,7 @@ body.ending-on .dim{background:transparent}
 .tq{margin:4px 10px 8px}
 .tver{opacity:.55;font-size:12px;margin:14px 0 0}
 .site{text-align:center;padding:40px 14px}
-/* ピクセルクラウドの中の小メニュー（サーバー／証明書／通信設定） */
+/* 良えWSの中の小メニュー（サーバー／証明書／通信設定） */
 .subs{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:10px 0 4px;border-bottom:2px dashed var(--soft);margin-bottom:4px}
 .subs::-webkit-scrollbar{display:none}
 .sub{flex:none;font:inherit;font-size:13px;line-height:1.3;white-space:nowrap;background:var(--surface);color:var(--muted);border:2px solid var(--line);padding:4px 10px;min-height:36px;cursor:pointer}
@@ -655,8 +656,8 @@ const chapterOf=d=>(GD.chapters.find(c=>d>=c.from&&d<=c.to)||GD.chapters[0]).n;
 
 /* ---------- 状態 ---------- */
 const KEY='gsi-demo-v2';
-const SERVER_IP='203.0.113.24',EDGE_HOST='pixeldo-edge.pixelcdn.example';   // お店のサーバー／12日目に作る入口（CDN）のアドレス（IPアドレスではなく名前）
-// ピクセルクラウド・ネームヤの設定（12日目〜）。どれも管理画面で、あとから何度でも変えられる
+const SERVER_IP='203.0.113.24',EDGE_HOST='pixeldo-edge.eews-cdn.example';   // お店のサーバー／12日目に作る入口（CDN）のアドレス（IPアドレスではなく名前）
+// 良えWS・おなまえや.comの設定（12日目〜）。どれも管理画面で、あとから何度でも変えられる
 const freshInf=()=>({edge:false,cache:false,wafSignup:'allow',wafLogin:'0',wafRate:'0',wafDecode:false,bot:'off',crawler:'allow',size:'s',fwWeb:'any',fwSsh:'any',fwOut:'any',patched:false,autoPatch:false,csp:'none',keyRotated:false,regLock:false,reg2fa:false,dnsFreeze:false,alarmOut:false});
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
@@ -664,6 +665,7 @@ const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{},inf:freshInf()}});
 let S=fresh();
+const normHostOld=v=>String(v||'').trim().toLowerCase().replace(/\.$/,'');   // 入口のアドレスを pixelcdn から eews-cdn に変えた（サービス名の変更）
 // rev：ステージの並びの版。rev のない保存データは、防壁編に2日（16・17日目）を足す前のものなので、運用編の日付を2日うしろへずらす
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg){S=Object.assign(fresh(),s);if(!s.rev){if(S.day>=16)S.day+=2;(S.voices||[]).forEach(v=>{if(v.day>=16)v.day+=2;});S.last=null;}S.rev=s.rev||2;
   // cleared：クリアした一番先の日（-1＝まだ0日目も終えていない）。記録のない保存データは、いまの日から決める
@@ -675,7 +677,7 @@ if(!S.sub)S.sub='server';
 if(!S.cfg.code)S.cfg.code={};if(!S.cfg.tasks)S.cfg.tasks={};
 S.cfg.inf=Object.assign(freshInf(),S.cfg.inf||{});if(!Array.isArray(S.traps))S.traps=[];
 if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
-(S.dns||[]).forEach(r=>{if(r.type==='A'&&r.value==='198.51.100.10'){r.type='ALIAS';r.value=EDGE_HOST;}});   // 入口をIPアドレスで向けていた版の記録は、名前（ALIAS）に直す
+(S.dns||[]).forEach(r=>{if((r.type==='A'&&r.value==='198.51.100.10')||(r.type==='ALIAS'&&normHostOld(r.value)==='pixeldo-edge.pixelcdn.example')){r.type='ALIAS';r.value=EDGE_HOST;}});   // 入口をIPアドレスで向けていた版の記録は、名前（ALIAS）に直す
 if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
 // stale＝別のタブ（同じサイトを開いた、もうひとつの画面）が記録を書き換えた。このタブの状態はもう古いので、保存しない。
 // そのままにすると、別のタブで「はじめから」にしても、こちらの古い状態で上書きして、前の記録が戻ってしまう。このタブに戻ってきたら、読み込み直す
@@ -1049,7 +1051,7 @@ function cpnFinish(r){
   cpnT=0;r.done=true;save();render();pcFocus($('p-shop'));
   if(S.cfg.code.coupon!=='atomic'&&r.n>1&&!S.seenCoupon){S.seenCoupon=true;save();
     const o=DAYS[S.day].demo;
-    say([{who:SHIRO,t:`いまの連打で、1回限りのクーポンが${r.n}回も効いた。合計は${yenS(o.product.price-o.coupon.off*r.n)}だよ`},{who:SHIRO,t:'1回目を「使用済み」と記録し終える前に、次が届いたからなんだ。「管理」タブのピクセルハブで直そう'}]);}
+    say([{who:SHIRO,t:`いまの連打で、1回限りのクーポンが${r.n}回も効いた。合計は${yenS(o.product.price-o.coupon.off*r.n)}だよ`},{who:SHIRO,t:'1回目を「使用済み」と記録し終える前に、次が届いたからなんだ。「管理」タブのキットハブで直そう'}]);}
 }
 function couponApply(){
   const atomic=S.cfg.code.coupon==='atomic';let r=cpnRes();
@@ -1111,7 +1113,7 @@ function idorBrowserHTML(){
 }
 function resetDemoRes(){S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;S.scrapeRes=null;S.fwRes=null;}
 /* --- 第3章 防壁編（サイトタブに出るもの）。ページの中＝お店のフォーム／外＝再現ボタンと結果 ---
-   対策はピクセルクラウドの設定（c.inf）。入口（CDN）の設定は、ドメインが入口を向いているときだけ効く（edgeOn） */
+   対策は良えWSの設定（c.inf）。入口（CDN）の設定は、ドメインが入口を向いているときだけ効く（edgeOn） */
 function signupDemo(){
   const mode=edgeOn()?S.cfg.inf.wafSignup:'allow',r=S.botRes;
   const page=mode==='block'
@@ -1205,7 +1207,7 @@ function certExpiredHTML(){
       <p class="int-code">NET::ERR_CERT_DATE_INVALID</p>
       <div class="acts"><button class="btn" disabled>詳細設定</button><button class="btn" disabled>このまま進む</button></div></div>`;
   return pcHTML(browserWin({k:'cert',title:'プライバシー エラー',fav:spr(IC.warn,2,''),url:'https://'+DOM(),sec:'bad'},page),'お客さんのパソコン',true)
-    +notes(note('解説：お客さんに見えている画面','<p><b>全員に警告画面</b></p><p>慣れた人が「このまま進む」を押し、その通信を盗み見られる</p><div class="acts"><button class="btn primary" data-act="goCert">ピクセルクラウドの「証明書」を開く</button></div>','danger'));
+    +notes(note('解説：お客さんに見えている画面','<p><b>全員に警告画面</b></p><p>慣れた人が「このまま進む」を押し、その通信を盗み見られる</p><div class="acts"><button class="btn primary" data-act="goCert">良えWSの「証明書」を開く</button></div>','danger'));
 }
 function certOkDemo(){
   return {notes:note('結果','<p><b>保護された接続</b>　証明書は有効。自動更新：オン</p><p>期限切れは起きない。期限が近づくと、自動で更新・設置をやり直す</p>','ok')};
@@ -1241,7 +1243,7 @@ function apikeyDemo(){
 }
 /* --- 第4章 運用編（管理タブに出るもの） --- */
 const vrows=(list,cls)=>`<div class="vulnlist">${list.map(it=>`<div class="vrow ${cls}"><b>${esc(it.name)}</b><span>${esc(it.note)}</span></div>`).join('')}</div>`;
-// 19日目〜：ピクセルクラウド「サーバー」のソフトウェア更新。調べる → 適用して再起動。自動適用のスイッチもここ
+// 19日目〜：良えWS「サーバー」のソフトウェア更新。調べる → 適用して再起動。自動適用のスイッチもここ
 function patchHTML(){
   const i=S.cfg.inf,o=DAYS[19].demo,today=S.day===19&&!demoOff(),shown=S.vulnShown||i.patched||S.day>19;
   let h=`<div class="sec"${today?' data-focus':''}><h3>ソフトウェアの更新</h3>`;
@@ -1255,7 +1257,7 @@ function patchHTML(){
   }
   return h+`<div class="row"><div class="desc">セキュリティ更新を自動で適用<span class="note">新しい更新が出たら、深夜に適用して再起動します</span></div>${infSw('autoPatch')}</div></div>`;
 }
-// 20日目：ピクセルハブのセキュリティ警告（使っているライブラリの、公開済みの穴）
+// 20日目：キットハブのセキュリティ警告（使っているライブラリの、公開済みの穴）
 function depsHTML(){
   const o=DAYS[S.day].demo;if(demoOff())return '';
   const fixed=S.cfg.code.deps==='update';
@@ -1263,7 +1265,7 @@ function depsHTML(){
     :note('結果','<p><b>既知の脆弱性あり</b></p><p>使っている部品の版を調べれば、誰でも狙える状態</p>','danger'));
   return `<div class="sec"${fixed?'':' data-focus'}><h3>セキュリティ警告</h3><p class="small muted" style="padding:10px 12px 0;margin:0">${fixed?'未対応の警告はありません':'依存ライブラリ（requirements.txt）に、公開済みの脆弱性があります'}</p><div class="pg-b">${vrows(fixed?o.after:o.items,fixed?'ok':'bad')}</div></div>`;
 }
-// 23日目：ネームヤに届いた、なりすましの移管申請
+// 23日目：おなまえや.comに届いた、なりすましの移管申請
 function domainDemoHTML(){
   if(demoOff())return '';
   const i=S.cfg.inf,r=S.domRes;
@@ -1273,7 +1275,7 @@ function domainDemoHTML(){
   return `<div class="sec" data-focus><h3>登録者変更・移管の申請</h3>
     <div class="dbdump" style="padding:8px 12px"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：${esc(DOM())} を別の管理者へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認の返信待ち（期限までに断らなければ、自動で承認）'}</div></div></div>`;
 }
-// 24日目：ピクセルクラウド「監視」の、夜間の通信ログ
+// 24日目：良えWS「監視」の、夜間の通信ログ
 function exfilDemoHTML(){
   if(demoOff())return '';
   const r=S.exfilRes;
@@ -1361,7 +1363,7 @@ function playCodeAnim(key,done){
 }
 function idorSeen(){
   const o=DAYS[S.day].demo;
-  if(S.idorId!==o.myId&&o.orders[S.idorId]&&S.cfg.code.access!=='owner'&&!S.seenIdor){S.seenIdor=true;save();say([{who:SHIRO,t:'ほら、番号を変えただけで、他のお客さんの注文と住所が見えちゃった'},{who:SHIRO,t:'「本人のものか」を確かめてないんだ。「管理」タブのピクセルハブで直そう'}]);}
+  if(S.idorId!==o.myId&&o.orders[S.idorId]&&S.cfg.code.access!=='owner'&&!S.seenIdor){S.seenIdor=true;save();say([{who:SHIRO,t:'ほら、番号を変えただけで、他のお客さんの注文と住所が見えちゃった'},{who:SHIRO,t:'「本人のものか」を確かめてないんだ。「管理」タブのキットハブで直そう'}]);}
 }
 function computeOrder(src){
   const o=DAYS[S.day].demo,real=o.product.price;
@@ -1405,7 +1407,7 @@ function demoReview(t){
   const safe=S.cfg.code.review==='escape';
   return safe?{safe:true,text:t}:{xss:true,redir:false,text:t};
 }
-function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「ピクセルハブ」で直そう'}]);}}
+function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「キットハブ」で直そう'}]);}}
 function renderVoices(){
   let h=`<h2>お知らせ</h2><p class="muted small">お客さんの声や、監視からのアラートが届きます</p>`;
   // その日のお知らせを開いたら、次は「通信」で原因を見る（通信タブにも目印が付く）
@@ -1653,7 +1655,7 @@ function whoisBox(){
     +'<p class="small" style="margin:8px 0 0">誰でもこれが見られます。攻撃者がこの情報でドメイン会社になりすませば、<b>ドメインごと乗っ取られる</b>きっかけになります。</p>'
     +'<button class="btn primary" data-act="whoisOn" style="margin-top:8px">WHOIS公開代行をオンにする</button></div>';
 }
-/* --- ドメイン会社（ネームヤ） --- */
+/* --- ドメイン会社（おなまえや.com） --- */
 function registrarHTML(){
   const ds=S.ds||{};let h='';
   if(!S.domain){
@@ -1696,7 +1698,7 @@ function registrarHTML(){
 function caHTML(){
   const c=S.cfg,ca=CAS[c.ca],D=esc(S.domain);
   let h=`<div class="sec"><h3>証明書の申請</h3>`;
-  if(!c.keyMade)return h+intro('申請には CSR（証明書の申請書）が必要です。先にサーバー側で秘密鍵とCSRを作ってください。')+'<div class="row"><span></span><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">ピクセルクラウドの「証明書」を開く</button></div></div>';
+  if(!c.keyMade)return h+intro('申請には CSR（証明書の申請書）が必要です。先にサーバー側で秘密鍵とCSRを作ってください。')+'<div class="row"><span></span><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">良えWSの「証明書」を開く</button></div></div>';
   if(!c.token)return h+`<div class="row"><div class="desc">server.csr を提出する<span class="note">対象：${D}。秘密鍵はサーバーに置いたまま、CSRだけを送ります</span></div><button class="btn primary" data-act="apply">提出する</button></div></div>`;
   if(!c.issued)return h+`<div class="capanel"><p class="small muted" style="margin:0">ドメインの所有確認</p>
       <p>${D} の持ち主であることを確認します。このドメインのDNSに次のレコードを追加してから、確認を依頼してください。</p>
@@ -1705,10 +1707,10 @@ function caHTML(){
       ${S.dcvMsg?`<p class="small ${caBusy?'muted':'msg-err'}" style="margin:10px 0 0">${S.dcvMsg}</p>`:''}</div></div>`;
   return h+`<div class="row"><div class="desc">${D}<span class="note">発行済み・有効期間 ${ca.v}・中間CA：${ca.ica}</span></div><span class="msg-ok small">発行済み</span></div>
     <div class="row"><div class="desc">ダウンロードできるファイル<span class="note">server.crt（サーバー証明書）／chain.crt（中間証明書）／fullchain.crt（両方をまとめたもの）</span></div></div>
-    <div class="row"><div class="desc">設置はサーバー側で行います</div><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">ピクセルクラウドの「証明書」を開く</button></div></div>`;
+    <div class="row"><div class="desc">設置はサーバー側で行います</div><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">良えWSの「証明書」を開く</button></div></div>`;
 }
 
-/* --- ピクセルクラウド：サーバーや、その周りの設備を借りるサービス。使い始めたサービスが、小メニューに並ぶ ---
+/* --- 良えWS：サーバーや、その周りの設備を借りるサービス。使い始めたサービスが、小メニューに並ぶ ---
    サーバー／証明書／通信設定（1日目〜）／入口（CDN）・WAF（12日目〜）／ファイアウォール（17日目〜）／シークレット（22日目〜）／監視（24日目〜） */
 // 長期サポート版のOSは、バージョンの数字はそのままで、修正だけが配られる。19日目の「更新を適用」で変わるのは、更新を当てたかどうか
 function osInfo(){
@@ -1740,7 +1742,7 @@ function cloudServerHTML(){
   if(live&&S.day<1)cNotes.push(note('解説','<p>今のところ、ここで設定することはありません。</p>'));
   return h;
 }
-// 入口（CDN）：お店の手前で通信を受け、サーバーへ取り次ぐ。作ったあと、ドメインの向き先（ネームヤのDNS）を入口に変えると通るようになる
+// 入口（CDN）：お店の手前で通信を受け、サーバーへ取り次ぐ。作ったあと、ドメインの向き先（おなまえや.comのDNS）を入口に変えると通るようになる
 function cloudEdgeHTML(){
   const i=S.cfg.inf,to=dnsTo();
   let h=`<div class="sec"><h3>入口（CDN）</h3>`;
@@ -1748,9 +1750,9 @@ function cloudEdgeHTML(){
     +`<div class="row"><div class="desc">入口を作る<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><button class="btn primary" data-act="edgeMake">作成する</button></div></div>`;
   h+=`<div class="row"><div class="desc">pixeldo-edge<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><span class="small msg-ok">稼働中</span></div>
     <div class="row"><div class="desc">入口のアドレス<span class="note">${EDGE_HOST}</span></div><button class="btn" data-act="copyEdge">${clip===EDGE_HOST?'コピーしました':'コピー'}</button></div>
-    <div class="row"><div class="desc">${esc(S.domain)} の向き先<span class="note">${to==='edge'?'入口（'+EDGE_HOST+'）':to==='server'?'サーバー（'+SERVER_IP+'）に直接':to==='both'?'入口とサーバーの両方':to==='none'?'登録がありません':'入口でもサーバーでもない宛先'}</span></div>${to==='edge'?'<span class="small msg-ok">入口を通っています</span>':'<button class="btn" data-act="svc" data-s="registrar">ネームヤを開く</button>'}</div>`;
+    <div class="row"><div class="desc">${esc(S.domain)} の向き先<span class="note">${to==='edge'?'入口（'+EDGE_HOST+'）':to==='server'?'サーバー（'+SERVER_IP+'）に直接':to==='both'?'入口とサーバーの両方':to==='none'?'登録がありません':'入口でもサーバーでもない宛先'}</span></div>${to==='edge'?'<span class="small msg-ok">入口を通っています</span>':'<button class="btn" data-act="svc" data-s="registrar">おなまえや.comを開く</button>'}</div>`;
   if(S.day>=14)h+=`<div class="row"><div class="desc">キャッシュ<span class="note">商品ページや画像など、誰が見ても同じ内容は、入口が覚えておいて代わりに返します</span></div>${infSw('cache')}</div>`;
-  if(to!=='edge')cNotes.push(note('解説：入口は、作っただけでは通らない',`<p>お客さんはいまも、サーバー（${SERVER_IP}）に直接来ています。ドメインの向き先（DNS）を入口のアドレスに変えると、通信が入口を通るようになります。</p><p>入口は世界中に置かれていて、IPアドレスは場所や時間で変わります。だから、IPアドレスではなく<b>名前</b>で向けます。DNSは、ドメインを取った「ネームヤ」で設定します。アドレスをコピーしてから、ネームヤを開きましょう。</p>`));
+  if(to!=='edge')cNotes.push(note('解説：入口は、作っただけでは通らない',`<p>お客さんはいまも、サーバー（${SERVER_IP}）に直接来ています。ドメインの向き先（DNS）を入口のアドレスに変えると、通信が入口を通るようになります。</p><p>入口は世界中に置かれていて、IPアドレスは場所や時間で変わります。だから、IPアドレスではなく<b>名前</b>で向けます。DNSは、ドメインを取った「おなまえや.com」で設定します。アドレスをコピーしてから、おなまえや.comを開きましょう。</p>`));
   return h+'</div>';
 }
 // WAF：入口に届いた通信を検査して、通す・止めるを決める。ルールは日が進むごとに増える
@@ -1853,13 +1855,13 @@ function cloudHTML(g){
   const subs=cloudSubs();
   if(!subs.some(x=>x[0]===S.sub))S.sub='server';
   const gs=g&&g.svc==='cloud'&&g.sub!==S.sub&&subs.some(x=>x[0]===g.sub)?g.sub:'';   // 小メニューに立てる矢印
-  let h=`<div class="subs${gs?' has-guide':''}" role="tablist" aria-label="ピクセルクラウドのメニュー">${subs.map(x=>`<button role="tab" class="sub" data-act="sub" data-sub="${x[0]}" aria-selected="${x[0]===S.sub}">${x[1]}${gs===x[0]?GUIDE:''}</button>`).join('')}</div>`;
+  let h=`<div class="subs${gs?' has-guide':''}" role="tablist" aria-label="良えWSのメニュー">${subs.map(x=>`<button role="tab" class="sub" data-act="sub" data-sub="${x[0]}" aria-selected="${x[0]===S.sub}">${x[1]}${gs===x[0]?GUIDE:''}</button>`).join('')}</div>`;
   let pg=({cert:certCloudHTML,net:cloudNetHTML,edge:cloudEdgeHTML,waf:cloudWafHTML,fw:cloudFwHTML,secret:cloudSecretHTML,mon:cloudMonHTML}[S.sub]||cloudServerHTML)();
   // 入口・WAFなど12日目からの画面は、最初の設定が小メニューのすぐ下に来る位置から見せる（その日の記録があれば、記録から）
   if(['edge','waf','fw','secret','mon'].includes(S.sub)&&!pg.includes('data-focus'))pg=pg.replace('<div class="sec"','<div class="sec" data-focus');
   return h+pg;
 }
-/* --- ピクセルハブ（コード共有）：お店のコードの置き場所。修正は、プルリクエストの中身を見てマージする。入れた修正はコミット履歴に残る --- */
+/* --- キットハブ（コード共有）：お店のコードの置き場所。修正は、プルリクエストの中身を見てマージする。入れた修正はコミット履歴に残る --- */
 const codeDays=()=>Object.keys(DAYS).map(Number).filter(n=>DAYS[n].fix).sort((a,b)=>a-b);
 function hubHTML(){
   const d=DAYS[S.day],fx=d&&d.fix,c=S.cfg,days=codeDays(),num=n=>days.indexOf(n)+1;
@@ -1874,7 +1876,7 @@ function hubHTML(){
   h+=`<div class="sec"><h3>コミット履歴</h3>${show.map(n=>`<div class="row"><div class="desc">${esc(DAYS[n].fix.label)}<span class="note">#${num(n)} をマージ　／　${n}日目</span></div>${n===S.day&&S.phase==='fix'?`<button class="link" data-act="undoFix" data-key="${DAYS[n].fix.key}">取り消す</button>`:''}</div>`).join('')}
     ${merged.length>show.length?`<p class="small muted" style="padding:8px 12px;margin:0">…ほか ${merged.length-show.length} 件</p>`:''}
     <div class="row"><div class="desc">よろず屋ピクセル堂を公開<span class="note">最初のコミット　／　0日目</span></div></div></div>`;
-  if(!fx)cNotes.push(note('解説','<p>ピクセルハブは、お店のコードの置き場所です。今日は、ここで入れる修正はありません。</p>'));
+  if(!fx)cNotes.push(note('解説','<p>キットハブは、お店のコードの置き場所です。今日は、ここで入れる修正はありません。</p>'));
   return h;
 }
 // 次に開くとよい管理画面（そのタブに矢印を立てる）。対策がそろっている・まだ攻撃を見ていないときは null
@@ -1902,16 +1904,16 @@ function guideTarget(){
 }
 // 管理タブ：「あなたのパソコン」のブラウザに、会社ごとのタブが並ぶ。次に開くとよいタブには矢印が立つ
 const SITE={
-  registrar:{name:'ネームヤ',role:'ドメイン会社',url:()=>'https://nameya.example/'+(S.domain?'domains/'+S.domain:'search')},
-  cloud:{name:'ピクセルクラウド',role:'クラウド',url:()=>'https://console.pixelcloud.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
-  ca:{name:'',role:'認証局',url:()=>'https://freessl.example/orders'},
-  hub:{name:'ピクセルハブ',role:'コード共有',url:()=>'https://pixelhub.example/pixeldo/shop'}
+  registrar:{name:'おなまえや.com',role:'ドメイン会社',url:()=>'https://onamaeya.example/'+(S.domain?'domains/'+S.domain:'search')},
+  cloud:{name:'良えWS',role:'クラウド',url:()=>'https://console.eews.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
+  ca:{name:'',role:'認証局',url:()=>'https://letsangou.example/orders'},
+  hub:{name:'キットハブ',role:'コード共有',url:()=>'https://kithub.example/pixeldo/shop'}
 };
 function renderConsole(){
   const c=S.cfg,p=$('p-console');
   const ids=['registrar','cloud'];
   if(c.ca&&c.ca!=='self')ids.push('ca');
-  if(isLive()&&S.day>=4)ids.push('hub');   // 4日目から、お店のコードをピクセルハブで管理する
+  if(isLive()&&S.day>=4)ids.push('hub');   // 4日目から、お店のコードをキットハブで管理する
   if(!ids.includes(S.svc))S.svc='cloud';
   const nm=id=>id==='ca'?CAS[c.ca].n:SITE[id].name,sv=S.svc,g=guideTarget();
   cNotes=[];
@@ -1922,7 +1924,7 @@ function renderConsole(){
       tabs:ids.map(id=>({id,title:nm(id),fav:spr(IC['logo_'+id],2,''),on:id===sv,guide:!!g&&g.svc===id&&id!==sv}))},page),'あなたのパソコン',true)
     +notes(...cNotes)+'<p class="shop-foot"></p>';
   pcRestore(p);
-  // ピクセルクラウドの小メニューは横に送れる。次に開くメニュー（矢印）か、いま開いているメニューが見える位置へ寄せる
+  // 良えWSの小メニューは横に送れる。次に開くメニュー（矢印）か、いま開いているメニューが見える位置へ寄せる
   const sb=p.querySelector('.subs'),gd=sb&&sb.querySelector('.sub .guide'),tg=sb&&(gd?gd.parentNode:sb.querySelector('.sub[aria-selected="true"]'));
   if(tg)sb.scrollLeft=Math.max(0,tg.offsetLeft-(sb.clientWidth-tg.offsetWidth)/2);
 }
@@ -1948,7 +1950,7 @@ function startIntro(){
     {who:YOU,t:'わっ。……きみ、いつからそこにいたの？'},
     {who:SHIRO,t:'ずっと前から、ここにいたよ。まあ、それはいいじゃない'},
     {who:SHIRO,t:'でも、まだきみのパソコンの中にあるだけだね。ネットに公開するには、まずドメイン（お店の住所）が必要だよ'},
-    {who:SHIRO,t:'「管理」タブのドメイン会社「ネームヤ」で取ってみよう'}
+    {who:SHIRO,t:'「管理」タブのドメイン会社「おなまえや.com」で取ってみよう'}
   ],()=>{S.phase='setup';S.badge.console=true;save();render();});
 }
 // その日の準備：前の日のデモの結果を消して、その日の管理画面を開いておく
@@ -1991,7 +1993,7 @@ function watchAttack(){
 // 12日目：ドメインが入口（CDN）を向いたら、シロが次（WAF）を案内する
 function edgeSaid(){
   if(!S.cfg.inf.edge||S.saidEdge||S.phase!=='fix'||dnsTo()!=='edge')return;
-  S.saidEdge=true;save();say([{who:SHIRO,t:'これで、お客さんの通信は入口を通るようになった'},{who:SHIRO,t:'ピクセルクラウドに戻って、「WAF」のルールを決めよう'}]);
+  S.saidEdge=true;save();say([{who:SHIRO,t:'これで、お客さんの通信は入口を通るようになった'},{who:SHIRO,t:'良えWSに戻って、「WAF」のルールを決めよう'}]);
 }
 function firstAttack(){
   const d=DAYS[S.day];
@@ -2203,7 +2205,7 @@ function rollHTML(){
   const seen=[];
   for(let n=1;n<=LAST_DAY;n++){const a=DAYS[n].attacker;let e=seen.find(x=>x.id===a);if(!e){e={id:a,days:[]};seen.push(e);}e.days.push(n);}
   h+=sect('攻撃者のみなさん（登場順）')+seen.map(e=>rollLine(e.id,e.days.join('・')+'日目',CAST[e.id].name)).join('');
-  h+=sect('協力')+[['registrar','ネームヤ'],['cloud','ピクセルクラウド'],['ca',CAS.free.n],['hub','ピクセルハブ']].map(([k,n])=>`<div class="cr"><span class="rlogo">${spr(IC['logo_'+k],4,'')}</span><div class="rwho">${esc(n)}</div></div>`).join('');
+  h+=sect('協力')+[['registrar','おなまえや.com'],['cloud','良えWS'],['ca',CAS.free.n],['hub','キットハブ']].map(([k,n])=>`<div class="cr"><span class="rlogo">${spr(IC['logo_'+k],4,'')}</span><div class="rwho">${esc(n)}</div></div>`).join('');
   h+=sect('スペシャルサンクス')+`<div class="cr"><div class="rwho">毎日苦情をくれたお客さんたち</div></div>`;
   h+=sect('制作')+`<div class="cr"><div class="rwho">${esc(ROLL_MAKER)}</div></div>`;
   // 引っかかったトラップ。trapsFrom＝数え始めた日（トラップを数える前の版で遊んだ記録は、途中から、または全部が「記録なし」）
@@ -2422,7 +2424,7 @@ document.addEventListener('click',e=>{
   }
   else if(a==='domBuy'){if(!S.ds||S.ds.status!=='ok')return;S.domain=S.ds.full;S.ds=null;save();render();
     const w=S.whois?[{who:SHIRO,t:'WHOIS公開代行にしたんだね。持ち主情報が隠れるから安心だ'}]:[{who:SHIRO,t:'公開代行を使わなかったね。試しに今のWHOISを引いてみた。この画面の下に出てるよ'},{who:SHIRO,t:'きみの氏名も住所も丸見えだ。攻撃者がこれでドメイン会社になりすますと、ドメインごと乗っ取られる。公開代行はオンにしておこう'}];
-    say([{who:SHIRO,t:S.domain+'、いい住所だね！'}].concat(w).concat([{who:SHIRO,t:'次は、このドメインをサーバーにつなごう。サーバーのIPアドレスは「ピクセルクラウド」で確認できるよ'},{who:SHIRO,t:'つなぐ設定（DNS）は、ドメインを取ったこの「ネームヤ」でやるんだ'}]));}
+    say([{who:SHIRO,t:S.domain+'、いい住所だね！'}].concat(w).concat([{who:SHIRO,t:'次は、このドメインをサーバーにつなごう。サーバーのIPアドレスは「良えWS（ええダブリューエス）」で確認できるよ。サーバーを貸してくれる会社だ'},{who:SHIRO,t:'つなぐ設定（DNS）は、ドメインを取ったこの「おなまえや.com」でやるんだ'}]));}
   else if(a==='whoisOn'){S.whois=true;save();render();say([{who:SHIRO,t:'公開代行をオンにしたよ。これでWHOISからは代行会社の情報しか出ない。乗っ取りの手がかりを一つ消せた'}]);}
   else if(a==='publish'){
     if(S.phase!=='setup'||!S.domain||relBusy)return;
@@ -2441,63 +2443,63 @@ document.addEventListener('click',e=>{
   else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(a==='postReview'){const el=$('reviewQ');S.reviewQ=el?el.value:'';S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
-      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのピクセルハブで直そう'}]);}}}
+      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのキットハブで直そう'}]);}}}
   else if(a==='xssPlay'){xssNav(S.day);}
   else if(a==='xssBack'){if(S.reviewRes){S.reviewRes.redir=false;save();render();}}
   else if(a==='storeRead'){S.storeRes={read:true};save();render();pcFocus($('p-console'));
-    if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、保存ファイルを開いただけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのピクセルハブで直そう'}]);}}
+    if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、保存ファイルを開いただけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのキットハブで直そう'}]);}}
   else if(a==='csrfOpen'){S.csrfRes={open:true};save();render();
-    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、裏でこのお店にお届け先の変更が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのピクセルハブで直そう'}]);}}
+    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、裏でこのお店にお届け先の変更が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのキットハブで直そう'}]);}}
   else if(a==='csrfBack'){if(S.csrfRes)S.csrfRes.open=false;save();render();}
   else if(a==='idorOpen'){S.idorRes={open:true};S.idorId=DAYS[S.day].demo.myId;save();render();}
   else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
   else if(a==='idorGo'){const el=$('idorUrl');const m=(el?el.value:'').match(/id=(\d+)/);S.idorId=m?Number(m[1]):0;save();render();idorSeen();}
   else if(a==='sessOpen'){S.sessionRes={open:true};save();render();}
   else if(a==='sessShare'){S.sessionRes={open:true,shared:true};save();render();
-    if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのピクセルハブで直そう'}]);}}
+    if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのキットハブで直そう'}]);}}
   else if(a==='sessBack'){S.sessionRes=null;save();render();}
   else if(a==='couponApply'){couponApply();}
   else if(a==='couponReset'){clearTimeout(cpnT);cpnT=0;S.couponRes=null;save();render();window.scrollTo(0,0);pcFocus($('p-shop'));}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();pcReveal('.devtools');}
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
-    if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
-  /* --- 12日目〜のデモ：対策はピクセルクラウドなどの設定（c.inf）を見て決まる --- */
+    if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのキットハブで直そう'}]);}}
+  /* --- 12日目〜のデモ：対策は良えWSなどの設定（c.inf）を見て決まる --- */
   else if(a==='botRun'){const mode=edgeOn()?c.inf.wafSignup:'allow',pass=mode==='allow'||mode==='count',list=[];
     if(pass)for(let i=0;i<4;i++)list.push('user'+(1000+Math.floor(Math.random()*8999))+'@tempmail.example');
     S.botRes={mode,made:pass?100:0,list};save();render();
-    if(pass&&!S.seenBot){S.seenBot=true;save();say([{who:SHIRO,t:'人間かどうかを確かめないから、プログラムで何件でも作れちゃう'},{who:SHIRO,t:'「管理」タブのピクセルクラウドで、入口（CDN）とWAFを用意して止めよう'}]);}}
+    if(pass&&!S.seenBot){S.seenBot=true;save();say([{who:SHIRO,t:'人間かどうかを確かめないから、プログラムで何件でも作れちゃう'},{who:SHIRO,t:'「管理」タブの良えWSで、入口（CDN）とWAFを用意して止めよう'}]);}}
   else if(a==='bruteTry'){const lim=edgeOn()?Number(c.inf.wafLogin||0):0,next=(S.bruteN||0)+100;
     if(lim&&next>=lim){S.bruteN=lim;S.bruteRes={stopped:true,at:lim};}else{S.bruteN=next;S.bruteRes={stopped:false};}save();render();
-    if(!S.bruteRes.stopped&&!S.seenBrute){S.seenBrute=true;save();say([{who:SHIRO,t:'何回失敗しても止まらないから、試し放題だ'},{who:SHIRO,t:'ピクセルクラウドの「WAF」で、ログインの回数を制限しよう'}]);}}
+    if(!S.bruteRes.stopped&&!S.seenBrute){S.seenBrute=true;save();say([{who:SHIRO,t:'何回失敗しても止まらないから、試し放題だ'},{who:SHIRO,t:'良えWSの「WAF」で、ログインの回数を制限しよう'}]);}}
   else if(a==='dosFire'){const i=c.inf,n=edgeOn()?i.wafRate:'0',held=n==='2000'||n==='100';
     S.dosRes=held?{load:n==='100'?12:i.cache?30:55,down:false,strict:n==='100'}:{load:100,down:true,big:i.size==='l'};save();render();pcFocus($('p-console'));
-    if(!held&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'一気に送られると、サーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルクラウドの「WAF」で、サイト全体の回数を決めよう'}]);}}
+    if(!held&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'一気に送られると、サーバーが落ちちゃう'},{who:SHIRO,t:'良えWSの「WAF」で、サイト全体の回数を決めよう'}]);}}
   else if(a==='wafEnc'){S.wafEnc=!S.wafEnc;S.wafRes=null;save();render();}
   else if(a==='wafSend'){const enc=!!S.wafEnc,pass=enc&&!c.inf.wafDecode,fixed=c.code.defense==='layered';S.wafRes={pass,enc};save();render();pcFocus($('p-console'));
-    if(pass&&!fixed&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'書き方を変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。ピクセルハブで、届いた先のコードを直そう'}]);}}
+    if(pass&&!fixed&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'書き方を変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。キットハブで、届いた先のコードを直そう'}]);}}
   else if(a==='scrapeRun'){const how=edgeOn()?c.inf.bot:'off',fixed=how==='challenge';S.scrapeRes=fixed?{all:false,got:30}:{all:true,ua:how==='ua'};save();render();pcFocus($('p-console'));
     if(!fixed&&!S.seenScrape){S.seenScrape=true;save();say([{who:SHIRO,t:'ゆっくり順番に取るだけだから、回数の制限にはかからない。全部持っていかれた'},{who:SHIRO,t:'同じ画面の「ボット対策」で、相手を見分けよう'}]);}}
   else if(a==='fwTry'){const fixed=c.inf.fwSsh==='admin';S.fwRes={open:!fixed};save();render();pcFocus($('p-console'));
-    if(!fixed&&!S.seenFw){S.seenFw=true;save();say([{who:SHIRO,t:'サーバーに直接つなげるから、入口の対策がぜんぶ素通りだ'},{who:SHIRO,t:'ピクセルクラウドの「ファイアウォール」で、受け付ける相手を絞ろう'}]);}}
+    if(!fixed&&!S.seenFw){S.seenFw=true;save();say([{who:SHIRO,t:'サーバーに直接つなげるから、入口の対策がぜんぶ素通りだ'},{who:SHIRO,t:'良えWSの「ファイアウォール」で、受け付ける相手を絞ろう'}]);}}
   else if(a==='vulnScan'){S.vulnShown=true;save();render();pcFocus($('p-console'));
     if(!c.inf.patched&&!S.seenVuln){S.seenVuln=true;save();say([{who:SHIRO,t:'直した版はもう配られてるのに、12件も当てないままになってる'},{who:SHIRO,t:'同じ画面の「適用して再起動」で、更新を当てよう'}]);}}
   else if(a==='patchNow'){c.inf.patched=true;S.vulnShown=true;save();render();pcFocus($('p-console'));say([{who:SHIRO,t:'更新が当たって、サーバーが再起動した。溜まっていた穴は、これでふさがった'}]);}
   else if(a==='skimPay'){const pol=c.inf.csp||'none';S.skimRes={stolen:pol==='none',dead:pol==='strict'};save();render();
-    if(pol==='none'&&!S.seenSkim){S.seenSkim=true;save();say([{who:SHIRO,t:'差し替えられた外部スクリプトが、入力を外へ送っちゃった'},{who:SHIRO,t:'ピクセルクラウドの「通信設定」でCSPを付けて、読み込み元と送り先を絞ろう'}]);}}
+    if(pol==='none'&&!S.seenSkim){S.seenSkim=true;save();say([{who:SHIRO,t:'差し替えられた外部スクリプトが、入力を外へ送っちゃった'},{who:SHIRO,t:'良えWSの「通信設定」でCSPを付けて、読み込み元と送り先を絞ろう'}]);}}
   else if(a==='keyView'){const safe=c.code.apikey==='server';S.keyRes={abused:!safe};save();render();
-    if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'ピクセルハブで、キーをコードから消そう。漏れたキーは、ピクセルクラウドの「シークレット」で入れ替える'}]);}}
+    if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'キットハブで、キーをコードから消そう。漏れたキーは、良えWSの「シークレット」で入れ替える'}]);}}
   else if(a==='keyRotate'){c.inf.keyRotated=true;S.keyRes=null;save();render();say([{who:SHIRO,t:'古いキーは失効した。コピーされた分は、もう使えない'}]);}
   else if(a==='domTry'){const locked=!!c.inf.regLock;S.domRes={hijacked:!locked};save();render();pcFocus($('p-console'));
     if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'この下の「ドメインの保護」で、移管ロックと2段階認証をかけよう'}]);}}
   else if(a==='exfilRun'){const out=c.inf.fwOut||'any';S.exfilRes={leaked:out==='any',none:out==='none'};save();render();pcFocus($('p-console'));
-    if(out==='any'&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルクラウドの「ファイアウォール」で、出ていく通信の宛先を絞ろう'}]);}}
-  /* --- ピクセルクラウド・ネームヤの設定 --- */
+    if(out==='any'&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'良えWSの「ファイアウォール」で、出ていく通信の宛先を絞ろう'}]);}}
+  /* --- 良えWS・おなまえや.comの設定 --- */
   else if(a==='infSw'){const k=b.dataset.k,v=S.vulnShown;c.inf[k]=!c.inf[k];resetDemoRes();S.vulnShown=v;save();render();}
-  else if(a==='edgeMake'){c.inf.edge=true;resetDemoRes();save();render();say([{who:SHIRO,t:'入口ができた。でもまだ、誰も入口を通ってない'},{who:SHIRO,t:'ドメインの向き先を、入口のアドレスに変えよう。アドレスをコピーして、ネームヤのDNSに「ALIAS」のレコードを足す。古い「A」レコードは消すんだ'}]);}
+  else if(a==='edgeMake'){c.inf.edge=true;resetDemoRes();save();render();say([{who:SHIRO,t:'入口ができた。でもまだ、誰も入口を通ってない'},{who:SHIRO,t:'ドメインの向き先を、入口のアドレスに変えよう。アドレスをコピーして、おなまえや.comのDNSに「ALIAS」のレコードを足す。古い「A」レコードは消すんだ'}]);}
   else if(a==='copyEdge'){clip=EDGE_HOST;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
   else if(a==='goCert'){S.svc='cloud';S.sub='cert';setTab('console');}
-  /* --- ピクセルハブ：プルリクエストの中身（コードの差分）を見て、マージする --- */
+  /* --- キットハブ：プルリクエストの中身（コードの差分）を見て、マージする --- */
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;
     const go=()=>{c.code[key]=v;resetDemoRes();save();render();const r=DAYS[S.day].check(CFG());
       say([{who:SHIRO,t:'マージできた。お店のコードに、修正が入ったよ'},{who:SHIRO,t:r.ok?'右下の「防げたか確かめる」で試してみよう':r.why}]);};
@@ -2540,7 +2542,7 @@ document.addEventListener('keydown',e=>{
   else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(e.target.id==='reviewQ'){e.preventDefault();const el=$('reviewQ');S.reviewQ=el.value;S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
-      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのピクセルハブで直そう'}]);}}}
+      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのキットハブで直そう'}]);}}}
 });
 
 /* ---------- 再開 ---------- */
@@ -2621,7 +2623,7 @@ title.addEventListener('keydown',e=>{
   if(window.ResizeObserver)new ResizeObserver(()=>{const l=$('netLog');if(l)l.scrollTop=l.scrollHeight;}).observe($('p-net'));
 }
 if(DEBUG)window.GSI_DEBUG={cfgForDay,dnsForDay,lastDay:LAST_DAY,music:Music};   // テスト用：n日目の朝の設定を取り出す
-// 版3（12日目以降の対策を、ピクセルクラウドやネームヤの設定に移した）より前の保存データ：
+// 版3（12日目以降の対策を、良えWSやおなまえや.comの設定に移した）より前の保存データ：
 // 12日目以降は設定の持ち方が違うので、その日の朝からやり直す。全部クリア済みなら、全部の対策が入った状態にする
 if(S.rev<3){
   ['signup','login','dos','bots','firewall','os','thirdparty','registrar','egress'].forEach(k=>{delete S.cfg.code[k];});

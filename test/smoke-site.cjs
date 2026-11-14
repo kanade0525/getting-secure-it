@@ -2,7 +2,7 @@
 // 設定（cfg）は直接そろえる。確かめること：
 //   ・ディスプレイ（.pc）が出ている　・シロのメモ（.hj-meta）がディスプレイの中に入っていない　・横にはみ出さない
 //   ・未対策なら「まずいこと」のメモが出る／対策後なら出ず、「防げた」のメモが出る
-//   ・管理タブ：未対策なら、対策を入れる場所（ブラウザのタブか、ピクセルクラウドの小メニュー）に案内の矢印が立つ／対策後は立たない
+//   ・管理タブ：未対策なら、対策を入れる場所（ブラウザのタブか、良えWSの小メニュー）に案内の矢印が立つ／対策後は立たない
 //   node test/smoke-site.cjs <index.html のあるフォルダ または URL> <スクショの出力先> [日,日,...]
 const { chromium } = require('playwright');
 const path = require('path');
@@ -19,7 +19,7 @@ const getPlan = async browser => {
 };
 const seed = (day, c, rec, D) => ({ rev: 3, day, phase: 'fix', tab: D.tab || 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [rec], svc: D.svc || 'hub', sub: D.sub || 'server', cfg: c });
 // 日ごとのデモの操作。tab/svc/sub は、開いておく画面。guide は、未対策のときに案内の矢印が立つ場所
-//   （ブラウザのタブ＝svc-◯◯／ピクセルクラウドの小メニュー＝sub-◯◯／対策を入れる画面をもう開いているなら ''）
+//   （ブラウザのタブ＝svc-◯◯／良えWSの小メニュー＝sub-◯◯／対策を入れる画面をもう開いているなら ''）
 const DAYS = {
   4: { steps: [async p => { await p.fill('#shopQ', "' OR '1'='1"); await p.click('.store-search [data-act="doSearch"]'); }] },
   6: { steps: [async p => { await p.click('[data-act="ordBuy"]'); }, async p => { await p.fill('#ordPrice', '1'); await p.click('[data-act="ordSend"]'); }] },
@@ -34,7 +34,7 @@ const DAYS = {
   18: { steps: [] },
   21: { steps: [async p => { await p.click('[data-act="skimPay"]'); }] },
   22: { steps: [async p => { await p.click('[data-act="keyView"]'); }] },
-  // 管理タブに出るデモ（ピクセルクラウド・ピクセルハブ・ネームヤの画面）
+  // 管理タブに出るデモ（良えWS・キットハブ・おなまえや.comの画面）
   5: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'svc-hub', steps: [async p => { await p.click('[data-act="storeRead"]'); }] },
   14: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'sub-waf', steps: [async p => { await p.click('[data-act="dosFire"]'); }] },
   15: { tab: 'console', svc: 'cloud', sub: 'waf', guide: 'svc-hub', steps: [async p => { await p.click('[data-act="wafEnc"]'); }, async p => { await p.click('[data-act="wafSend"]'); }] },
