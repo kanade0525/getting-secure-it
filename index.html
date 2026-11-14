@@ -668,6 +668,7 @@ let S=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg){S=Object.assign(fresh(),s);if(!s.rev){if(S.day>=16)S.day+=2;(S.voices||[]).forEach(v=>{if(v.day>=16)v.day+=2;});S.last=null;}S.rev=s.rev||2;
   // cleared：クリアした一番先の日（-1＝まだ0日目も終えていない）。記録のない保存データは、いまの日から決める
   if(s.cleared==null)S.cleared=S.phase==='end'?LAST_DAY:S.phase==='clear'?S.day:S.day>=1?S.day-1:S.phase==='day0'?0:-1;}}catch(e){}
+S.day=Math.max(0,Math.min(LAST_DAY,Math.floor(Number(S.day))||0));   // 壊れた記録で、ない日を指していても止まらないように
 delete S.trust;delete S.victims;
 if(S.cfg&&S.cfg.ca==='paid')S.cfg.ca='free';
 if(!S.sub)S.sub='server';
@@ -676,7 +677,14 @@ S.cfg.inf=Object.assign(freshInf(),S.cfg.inf||{});if(!Array.isArray(S.traps))S.t
 if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
 (S.dns||[]).forEach(r=>{if(r.type==='A'&&r.value==='198.51.100.10'){r.type='ALIAS';r.value=EDGE_HOST;}});   // 入口をIPアドレスで向けていた版の記録は、名前（ALIAS）に直す
 if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+// stale＝別のタブ（同じサイトを開いた、もうひとつの画面）が記録を書き換えた。このタブの状態はもう古いので、保存しない。
+// そのままにすると、別のタブで「はじめから」にしても、こちらの古い状態で上書きして、前の記録が戻ってしまう。このタブに戻ってきたら、読み込み直す
+let stale=false;
+function save(){if(stale)return;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null)stale=true;});
+const reloadIfStale=()=>{if(stale&&document.visibilityState!=='hidden')location.reload();};
+document.addEventListener('visibilitychange',reloadIfStale);
+window.addEventListener('focus',reloadIfStale);
 let busy=false,certBusy=false,dnsBusy=false;
 const dm=s=>String(s).replace(/pixeldo\.example/g,S.domain||'pixeldo.example');
 const $=id=>document.getElementById(id);
@@ -2025,7 +2033,7 @@ const setDnsForDay=n=>{S.dns=[dnsForDay(n)].concat((S.dns||[]).filter(r=>!(r.nam
 function daySheet(){
   const name=n=>n===0?'0日目　オープン準備':DAYS[n].title;
   let h=`<div class="loghd"><h2 id="mTitle" style="margin:0">日を選ぶ</h2><button class="btn" data-act="${daysFromTitle?'toTitle':'close'}">${daysFromTitle?'タイトルへ戻る':'閉じる'}</button></div>
-    <p class="muted small">${DEBUG?'<b>デバッグ中</b>：どの日でも選べます。':'クリアした日は、もう一度遊べます。'}選んだ日の朝から始まり、いまの日の途中経過は残りません。</p>`;
+    <p class="muted small">${DEBUG?'<b>デバッグ中</b>：どの日でも選べます。':'クリアした日は、もう一度遊べます。'}選んだ日の朝から始まり、いまの日の途中経過は残りません。クリアの印と会話ログは残ります（すべて消すには、タイトルの「はじめから」）。</p>`;
   if(DEBUG)h+=`<label class="dbgopt"><input type="checkbox" id="dbgFix" ${dbgFix?'checked':''}><span>対策の場面から始める（朝の会話と、攻撃の再生を飛ばす）</span></label>`;
   h+='<div class="daylist">';
   GD.chapters.forEach(ch=>{
@@ -2048,7 +2056,7 @@ function showDays(fromTitle){
 function jumpDay(n,toFix){
   if(!canPick(n)||busy)return;
   hideModal();hideToast();netStop();Q=[];showing=false;clearInterval(typing);typing=null;setTalking(false);resetDemoRes();
-  if(n===0){S=Object.assign(fresh(),{cleared:S.cleared,chatLog:S.chatLog||[]});save();render();startIntro();return;}
+  if(n===0){S=Object.assign(fresh(),{cleared:S.cleared,chatLog:S.chatLog||[],traps:S.traps||[],trapsFrom:S.trapsFrom||0});pcScroll={};clip='';nr.type='A';nr.name='';nr.val='';save();render();startIntro();return;}
   if(!S.domain){S.domain='pixeldo.shop';S.whois=true;}
   setDnsForDay(n);clip='';
   S.dnsOk=true;S.relMsg='';S.cfg=cfgForDay(n);
@@ -2343,7 +2351,7 @@ function stingPlay(still,done){
 function reset(){
   try{localStorage.removeItem(KEY);}catch(e){}
   $('ending').hidden=true;rollQuit();document.body.classList.remove('ending-on');
-  netStop();S=fresh();pcScroll={};Q=[];showing=false;setTalking(false);busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.name='';nr.val='';
+  netStop();S=fresh();pcScroll={};Q=[];showing=false;setTalking(false);busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.type='A';nr.name='';nr.val='';clearTimeout(cpnT);cpnT=0;
   hideToast();hideModal();render();startIntro();
 }
 
@@ -2625,7 +2633,12 @@ if(S.rev<3){
   S.trapsFrom=S.phase==='end'?LAST_DAY+1:Math.max(1,S.day);   // この版より前は、引っかかったトラップを数えていなかった
   S.rev=3;save();
 }
-render();
+// 記録が壊れていて描けないときは、その記録をよけて（gsi-demo-v2-broken）、まっさらな状態で始める。
+// ここで止まると、タイトルが出ず、前の記録の画面が残ったままになる
+try{render();}catch(e){
+  try{const raw=localStorage.getItem(KEY);if(raw)localStorage.setItem(KEY+'-broken',raw);localStorage.removeItem(KEY);}catch(e2){}
+  S=fresh();render();
+}
 showTitle(false);
 })();
 </script>

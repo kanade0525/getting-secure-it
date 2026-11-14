@@ -93,6 +93,45 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   ok('全部クリアしたあとは、一般でも「エンディング」を選べる', await p.locator('.dayrow[data-act="ending"]').count() === 1);
   await p.close();
 
+  // 3d) 「はじめから → はい」：前の記録が、状態にも画面にも残らない（まっさらな新規と同じになる）
+  const endSave = Object.assign({}, save6, { rev: 3, day: 24, phase: 'end', cleared: 24, cart: 2, shopQ: 'ロボット', traps: [{ day: 2, t: 'TLS 1.3 だけにした' }], trapsFrom: 0, chatLog: [{ who: 'シロ', t: 'まえのきろく' }], badge: { voice: true, net: true }, last: { ok: true, https: true, lines: [{ k: 'ok', t: 'まえのきろく' }] }, domain: 'maeno-kiroku.shop',
+    voices: [{ who: 'たなか', t: 'まえのきろく', day: 3, unread: true }], dns: [{ type: 'ALIAS', name: '@', value: 'pixeldo-edge.pixelcdn.example' }, { type: 'TXT', name: '_acme-challenge', value: 'ABCD-EFGH' }], svc: 'cloud', sub: 'waf', cfg: Object.assign({}, SAFE, { autoRenew: true, inf: { edge: true, wafSignup: 'captcha', wafLogin: '100', regLock: true } }) });
+  const begin = async st => {
+    const q = await open('', st); await q.click('.menu button[data-t="new"]'); if (st) await q.click('.menu button[data-t="yes"]'); await q.waitForTimeout(150); await clear(q);
+    const texts = []; for (const t of ['shop', 'voice', 'net', 'console']) { await q.click(`.tabs button[data-tab="${t}"]`); await q.waitForTimeout(50); texts.push((await q.locator('body').innerText()).replace(/\s+/g, ' ')); }
+    await q.click('#logBtn'); texts.push((await q.locator('#sheet').innerText()).replace(/\s+/g, ' ')); await q.click('#sheet [data-act="close"]');
+    await q.click('.daybtn'); texts.push((await q.locator('#sheet').innerText()).replace(/\s+/g, ' ')); await q.click('#sheet [data-act="close"]');
+    const st2 = await state(q); await q.close(); return { texts: texts.join('\n'), state: JSON.stringify(st2, Object.keys(st2).sort()), raw: st2 };
+  };
+  const fresh0 = await begin(null), again = await begin(endSave);
+  ok('はじめから：全部クリアした記録から始め直すと、保存内容が、まっさらな新規と同じになる', fresh0.state === again.state && again.raw.cleared === -1 && !again.raw.traps.length && !again.raw.voices.length && !again.raw.domain && !again.raw.dns.length && !again.raw.cfg.inf.edge);
+  ok('はじめから：どのタブ・会話ログ・日の一覧にも、前の記録が出ない（画面の文字が、まっさらな新規と同じ）', fresh0.texts === again.texts && !/まえのきろく|maeno/.test(again.texts));
+
+  // 3e) 同じサイトを2つのタブで開いているとき：片方で「はじめから」にしたら、もう片方の古い画面が、あとから記録を上書きしない
+  { const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); const t1 = await ctx.newPage(), t2 = await ctx.newPage(); t1.on('pageerror', e => errs.push(String(e))); t2.on('pageerror', e => errs.push(String(e)));
+    await t1.goto(URL); await t1.evaluate(x => localStorage.setItem('gsi-demo-v2', x), JSON.stringify(Object.assign({}, save6, { rev: 3, traps: [] }))); await t1.goto(URL); await t1.click('.menu button[data-t="cont"]'); await clear(t1);   // タブ1：6日目の途中
+    await t2.goto(URL); await t2.click('.menu button[data-t="new"]'); await t2.click('.menu button[data-t="yes"]'); await t2.waitForTimeout(150); await clear(t2);                     // タブ2：はじめから
+    await t1.click('.tabs button[data-tab="console"]'); await t1.waitForTimeout(80);   // タブ1（古い画面）を操作する：以前はここで、6日目の記録が書き戻っていた
+    s = await state(t2);
+    ok('2つのタブ：古いほうのタブを操作しても、記録は「はじめから」のまま', s.day === 0 && s.cleared === -1 && !s.domain);
+    await t1.evaluate(() => window.dispatchEvent(new Event('focus'))); await t1.waitForTimeout(400);   // タブ1に戻ってきた
+    ok('2つのタブ：古いほうのタブは、戻ってきたときに読み込み直して、新しい記録になる', (await t1.locator('#title').isVisible()) && /0日目/.test(await t1.locator('#title').innerText()) && !/6日目|neko/.test(await t1.locator('#title').innerText()));
+    await ctx.close(); }
+
+  // 3f) 壊れた記録（ない日を指している）でも、起動で止まらず、タイトルが出る
+  p = await open('', Object.assign({}, save6, { rev: 3, day: 99, phase: 'fix' }));
+  ok('壊れた記録：タイトルが出て、「はじめから」を選べる', (await p.locator('#title').isVisible()) && (await p.locator('.menu button[data-t="new"]').count()) === 1);
+  await p.click('.menu button[data-t="new"]'); await p.click('.menu button[data-t="yes"]'); await p.waitForTimeout(150); s = await state(p);
+  ok('壊れた記録：「はじめから」で、まっさらになる', s.day === 0 && s.phase === 'intro' && s.cleared === -1);
+  await p.close();
+
+  // 3g) 「日を選ぶ → 0日目」は、もう一度遊ぶための移動：クリアの印・会話ログ・引っかかったトラップは残る（説明にも書いてある）
+  p = await open('', endSave); await p.click('.menu [data-t="days"]');
+  ok('日を選ぶ：説明に「クリアの印と会話ログは残る／すべて消すにはタイトルのはじめから」とある', /クリアの印と会話ログは残ります/.test(await p.locator('#sheet').innerText()) && /タイトルの「はじめから」/.test(await p.locator('#sheet').innerText()));
+  await p.click('.dayrow[data-day="0"]'); await p.waitForTimeout(150); await clear(p); s = await state(p);
+  ok('日を選ぶ → 0日目：0日目から遊び直せて、クリアの印・会話ログ・トラップは残り、ドメインや設定は最初に戻る', s.day === 0 && s.cleared === 24 && s.traps.length === 1 && s.chatLog.some(m => m.t === 'まえのきろく') && !s.domain && !s.dns.length && !s.cfg.https && !s.voices.length);
+  await p.close();
+
   // 4) タイトルの「全4章…」を5回押すと、デバッグの入・切
   p = await open('', save6);
   for (let i = 0; i < 5; i++) await p.click('.tver');
