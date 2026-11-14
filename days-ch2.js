@@ -1,7 +1,7 @@
 /* Getting Secure It — 第2章 アプリ編（4〜11日目）
    学習用の防御シミュレーション。各日は「症状→原因確認→対策を入れる→もう一度確かめる→解説」。
    データの形：
-     fix:{key,value,label,done}   ピクセルハブの「対策を入れる」ボタン一発で c.code[key]=value を適用
+     fix:{key,value,label,done}   ピクセルハブのプルリクエスト。中身（コードの差分）を見てマージすると c.code[key]=value になる
      tasks:[{id,l,kind}]                                   サイトタブ「お店の対応」（c.tasks[id]）
      check(c)→{ok,lines,why,blocked,todo,voices}
    verify の流れは第1章と同じ（通信タブで再生→ok ならクリア）。*/

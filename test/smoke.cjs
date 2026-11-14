@@ -32,6 +32,15 @@ const log = (...a) => console.log('[smoke]', ...a);
   const settle = async ph => { for (let i = 0; i < 160; i++) { const s = await state(); if (s && s.phase === ph) return; if (await winUp()) await winNext(); await page.waitForTimeout(100); } throw new Error('phase ' + ph + ' not reached; now ' + (await state()).phase); };
   const toNext = async () => { for (let i = 0; i < 60; i++) { if (await page.locator('#sheet [data-act="nextDay"]').isVisible()) { await page.click('#sheet [data-act="nextDay"]'); return; } if (await winUp()) await winNext(); await page.waitForTimeout(100); } throw new Error('learn nextDay not shown'); };
 
+  // 朝の流れ：お知らせが届く → シロの案内どおり「お知らせ」を開く →「通信」で再生 → 対策フェーズ
+  const morning = async () => {
+    for (let i = 0; i < 160; i++) { const s = await state(); if (s && s.phase === 'incident' && s.step === 'read') break; if (await winUp()) await winNext(); await page.waitForTimeout(100); }
+    if ((await state()).step !== 'read') throw new Error('お知らせが届かない');
+    await tab('voice');
+    if ((await state()).step !== 'net') throw new Error('お知らせを開いても、通信へ進まない');
+    await tab('net'); await settle('fix');
+  };
+
   await shot('00-title');
   await page.click('.menu button[data-t="new"]');
   await dismiss();
@@ -48,8 +57,12 @@ const log = (...a) => console.log('[smoke]', ...a);
   await click('[data-act="publish"]'); await page.waitForTimeout(500); await dismiss();
   await waitPhase('incident');
   log('day1 header:', await header());
-  await page.waitForTimeout(400); await dismiss();
-  await tab('net'); await settle('fix');
+  // お知らせを読む前に「通信」を開いても、再生は始まらない（シロが「先にお知らせ」と言う）
+  for (let i = 0; i < 160; i++) { const s = await state(); if (s.step === 'read') break; if (await winUp()) await winNext(); await page.waitForTimeout(100); }
+  await tab('net'); await page.waitForTimeout(200);
+  log('net before reading:', (await page.locator('#winText').innerText()).slice(0, 12), '/ phase', (await state()).phase);
+  if ((await state()).phase !== 'incident') throw new Error('お知らせを読む前に再生が始まった');
+  await morning();
   log('day1 attacker label:', await page.locator('#netLog .lh.atk').innerText(), '/ button:', await page.locator('#verifyBtn').innerText());
   await shot('03-net-day1');
   // day1 fix
@@ -70,7 +83,7 @@ const log = (...a) => console.log('[smoke]', ...a);
   await click('#verifyBtn'); await settle('clear'); await clearWin(); await shot('06-learn-day1');
   await toNext(); await settle('incident');
   log('day2 header:', await header());
-  await tab('net'); await settle('fix');
+  await morning();
   log('day2 attacker label:', await page.locator('#netLog .lh.atk').innerText());
   await shot('07-net-day2');
   await tab('console'); await svc('cloud', 'net');
@@ -78,7 +91,7 @@ const log = (...a) => console.log('[smoke]', ...a);
   await click('#verifyBtn'); await settle('clear');
   await toNext(); await settle('incident');
   log('day3 header:', await header());
-  await tab('net'); await settle('fix');
+  await morning();
   log('day3 attacker label:', await page.locator('#netLog .lh.atk').innerText());
   // trap: hsts 5分（わざと失敗させる）
   await tab('console'); await svc('cloud', 'net'); await click('#hsts');

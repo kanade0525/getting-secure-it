@@ -1,5 +1,5 @@
 // 通信タブの通し確認（全24日）：攻撃の再生 → 対策 → 「防げたか確かめる」→ クリア。
-// 各日の対策画面は通らず、設定（cfg）を直接そろえて、通信タブの表示と進行だけを確かめる。
+// 各日の対策画面は通らず、設定（cfg）を直接そろえて、通信タブの表示と進行だけを確かめる（対策画面の操作は smoke.cjs・smoke-infra.cjs）。
 //   node test/smoke-net.cjs <index.html のあるフォルダ または URL> <スクショの出力先> [日,日,...]
 const { chromium } = require('playwright');
 const path = require('path');
@@ -7,30 +7,24 @@ const DIR = process.argv[2], OUT = process.argv[3], ONLY = process.argv[4] ? pro
 const URL = /^https?:/.test(DIR) ? DIR : 'file://' + path.join(DIR, 'index.html');
 const log = (...a) => console.log('[net]', ...a);
 
-const SAFE = { ca: 'free', keyMade: true, token: 'DONE-DONE', issued: true, installed: 'fullchain', autoRenew: true, cert: true, https: true, redirect: true, tlsMin: '1.2', ciph: { aes: true, chacha: true, des3: false, rc4: false }, hsts: true, hstsAge: '31536000', code: {}, tasks: {} };
-const cfg = o => { const c = JSON.parse(JSON.stringify(SAFE)); for (const k in o) { if (k === 'ciph' || k === 'code') Object.assign(c[k], o[k]); else c[k] = o[k]; } return c; };
-// 日ごとの「未対策の設定」と「対策の中身」。fix は対策後に上書きする項目
-const DAYS = {
-  1: { bad: { https: false, cert: false, redirect: false, hsts: false, ca: null, installed: null, issued: false }, fix: {} },
-  2: { bad: { tlsMin: '1.0', ciph: { rc4: true, des3: true }, hsts: false }, fix: { hsts: false } },
-  3: { bad: { hsts: false }, fix: {} },
-  4: { key: 'search', val: 'param' }, 5: { key: 'hash', val: 'bcrypt' }, 6: { key: 'price', val: 'server' }, 7: { key: 'review', val: 'escape' },
-  8: { key: 'session', val: 'secure' }, 9: { key: 'csrf', val: 'token' }, 10: { key: 'access', val: 'owner' }, 11: { key: 'coupon', val: 'atomic' },
-  12: { key: 'signup', val: 'verify' }, 13: { key: 'login', val: 'throttle' }, 14: { key: 'dos', val: 'shield' }, 15: { key: 'defense', val: 'layered' },
-  16: { key: 'bots', val: 'challenge' }, 17: { key: 'firewall', val: 'restrict' },
-  18: { bad: { autoRenew: false }, fix: {} },
-  19: { key: 'os', val: 'update' }, 20: { key: 'deps', val: 'update' }, 21: { key: 'thirdparty', val: 'lock' }, 22: { key: 'apikey', val: 'server' },
-  23: { key: 'registrar', val: 'lock' }, 24: { key: 'egress', val: 'monitor' }
+// 設定は、ゲーム本体から「n日目の朝の設定」を取り出して使う（#debug のときだけ window.GSI_DEBUG がある）。
+//   未対策＝その日の朝（前の日までの対策だけ）／対策後＝次の日の朝（その日の対策も入っている）
+const getPlan = async browser => {
+  const p = await browser.newPage(); await p.goto(URL + '#debug');
+  const r = await p.evaluate(() => { const o = {}, G = window.GSI_DEBUG; for (let n = 1; n <= G.lastDay; n++) o[n] = { bad: G.cfgForDay(n), good: G.cfgForDay(n + 1), dnsBad: G.dnsForDay(n), dnsGood: G.dnsForDay(n + 1) }; return o; });
+  await p.close(); return r;
 };
-const seed = (day, phase, c, last) => ({ rev: 2, day, phase, tab: 'shop', voices: [], badge: {}, cart: 0, chatLog: [], last: last || null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [{ type: 'A', name: '@', value: '203.0.113.24' }], svc: 'hub', sub: 'server', cfg: c });
+// step:'net'＝お知らせはもう読んだ（通信タブを開くと再生が始まる）
+const seed = (day, phase, c, ip, last) => ({ rev: 3, day, phase, step: 'net', tab: 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: last || null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [{ type: 'A', name: '@', value: ip }], svc: 'hub', sub: 'server', cfg: c });
 
 (async () => {
   const browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });
   const errors = [], fails = [];
   const check = (day, what, ok) => { if (!ok) { fails.push(day + '日目: ' + what); log('NG', day + '日目', what); } };
-  for (const day of Object.keys(DAYS).map(Number)) {
+  const PLAN = await getPlan(browser);
+  for (const day of Object.keys(PLAN).map(Number)) {
     if (ONLY && !ONLY.includes(day)) continue;
-    const D = DAYS[day], bad = cfg(D.bad || {}), good = cfg(Object.assign({}, D.fix || {}, D.key ? { code: { [D.key]: D.val } } : {}));
+    const D = PLAN[day], bad = D.bad, good = D.good;
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
     page.on('pageerror', e => errors.push(day + '日目: ' + String(e)));
     page.on('console', m => { if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push(day + '日目: ' + m.text()); });
@@ -48,7 +42,7 @@ const seed = (day, phase, c, last) => ({ rev: 2, day, phase, tab: 'shop', voices
     });
 
     // 1) 攻撃の日：通信タブを開くと再生され、対策フェーズへ進む
-    await boot(seed(day, 'incident', bad));
+    await boot(seed(day, 'incident', bad, D.dnsBad));
     await clearWin();
     await page.click('.tabs button[data-tab="net"]');
     check(day, '攻撃の再生後に対策フェーズへ進む', await settle('fix'));
@@ -62,7 +56,7 @@ const seed = (day, phase, c, last) => ({ rev: 2, day, phase, tab: 'shop', voices
 
     // 2) 対策してから「防げたか確かめる」→ クリア
     const s = await state();
-    await boot(Object.assign(seed(day, 'fix', good, s.last), { tab: 'console' }));
+    await boot(Object.assign(seed(day, 'fix', good, D.dnsGood, s.last), { tab: 'console' }));
     await clearWin();
     const before = await (async () => { await page.click('.tabs button[data-tab="net"]'); await page.waitForTimeout(60); return view(); })();
     check(day, '確かめる前は、前回の結果のまま（先に答えを見せない）', before.bad >= 1 && !before.shield);

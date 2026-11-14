@@ -176,6 +176,7 @@ body.fab-on:not(.talking) #p-net:not([hidden]){height:calc(var(--net-h) - 64px)}
 .sw:disabled{opacity:.45;cursor:not-allowed}
 select{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:4px 8px;min-height:44px}
 select:disabled{opacity:.45}
+.row select{max-width:100%;min-width:0}
 .chk{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:2px dashed var(--soft);cursor:pointer}
 .chk:last-child{border-bottom:0}
 .chk input{width:20px;height:20px;accent-color:var(--accent)}
@@ -461,6 +462,39 @@ input[type="text"]:disabled{opacity:.6}
 .ch{position:absolute;display:block;line-height:0}
 .ch.lurk{filter:brightness(.22)}
 .tsub{opacity:.8;margin:0 0 12px;font-size:15px}
+/* ---------- エンディング（タイトルと同じ夜の街角。会話ウィンドウの下に敷く）とエンドロール ---------- */
+.ending{z-index:11;padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))}
+.ebox{margin:auto;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.ekick{margin:0;font-size:15px;letter-spacing:.3em;margin-right:-.3em;color:#c3c7d6;text-shadow:2px 2px 0 #1a1426}
+body.ending-on .dim{background:transparent}
+.roll{position:fixed;inset:0;z-index:31;background:#000;color:#fff;color-scheme:dark;overflow:hidden}
+.roll[hidden]{display:none}
+.rtrack{position:absolute;left:0;right:0;top:100%;display:flex;flex-direction:column;align-items:center;gap:26px;padding:0 20px 40px;text-align:center}
+.rtrack[hidden]{display:none}
+.rtrack.go{animation:rollUp var(--dur,60s) linear forwards}
+@keyframes rollUp{to{transform:translateY(calc(-100% - 100vh))}}
+.rtitle{font-size:28px;color:#ffe08a;text-shadow:2px 2px 0 #c2373f}
+.rsect{font-size:14px;letter-spacing:.2em;margin:34px -.2em 0 0;color:#c3c7d6}
+.cr{display:flex;flex-direction:column;align-items:center;gap:5px}
+.rsp,.rlogo{display:block;line-height:0}
+.rlogo .spr{background:#fff;box-shadow:0 0 0 4px #fff}
+.rrole{font-size:13px;color:#a6abd4}
+.rwho{font-size:18px;line-height:1.5}
+.rtraps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-width:420px;text-align:left;font-size:15px;line-height:1.6}
+.rtraps li{display:grid;grid-template-columns:4.2em minmax(0,1fr);gap:8px}
+.rtraps li span{color:#a6abd4}
+.rend{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:20px;text-align:center}
+.rend[hidden]{display:none}
+.rfin{margin:0;font-size:clamp(20px,5.5vw,26px);line-height:1.6}
+.rend .acts{justify-content:center}
+.rskip{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:2;font:inherit;font-size:13px;color:#fff;background:#000;border:2px solid #fff;padding:4px 12px;min-height:44px;cursor:pointer}
+.rskip[hidden]{display:none}
+@media (prefers-reduced-motion:no-preference){.rend{animation:rendIn .9s steps(6,end)}}
+@keyframes rendIn{from{opacity:0}to{opacity:1}}
+/* 動きを減らす設定：流さずに、上から順にスクロールで読む */
+.roll.static{overflow:auto}
+.roll.static .rtrack{position:static;padding-top:calc(60px + env(safe-area-inset-top,0px))}
+.roll.static .rend{position:static;padding:50px 20px calc(60px + env(safe-area-inset-bottom,0px))}
 .menu{border:4px solid #fff;outline:4px solid #070916;background:rgba(7,9,22,.86);padding:10px 8px;text-align:left;display:flex;flex-direction:column;gap:2px}
 .menu button{font:inherit;font-size:18px;line-height:1.5;color:#fff;background:none;border:0;text-align:left;padding:8px 10px 8px 34px;position:relative;cursor:pointer;min-height:44px}
 .menu button::before{content:"";position:absolute;left:12px;top:15px;width:8px;height:14px;background:currentColor;opacity:0;-webkit-mask:var(--cursor) center/contain no-repeat;mask:var(--cursor) center/contain no-repeat}
@@ -472,8 +506,9 @@ input[type="text"]:disabled{opacity:.6}
 .tver{opacity:.55;font-size:12px;margin:14px 0 0}
 .site{text-align:center;padding:40px 14px}
 /* ピクセルクラウドの中の小メニュー（サーバー／証明書／通信設定） */
-.subs{display:flex;gap:6px;flex-wrap:wrap;padding:10px 0 4px;border-bottom:2px dashed var(--soft);margin-bottom:4px}
-.sub{font:inherit;font-size:13px;line-height:1.3;background:var(--surface);color:var(--muted);border:2px solid var(--line);padding:4px 10px;min-height:36px;cursor:pointer}
+.subs{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:10px 0 4px;border-bottom:2px dashed var(--soft);margin-bottom:4px}
+.subs::-webkit-scrollbar{display:none}
+.sub{flex:none;font:inherit;font-size:13px;line-height:1.3;white-space:nowrap;background:var(--surface);color:var(--muted);border:2px solid var(--line);padding:4px 10px;min-height:36px;cursor:pointer}
 .sub[aria-selected="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .capanel{margin:10px 12px;padding:12px;border:3px dashed var(--line);background:var(--bg)}
 .capanel p{margin:0 0 8px}
@@ -559,6 +594,9 @@ input[type="text"]:disabled{opacity:.6}
 
 <div id="title" class="title-screen" hidden></div>
 
+<div id="ending" class="title-screen ending" hidden></div>
+<div id="roll" class="roll" role="region" aria-label="エンドロール" hidden></div>
+
 <div id="modal" class="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="sheet"></div></div>
 
 <script src="sprites.js"></script>
@@ -588,21 +626,24 @@ const chapterOf=d=>(GD.chapters.find(c=>d>=c.from&&d<=c.to)||GD.chapters[0]).n;
 
 /* ---------- 状態 ---------- */
 const KEY='gsi-demo-v2';
-const SERVER_IP='203.0.113.24';
+const SERVER_IP='203.0.113.24',EDGE_IP='198.51.100.10';   // お店のサーバー／12日目に作る入口（CDN）
+// ピクセルクラウド・ネームヤの設定（12日目〜）。どれも管理画面で、あとから何度でも変えられる
+const freshInf=()=>({edge:false,cache:false,wafSignup:'allow',wafLogin:'0',wafRate:'0',wafDecode:false,bot:'off',crawler:'allow',size:'s',fwWeb:'any',fwSsh:'any',fwOut:'any',patched:false,autoPatch:false,csp:'none',keyRotated:false,regLock:false,reg2fa:false,dnsFreeze:false,alarmOut:false});
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,scrapeRes:null,seenScrape:false,fwRes:null,seenFw:false,rev:2,cleared:-1,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,scrapeRes:null,seenScrape:false,fwRes:null,seenFw:false,step:null,traps:[],saidEdge:false,rev:3,cleared:-1,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
-  cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{}}});
+  cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{},inf:freshInf()}});
 let S=fresh();
 // rev：ステージの並びの版。rev のない保存データは、防壁編に2日（16・17日目）を足す前のものなので、運用編の日付を2日うしろへずらす
-try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg){S=Object.assign(fresh(),s);if(!s.rev){if(S.day>=16)S.day+=2;(S.voices||[]).forEach(v=>{if(v.day>=16)v.day+=2;});S.last=null;}S.rev=2;
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.cfg){S=Object.assign(fresh(),s);if(!s.rev){if(S.day>=16)S.day+=2;(S.voices||[]).forEach(v=>{if(v.day>=16)v.day+=2;});S.last=null;}S.rev=s.rev||2;
   // cleared：クリアした一番先の日（-1＝まだ0日目も終えていない）。記録のない保存データは、いまの日から決める
   if(s.cleared==null)S.cleared=S.phase==='end'?LAST_DAY:S.phase==='clear'?S.day:S.day>=1?S.day-1:S.phase==='day0'?0:-1;}}catch(e){}
 delete S.trust;delete S.victims;
 if(S.cfg&&S.cfg.ca==='paid')S.cfg.ca='free';
 if(!S.sub)S.sub='server';
 if(!S.cfg.code)S.cfg.code={};if(!S.cfg.tasks)S.cfg.tasks={};
+S.cfg.inf=Object.assign(freshInf(),S.cfg.inf||{});if(!Array.isArray(S.traps))S.traps=[];
 if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
 if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
@@ -1030,86 +1071,91 @@ function idorBrowserHTML(){
     +notes(n)+`<div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
 function resetDemoRes(){S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;S.scrapeRes=null;S.fwRes=null;}
-/* --- 第3章 防壁編（サイトタブに出るもの）。ページの中＝お店のフォーム／外＝再現ボタンと結果 --- */
+/* --- 第3章 防壁編（サイトタブに出るもの）。ページの中＝お店のフォーム／外＝再現ボタンと結果 ---
+   対策はピクセルクラウドの設定（c.inf）。入口（CDN）の設定は、ドメインが入口を向いているときだけ効く（edgeOn） */
 function signupDemo(){
-  const fixed=S.cfg.code.signup==='verify',r=S.botRes;
-  const page=`<div class="pg" data-focus><div class="co-head">会員登録</div><div class="pg-b">
-    <div class="signup-form"><input disabled placeholder="メールアドレス"><input disabled placeholder="パスワード">${fixed?'<div class="captcha"><i class="cbox"></i>私はロボットではありません</div>':''}</div>
+  const mode=edgeOn()?S.cfg.inf.wafSignup:'allow',r=S.botRes;
+  const page=mode==='block'
+    ?`<div class="pg" data-focus><div class="co-head">会員登録</div><div class="pg-b"><p class="pg-err" style="margin:0"><b>403 Forbidden</b>　アクセスが拒否されました。</p></div></div>`
+    :`<div class="pg" data-focus><div class="co-head">会員登録</div><div class="pg-b">
+    <div class="signup-form"><input disabled placeholder="メールアドレス"><input disabled placeholder="パスワード">${mode==='captcha'?'<div class="captcha"><i class="cbox"></i>私はロボットではありません</div>':''}</div>
     <button class="btn" disabled style="margin-top:8px">登録</button></div></div>`;
-  const how=note('再現：自動登録',`<p>この会員登録フォームに、自動で連続して登録を送ります。</p><div class="acts"><button class="btn primary" data-act="botRun">自動で100件登録してみる</button></div>`);
+  const how=note('再現：自動登録',`<p>この会員登録フォームに、プログラムで連続して登録を送ります。</p><div class="acts"><button class="btn primary" data-act="botRun">自動で100件登録してみる</button></div>`);
   let n='';
-  if(r)n=r.blocked?note('結果',`<p><b>${r.made}件で停止</b></p><p>人間確認とレート制限が、自動の連続登録を弾いた</p>`,'ok')
-    :note('結果',`<p><b>${r.made}件 登録成功</b></p><p>人間確認がないので、いくらでも作れてしまった</p><div class="dbdump">${r.list.map(m=>'<div>'+esc(m)+'</div>').join('')}<div>…ほか約${r.made-r.list.length}件</div></div>`,'danger');
+  if(r)n=r.made?note('結果',`<p><b>${r.made}件 登録成功</b></p><p>${r.mode==='count'?'WAFは数えただけで、1件も止めていない':'人間かどうかを確かめないので、いくらでも作れてしまった'}</p><div class="dbdump">${r.list.map(m=>'<div>'+esc(m)+'</div>').join('')}<div>…ほか約${r.made-r.list.length}件</div></div>`,'danger')
+    :r.mode==='block'?note('結果','<p><b>0件</b>　WAFが、登録フォームへの送信をすべて止めた</p><p>ただし、本物のお客さんも会員登録できない</p>')
+    :note('結果','<p><b>0件</b>　入口のWAFが、人間か確かめる画面を出した</p><p>プログラムは答えられず、登録まで進めない</p>','ok');
   return {page,notes:n+how};
 }
 function loginDemo(){
-  const n0=S.bruteN||0,r=S.bruteRes,locked=!!(r&&r.locked);
+  const lim=edgeOn()?Number(S.cfg.inf.wafLogin||0):0,n0=S.bruteN||0,r=S.bruteRes,stopped=!!(r&&r.stopped);
   const page=`<div class="pg" data-focus><div class="co-head">ログイン</div><div class="pg-b">
     <div class="signup-form"><input disabled value="tanaka@example.com"><input disabled placeholder="パスワード"></div>
     <button class="btn" disabled style="margin-top:8px">ログイン</button>
-    ${locked?'<p class="pg-err">ログインの失敗が続いたため、このアカウントは一時的にロックされています。</p>':n0?'<p class="pg-err">メールアドレスかパスワードが違います。</p>':''}</div></div>`;
-  const how=note('再現：tanaka さんのアカウントを狙う',`<p>パスワードを次々に試します。試行回数：<b>${n0}</b>${locked?' <span class="warnT">ロック中</span>':''}</p><div class="acts"><button class="btn primary" data-act="bruteTry">パスワードを100回試す</button></div>`);
+    ${stopped?'<p class="pg-err"><b>429 Too Many Requests</b>　アクセスが多すぎます。しばらくしてからお試しください。</p>':n0?'<p class="pg-err">メールアドレスかパスワードが違います。</p>':''}</div></div>`;
+  const how=note('再現：tanaka さんのアカウントを狙う',`<p>パスワードを次々に試します。試した回数：<b>${n0.toLocaleString()}</b></p><div class="acts"><button class="btn primary" data-act="bruteTry">パスワードを100回試す</button></div>`);
   let n='';
-  if(r)n=locked?note('結果',`<p><b>${r.at}回でロック</b></p><p>連続失敗を制限したので、総当たりが成立しない</p>`,'ok')
-    :note('結果',`<p><b>${n0}回試しても止まらない</b></p><p>このまま続ければ、いつか当てられてしまう</p>`,'danger');
+  if(r)n=stopped?(r.at<=2?note('結果',`<p><b>${r.at}回で止まった</b></p><p>ただし、2回打ち間違えただけのお客さんも、同じように止められる</p>`)
+      :note('結果',`<p><b>${r.at}回で止まった</b></p><p>入口のWAFが、回数を超えた相手を止めた。総当たりが成り立たない</p>`,'ok'))
+    :note('結果',`<p><b>${n0.toLocaleString()}回試しても止まらない</b></p><p>${lim?'5分で'+lim.toLocaleString()+'回までは、そのまま試せる。':''}このまま続ければ、いつか当てられてしまう</p>`,'danger');
   return {page,notes:n+how};
 }
 /* --- 第3章 防壁編のデモ（管理タブに出るもの。店長の監視視点で再現） --- */
 function dosDemoHTML(){
   if(demoOff())return '';
   const r=S.dosRes,load=r?r.load:8,col=load>90?'var(--danger)':load>60?'var(--gold)':'var(--safe)';
-  if(r)cNotes.push(r.down?note('結果','<p><b>サーバーダウン</b></p><p>全部そのまま受けたので、量で押し切られた。本物のお客さんも開けない</p>','danger')
-    :note('結果',`<p><b>耐えた（負荷 ${load}%）</b></p><p>入口で吸収し、異常な集中をレート制限で遮断した</p>`,'ok'));
-  cNotes.push(note('再現：大量アクセス','<p>お店のサーバーに、大量のアクセスを一気に送ります。</p><div class="acts"><button class="btn primary" data-act="dosFire">大量アクセスを送る</button></div>'));
+  if(r)cNotes.push(r.down?note('結果',`<p><b>サーバーダウン</b></p><p>${r.big?'大きくしたサーバーも、量で押し切られた':'来た分をそのまま受けたので、量で押し切られた'}。本物のお客さんも開けない</p>`,'danger')
+    :r.strict?note('結果',`<p><b>耐えた（負荷 ${load}%）</b></p><p>ただし、ふつうに買い物するお客さんも「アクセスが多すぎます」と止められる</p>`)
+    :note('結果',`<p><b>耐えた（負荷 ${load}%）</b></p><p>入口のWAFが、決めた回数を超えた相手を止めた</p>`,'ok'));
+  cNotes.push(note('再現：大量アクセス','<p>お店に、大量のアクセスを一気に送ります。</p><div class="acts"><button class="btn primary" data-act="dosFire">大量アクセスを送る</button></div>'));
   return `<div class="sec" data-focus><h3>サーバーの負荷</h3><div class="pg-b"><div class="mon-h">アクセス状況</div>
     <div class="meter"><div class="meter-bar" style="width:${Math.min(100,load)}%;background:${col}"></div></div>
     <div class="small muted" style="margin:6px 0 0">負荷 ${load}%${r&&r.down?' — ダウン':''}</div></div></div>`;
 }
+// 15日目：WAF の記録。そのままの攻撃は止まるが、エンコードした書き方は通る（「検査の前にデコード」がオフのとき）
 function wafDemoHTML(){
   if(demoOff())return '';
-  const layered=S.cfg.code.defense==='layered',enc=!!S.wafEnc,r=S.wafRes;
+  const fixed=S.cfg.code.defense==='layered',enc=!!S.wafEnc,r=S.wafRes;
   const PLAIN="' OR 1=1 --",ENC='%27%20OR%201%3D1%20--';
   if(r)cNotes.push(r.pass
-    ?(layered?note('結果','<p><b>WAF通過 → でも根本で無効化</b></p><p>入力検証と最小権限で、届いても実行されない</p>','ok')
-             :note('結果','<p><b>WAFを通過して届いた</b></p><p>WAF頼みだと、書き方を変えられると素通りする</p>','danger'))
-    :note('結果','<p><b>WAFがブロック</b></p><p>既知のパターンは弾けた（でも書き方を変えると…？）</p>','ok'));
-  cNotes.push(note('再現：商品検索へ攻撃を送る',`<div class="dbdump"><div>${enc?ENC+'（エンコード）':esc(PLAIN)+'（そのまま）'}</div></div>
-    <div class="acts"><button class="btn" data-act="wafEnc" aria-pressed="${enc}">${enc?'エンコードを解除':'エンコードを変える'}</button><button class="btn primary" data-act="wafSend">送信する</button></div>`));
+    ?(fixed?note('結果','<p><b>WAFを通過 → でもコードで止まった</b></p><p>お問い合わせフォームが入力を値として扱うので、届いても実行されない</p>','ok')
+           :note('結果','<p><b>WAFを通過して届いた</b></p><p>WAF頼みだと、書き方を変えられると素通りする</p>','danger'))
+    :note('結果',r.enc?'<p><b>WAFがブロック</b></p><p>デコードして元の形に戻してから検査したので、書き換えても見抜けた</p>':'<p><b>WAFがブロック</b></p><p>既知の型は止められた（でも書き方を変えると……？）</p>','ok'));
+  cNotes.push(note('再現：お問い合わせフォームへ攻撃を送る',`<div class="dbdump"><div>「${enc?ENC:esc(PLAIN)}」${enc?'（エンコードした書き方）':'（そのまま）'}</div></div>
+    <div class="acts"><button class="btn" data-act="wafEnc" aria-pressed="${enc}">${enc?'そのままの書き方に戻す':'エンコードした書き方に変える'}</button><button class="btn primary" data-act="wafSend">送信する</button></div>`));
   // 管理画面に出るのは、WAF の記録（通した／止めた）だけ
-  return `<div class="sec" data-focus><h3>WAF（防壁）の記録</h3>
-    ${r?`<div class="wafrow ${r.pass?'pass':'block'}"><b>${r.pass?'通過':'ブロック'}</b><code>/search?q=${r.pass?ENC:esc(PLAIN)}</code></div>`:'<p class="small muted" style="padding:8px 12px;margin:0">記録はまだありません</p>'}</div>`;
+  return `<div class="sec" data-focus><h3>WAF の記録</h3>
+    ${r?`<div class="wafrow ${r.pass?'pass':'block'}"><b>${r.pass?'通過':'ブロック'}</b><code>POST /contact　name=${r.enc?ENC:esc(PLAIN)}</code></div>`:'<p class="small muted" style="padding:8px 12px;margin:0">記録はまだありません</p>'}</div>`;
 }
 // 16日目：入口（CDN／WAF）の記録。同じ相手が、商品ページを番号順に全部取っていく（スクレイピング）
 function scrapeDemoHTML(){
   if(demoOff())return '';
-  const fixed=S.cfg.code.bots==='challenge',r=S.scrapeRes;
-  if(r)cNotes.push(r.all?note('結果','<p><b>全1,240商品を取得できた</b></p><p>写真・説明・値段を丸ごと集められる。そっくりの偽サイトも作れてしまう</p>','danger')
-    :note('結果',`<p><b>${r.got}件で止まった</b></p><p>入口がボットと判定して、ブラウザかどうかの確認を出した。お客さんと検索エンジンは、そのまま通る</p>`,'ok'));
+  const fixed=edgeOn()&&S.cfg.inf.bot==='challenge',r=S.scrapeRes;
+  if(r)cNotes.push(r.all?note('結果',`<p><b>全1,240商品を取得できた</b></p><p>${r.ua?'ふつうのブラウザの名前を名乗っただけで、すべて通った。':''}写真・説明・値段を丸ごと集められる。そっくりの偽サイトも作れてしまう</p>`,'danger')
+    :note('結果',`<p><b>${r.got}件で止まった</b></p><p>入口がボットと判定して、ブラウザかどうかの確認を出した</p>`,'ok'));
   cNotes.push(note('再現：商品ページを集める','<p>プログラムで、商品ページを番号順に全部取りに行きます。</p><div class="acts"><button class="btn primary" data-act="scrapeRun">全商品のページを自動で集める</button></div>'));
   const row=(n,ok)=>`<div class="wafrow ${ok?'pass':'block'}"><b>${ok?'通過':'ブロック'}</b><code>198.51.100.77　GET /items/${n}${ok?'':'　ボットと判定'}</code></div>`;
   const gap=t=>`<p class="small muted" style="padding:2px 12px;margin:0">${t}</p>`;
   let rows;
   if(r)rows=r.all?row(1,1)+row(2,1)+row(3,1)+gap('…')+row('1,240',1):row(1,1)+gap(`…ほか ${r.got-1} 件`)+row(r.got+1,0)+row(r.got+2,0);
   else rows=fixed?gap('記録はまだありません'):row(1,1)+row(2,1)+row(3,1)+gap('…ほか 1,237 件');
-  return `<div class="sec" data-focus><h3>入口（CDN）の記録</h3>${rows}</div>`;
+  return `<div class="sec" data-focus><h3>入口の記録</h3>${rows}</div>`;
 }
-// 17日目：サーバーのファイアウォールと、管理用ログイン（SSH）の記録。サーバーのIPアドレスへ直接来る相手は、入口を通らない
-function fwDemoHTML(){
+// 17日目：サーバーの管理用ログイン（SSH）の記録。サーバーのIPアドレスへ直接来る相手は、入口を通らない
+function fwLogHTML(){
   if(demoOff())return '';
-  const fixed=S.cfg.code.firewall==='restrict',r=S.fwRes;
-  if(r)cNotes.push(r.open?note('結果','<p><b>1,000回試しても止まらない</b></p><p>サーバーに直接つなげるので、入口のレート制限もボットの判定もかからない。弱いパスワードなら、いつか当たる</p><p>お店のサイトも、サーバーのIPアドレスに直接つなげば、入口を通らずに取得できた</p>','danger')
-    :note('結果','<p><b>つながらない</b></p><p>ファイアウォールが、入口と管理者以外からの接続を捨てる。ログインを試すことすらできない</p>','ok'));
+  const ssh=S.cfg.inf.fwSsh||'any',fixed=ssh==='admin',r=S.fwRes;
+  if(r)cNotes.push(r.open?note('結果',`<p><b>1,000回試しても止まらない</b></p><p>${ssh==='port'?'番号を2222に変えても、開いている番号を順番に探せば見つかる。':''}サーバーに直接つなげるので、入口のレート制限もボットの判定もかからない。弱いパスワードなら、いつか当たる</p>`,'danger')
+    :note('結果','<p><b>つながらない</b></p><p>ファイアウォールが、管理者以外からの接続を捨てる。ログインを試すことすらできない</p>','ok'));
   cNotes.push(note('再現：サーバーに直接つなぐ',`<p>入口（CDN）を通らず、サーバーのIPアドレス ${SERVER_IP} に直接つないで、管理用ログイン（SSH）を試し続けます。</p><div class="acts"><button class="btn primary" data-act="fwTry">直接つないで、ログインを1,000回試す</button></div>`));
   // ターミナルに出るのは、本物のコマンドとその出力だけ（説明はシロのメモに書く）
-  const P='<span class="tp">app@shop-server-01:~$</span> ',fail=(u,ip)=>`Failed password for ${u} from ${ip}`;
+  const P='<span class="tp">app@shop-server-01:~$</span> ',port=ssh==='port'?' port 2222':'',fail=(u,ip)=>`Failed password for ${u} from ${ip}${port}`;
   const tail=fixed?['Accepted publickey for app from 192.0.2.10']
     :r?[fail('app','203.0.113.99'),fail('app','203.0.113.99'),fail('app','203.0.113.99')]
     :[fail('root','198.51.100.23'),fail('admin','192.0.2.61'),fail('ubuntu','198.51.100.140')];
   const log=P+'tail -3 /var/log/auth.log\n'+tail.join('\n')+'\n'+P+'grep -c "Failed password" /var/log/auth.log\n'+(fixed?'0':r?'5812':'4812')+'\n'+P+'<span class="cur">▋</span>';
-  return `<div class="sec"${r?'':' data-focus'}><h3>ファイアウォール</h3>
-    <div class="row"><div class="desc">Web（80・443番）<span class="note">お店のサイト</span></div><span class="small ${fixed?'msg-ok':'muted'}">${fixed?'入口（CDN）からだけ':'すべての相手から'}</span></div>
-    <div class="row"><div class="desc">SSH（22番）<span class="note">サーバーの管理用ログイン。${fixed?'鍵で認証':'パスワードで認証'}</span></div><span class="small ${fixed?'msg-ok':'muted'}">${fixed?'管理者のIPアドレスからだけ':'すべての相手から'}</span></div>
-    <div class="term" style="margin-bottom:10px"${r?' data-focus':''}><div class="term-h">shop-server-01 — ターミナル（SSH）</div><pre class="term-b">${log}</pre></div></div>`;
+  return `<div class="sec" data-focus><h3>管理用ログイン（SSH）の記録</h3>
+    <div class="term" style="margin-bottom:10px"><div class="term-h">shop-server-01 — ターミナル（SSH）</div><pre class="term-b">${log}</pre></div></div>`;
 }
 /* --- 第4章 運用編（サイトタブに出るもの） --- */
 // 16日目：証明書が期限切れ。ブラウザはお店のページの代わりに、警告のページを出す
@@ -1120,20 +1166,21 @@ function certExpiredHTML(){
       <p class="int-code">NET::ERR_CERT_DATE_INVALID</p>
       <div class="acts"><button class="btn" disabled>詳細設定</button><button class="btn" disabled>このまま進む</button></div></div>`;
   return pcHTML(browserWin({k:'cert',title:'プライバシー エラー',fav:spr(IC.warn,2,''),url:'https://'+DOM(),sec:'bad'},page),'お客さんのパソコン',true)
-    +notes(note('解説：お客さんに見えている画面','<p><b>全員に警告画面</b></p><p>慣れた人が「このまま進む」を押し、その通信を盗み見られる</p><div class="acts"><button class="btn primary" data-act="autorenew">自動更新をオンにして更新する</button></div>','danger'));
+    +notes(note('解説：お客さんに見えている画面','<p><b>全員に警告画面</b></p><p>慣れた人が「このまま進む」を押し、その通信を盗み見られる</p><div class="acts"><button class="btn primary" data-act="goCert">ピクセルクラウドの「証明書」を開く</button></div>','danger'));
 }
 function certOkDemo(){
   return {notes:note('結果','<p><b>保護された接続</b>　証明書は有効。自動更新：オン</p><p>期限切れは起きない。期限が近づくと、自動で更新・設置をやり直す</p>','ok')};
 }
 function skimmerDemo(){
-  const locked=S.cfg.code.thirdparty==='lock',r=S.skimRes;
+  const p=S.cfg.inf.csp||'none',r=S.skimRes,off='（CSPにより読み込まない）';
   const page=`<div class="pg" data-focus><div class="co-head">お支払い</div><div class="pg-b">
     <div class="signup-form"><input disabled placeholder="カード番号 4242 4242 4242 4242"></div>
     <button class="btn primary" data-act="skimPay" style="margin-top:8px">カード情報を入力して送信</button></div></div>`;
-  const how=note('解説：このページが読み込んでいるスクリプト',`<div class="dbdump"><div>/js/app.js（自分のサイト）</div><div>cdn.payments.example/pay.js（決済）</div><div class="${locked?'':'warnT'}">cdn.analytics-free.example/track.js ${locked?'（SRIで検証）':'← 差し替え済み'}</div></div>`,locked?'':'danger');
+  const how=note('解説：このページが読み込んでいるスクリプト',`<div class="dbdump"><div>/js/app.js（自分のサイト）</div><div>cdn.payments.example/pay.js（決済サービス）${p==='strict'?off:''}</div><div class="${p==='none'?'warnT':''}">cdn.analytics-free.example/track.js ${p==='none'?'← 差し替え済み':off}</div></div>`,p==='none'?'danger':'');
   let n='';
   if(r)n=r.stolen?note('結果','<p><b>外部へ送信された</b></p><p>差し替えられた track.js が、入力を攻撃者のサーバーへコピーした</p>','danger')
-    :note('結果','<p><b>盗まれない</b></p><p>SRIで差し替えを検知して読み込まず、CSPで許可外への送信も遮断</p>','ok');
+    :r.dead?note('結果','<p><b>支払いができない</b></p><p>決済サービスのスクリプトまで読み込めず、ボタンを押しても何も起きない</p>')
+    :note('結果','<p><b>盗まれない</b></p><p>ブラウザが、許可した場所以外のスクリプトを読み込まない。許可外の場所へは、送信もできない</p>','ok');
   return {page,notes:n+how};
 }
 function apikeyDemo(){
@@ -1153,38 +1200,50 @@ function apikeyDemo(){
     :note('結果','<p><b>キーが無い</b></p><p>キーはサーバー側だけ。ブラウザからは取り出せない</p>','ok');
   return {page,notes:n+how};
 }
-/* --- 第4章 運用編のデモ（管理タブに出るもの） --- */
-function vulnDemoHTML(){
-  const o=DAYS[S.day].demo;if(demoOff())return '';
-  const fixed=S.cfg.code[o.fixKey]==='update',done=fixed||S.vulnShown;
-  let h=`<div class="sec" data-focus><h3>${esc(o.title)}</h3><div class="pg-b">`;
-  if(!done){
-    h+=`<div class="mon-h">構成を調べます</div><button class="btn primary" data-act="vulnScan">脆弱性スキャンを実行</button>`;
+/* --- 第4章 運用編（管理タブに出るもの） --- */
+const vrows=(list,cls)=>`<div class="vulnlist">${list.map(it=>`<div class="vrow ${cls}"><b>${esc(it.name)}</b><span>${esc(it.note)}</span></div>`).join('')}</div>`;
+// 19日目〜：ピクセルクラウド「サーバー」のソフトウェア更新。調べる → 適用して再起動。自動適用のスイッチもここ
+function patchHTML(){
+  const i=S.cfg.inf,o=DAYS[19].demo,today=S.day===19&&!demoOff(),shown=S.vulnShown||i.patched||S.day>19;
+  let h=`<div class="sec"${today?' data-focus':''}><h3>ソフトウェアの更新</h3>`;
+  if(!i.patched){
+    h+=`<div class="row"><div class="desc">未適用のセキュリティ更新<span class="note">${shown?'12件':'まだ調べていません'}</span></div><button class="btn${shown?'':' primary'}" data-act="vulnScan">${shown?'もう一度調べる':'更新を調べる'}</button></div>`;
+    if(shown){h+=`<div class="pg-b">${vrows(o.items,'bad')}</div><div class="row"><div class="desc">更新を適用する<span class="note">適用のあと、サーバーを再起動します（1分ほど）</span></div><button class="btn primary" data-act="patchNow">適用して再起動</button></div>`;
+      if(today)cNotes.push(note('結果','<p><b>既知の脆弱性あり</b></p><p>バージョンを調べれば、誰でも狙える状態</p>','danger'));}
   }else{
-    const list=fixed?o.after:o.items;
-    h+=`<div class="mon-h">${fixed?'更新後':'検出された問題'}</div><div class="vulnlist">${list.map(it=>`<div class="vrow ${fixed?'ok':'bad'}"><b>${esc(it.name)}</b><span>${esc(it.note)}</span></div>`).join('')}</div>`;
-    cNotes.push(fixed?note('結果','<p><b>既知の穴なし</b></p><p>更新で、公開済みの脆弱性はふさがった</p>','ok')
-      :note('結果','<p><b>既知の脆弱性あり</b></p><p>バージョンを調べれば、誰でも狙える状態</p>','danger'));
+    h+=`<div class="row"><div class="desc">未適用のセキュリティ更新<span class="note">0件</span></div><span class="small msg-ok">最新</span></div>`;
+    if(today){h+=`<div class="pg-b">${vrows(o.after,'ok')}</div>`;cNotes.push(note('結果','<p><b>既知の穴なし</b></p><p>更新で、公開済みの脆弱性はふさがった</p>','ok'));}
   }
-  return h+'</div></div>';
+  return h+`<div class="row"><div class="desc">セキュリティ更新を自動で適用<span class="note">新しい更新が出たら、深夜に適用して再起動します</span></div>${infSw('autoPatch')}</div></div>`;
 }
+// 20日目：ピクセルハブのセキュリティ警告（使っているライブラリの、公開済みの穴）
+function depsHTML(){
+  const o=DAYS[S.day].demo;if(demoOff())return '';
+  const fixed=S.cfg.code.deps==='update';
+  cNotes.push(fixed?note('結果','<p><b>既知の穴なし</b></p><p>ライブラリを上げて、公開済みの脆弱性はふさがった</p>','ok')
+    :note('結果','<p><b>既知の脆弱性あり</b></p><p>使っている部品の版を調べれば、誰でも狙える状態</p>','danger'));
+  return `<div class="sec"${fixed?'':' data-focus'}><h3>セキュリティ警告</h3><p class="small muted" style="padding:10px 12px 0;margin:0">${fixed?'未対応の警告はありません':'依存ライブラリ（requirements.txt）に、公開済みの脆弱性があります'}</p><div class="pg-b">${vrows(fixed?o.after:o.items,fixed?'ok':'bad')}</div></div>`;
+}
+// 23日目：ネームヤに届いた、なりすましの移管申請
 function domainDemoHTML(){
   if(demoOff())return '';
-  const locked=S.cfg.code.registrar==='lock',r=S.domRes;
+  const i=S.cfg.inf,r=S.domRes;
   if(r)cNotes.push(r.hijacked?note('結果','<p><b>受理されかけた</b></p><p>本人確認が甘く、ドメインごと乗っ取られる寸前</p>','danger')
-    :note('結果','<p><b>拒否された</b></p><p>移管ロックと2段階認証で、なりすまし申請を止めた</p>','ok'));
+    :note('結果',`<p><b>拒否された</b></p><p>移管ロックが、なりすましの申請を止めた${i.reg2fa?'。アカウントも、2段階認証で守られている':''}</p>`,'ok'));
   cNotes.push(note('再現：なりすましの移管申請','<p>攻撃者が持ち主のふりをして、ドメインの移管を申請します。</p><div class="acts"><button class="btn primary" data-act="domTry">なりすましの移管申請が来た場合を再現する</button></div>'));
   return `<div class="sec" data-focus><h3>登録者変更・移管の申請</h3>
-    <div class="dbdump" style="padding:8px 12px"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：${esc(DOM())} を別の管理者へ移管</div><div class="${locked?'':'warnT'}">本人確認：${locked?'移管ロック＋2段階認証':'確認メールのみ'}</div></div></div>`;
+    <div class="dbdump" style="padding:8px 12px"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：${esc(DOM())} を別の管理者へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認メールの返信待ち（返信がなければ、7日後に自動で承認）'}</div></div></div>`;
 }
+// 24日目：ピクセルクラウド「監視」の、夜間の通信ログ
 function exfilDemoHTML(){
   if(demoOff())return '';
   const r=S.exfilRes;
   if(r)cNotes.push(r.leaked?note('結果','<p><b>素通りした</b></p><p>外向きが自由なので、少量ずつ会員データを持ち出せた</p>','danger')
-    :note('結果','<p><b>遮断・検知した</b></p><p>許可外の宛先への送信を止め、異常として通報した</p>','ok'));
+    :r.none?note('結果','<p><b>遮断した</b></p><p>ただし、決済サービスやメールへの接続まで止まっている</p>')
+    :note('結果',`<p><b>遮断した</b></p><p>許可した宛先ではないので、ファイアウォールが送信を止めた${S.cfg.inf.alarmOut?'。アラームが、異常として通知した':''}</p>`,'ok'));
   cNotes.push(note('再現：外向きの通信','<p>深夜の記録と同じ宛先へ、サーバーからデータを送ってみます。</p><div class="acts"><button class="btn primary" data-act="exfilRun">この外向き通信を試す</button></div>'));
   return `<div class="sec" data-focus><h3>夜間の通信ログ</h3><div class="pg-b"><div class="mon-h">外向きの通信（深夜帯）</div>
-    <div class="dbdump" style="padding:0"><div>02:14  → unknown-host.example  2 KB</div><div>02:41  → unknown-host.example  3 KB</div><div>03:08  → unknown-host.example  2 KB</div><div>…小分けで継続</div></div></div></div>`;
+    <div class="dbdump" style="padding:0"><div>02:14  → unknown-host.example  2 KB</div><div>02:41  → unknown-host.example  3 KB</div><div>03:08  → unknown-host.example  2 KB</div><div>…ほか 41 件</div></div></div></div>`;
 }
 /* --- 「対策を入れる」ときに、コードが書き換わるアニメ --- */
 const SNIP={
@@ -1215,14 +1274,6 @@ const SNIP={
     ['if (coupon.unused)      // 確認','n = coupon.useOnce()    // 確認と記録を1回で'],
     ['  apply(coupon)         // この隙間で割り込み','if (n == 1)'],
     ['coupon.markUsed()       // 記録（別）','  apply(coupon)']]},
-  signup:{file:'signup.py',lines:[
-    ['def register(req):','def register(req):'],
-    ['    create_user(req)   # 誰でも作成','    if not captcha_ok(req): reject()'],
-    ['    return ok','    rate_limit(req.ip); create_user(req)']]},
-  login:{file:'login.py',lines:[
-    ['def login(req):','def login(req):'],
-    ['    check(req.pw)      # 何回でも','    if fails(req.user) >= 5: lock()'],
-    ['    return ok','    throttle(); check(req.pw)']]},
   session:{file:'config/session.py',lines:[
     ['SESSION_STORE       = "url"     # URLに付ける','SESSION_STORE       = "cookie"  # Cookieに入れる'],
     ['COOKIE_SECURE       = False','COOKIE_SECURE       = True      # HTTPSのときだけ送る'],
@@ -1230,53 +1281,26 @@ const SNIP={
     ['COOKIE_SAMESITE     = None','COOKIE_SAMESITE     = "Lax"     # 別サイトからの送信を防ぐ'],
     ['SESSION_MAX_AGE     = None      # 無期限','SESSION_MAX_AGE     = 1209600   # 2週間'],
     ['LOGOUT_ON_PW_CHANGE = False','LOGOUT_ON_PW_CHANGE = True      # 変更時は他端末もログアウト']]},
-  dos:{file:'infra.yml',lines:[
-    ['edge:   none        # 直接受ける','edge:   cdn + waf   # 入口で吸収'],
-    ['limit:  none','limit:  100/min     # レート制限'],
-    ['app.handle(all)','app.handle(allowed)']]},
-  defense:{file:'defense.py',lines:[
-    ['defense = [waf]            # WAF頼み','defense = [waf, validate, least_priv]'],
-    ['run(req.raw)              # そのまま','run(validate(req.input))  # 検証してから']]},
-  bots:{file:'infra.yml',lines:[
-    ['edge:   cdn + waf','edge:   cdn + waf'],
-    ['limit:  100/min','limit:  100/min'],
-    ['bots:   allow all     # 相手を見分けない','bots:   challenge     # ブラウザか確かめる'],
-    ['crawl:  unlimited','crawl:  30 pages/min  # 相手ごとの取得量'],
-    ['allow:  -','allow:  search bots   # 確認済みの検索エンジン']]},
-  firewall:{file:'firewall.yml',lines:[
-    ['web 80,443:  from any','web 80,443:  from edge      # 入口からだけ'],
-    ['ssh 22:      from any','ssh 22:      from admin_ip  # 管理者だけ'],
-    ['ssh auth:    password','ssh auth:    key            # 鍵で認証']]},
-  os:{file:'server.sh',lines:[
-    ['# OpenSSL 1.0.1 (Heartbleed)','apt update && apt upgrade -y'],
-    ['# OpenSSH 6.6 / 未適用12件','# OS・ミドルウェアを更新'],
-    ['run_server()','run_server()  # 既知CVEなし']]},
-  deps:{file:'package.json',lines:[
-    ['"image-lib": "1.2.0",   // RCE','"image-lib": "3.4.1",'],
-    ['"web-util":  "0.9.3"','"web-util":  "2.1.0"']]},
-  thirdparty:{file:'checkout.html',lines:[
-    ['<script src="//cdn.ext/track.js">','<script src="//cdn.ext/track.js"'],
-    ['<\/script>','  integrity="sha384-…" crossorigin><\/script>'],
-    ['# CSP: なし','# CSP: default-src self; connect-src self']]},
+  defense:{file:'contact.py',lines:[
+    ['sql = "INSERT INTO inquiries (name, body)"','sql = "INSERT INTO inquiries (name, body)"'],
+    ['sql += " VALUES (" + name + ", " + body + ")"  // 連結','sql += " VALUES (?, ?)"             // プレースホルダ'],
+    ['db.run(sql)','db.run(sql, [name, body])']]},
+  deps:{file:'requirements.txt',lines:[
+    ['image-lib==1.2.0     # 遠隔コード実行の穴','image-lib==3.4.1'],
+    ['web-util==0.9.3','web-util==2.1.0']]},
   apikey:{file:'pay.js',lines:[
     ['const KEY = "sk_live_9f2a…"  // 丸見え','// キーはサーバー側だけで扱う'],
-    ['fetch(api, {key: KEY})','fetch("/api/pay")   // 署名はサーバーで']]},
-  registrar:{file:'domain.cfg',lines:[
-    ['transfer_lock: off','transfer_lock: on      # 移管ロック'],
-    ['account_2fa:    off','account_2fa:    on      # 2段階認証']]},
-  egress:{file:'egress.cfg',lines:[
-    ['egress: allow all        # 出口自由','egress: allow [known_hosts]  # 許可先だけ'],
-    ['monitor: off','monitor: on  alert_on_anomaly  # 異常検知']]}
+    ['fetch(api, {key: KEY})','fetch("/api/pay")   // サーバーが「シークレット」から読む']]}
 };
 function playCodeAnim(key,done){
   const s=SNIP[key];
   if(!s){done();return;}
   const ov=document.createElement('div');ov.className='codeanim';ov.id='codeanim';
   const rows=s.lines.map((ln,i)=>{const chg=ln[0]!==ln[1];return '<div class="ca-row'+(chg?' chg':'')+'" data-i="'+i+'"><span class="ca-ln">'+(i+1)+'</span><span class="ca-tx">'+esc(ln[0])+'</span></div>';}).join('');
-  ov.innerHTML='<div class="ca-win"><div class="ca-bar"><span class="ca-dot r"></span><span class="ca-dot y"></span><span class="ca-dot g"></span><span class="ca-file">'+esc(s.file)+'</span><span class="ca-tag">対策を書き込み中…</span></div><div class="ca-code">'+rows+'</div></div>';
+  ov.innerHTML='<div class="ca-win"><div class="ca-bar"><span class="ca-dot r"></span><span class="ca-dot y"></span><span class="ca-dot g"></span><span class="ca-file">'+esc(s.file)+'</span><span class="ca-tag">変更を取り込んでいます…</span></div><div class="ca-code">'+rows+'</div></div>';
   document.body.appendChild(ov);
   const changed=s.lines.map((ln,i)=>({i,from:ln[0],to:ln[1]})).filter(x=>x.from!==x.to);
-  const finish=()=>{const tag=ov.querySelector('.ca-tag');if(tag){tag.textContent='対策を適用しました';tag.className='ca-tag ok';}setTimeout(()=>{ov.classList.add('done');setTimeout(()=>{ov.remove();done();},240);},460);};
+  const finish=()=>{const tag=ov.querySelector('.ca-tag');if(tag){tag.textContent='マージしました';tag.className='ca-tag ok';}setTimeout(()=>{ov.classList.add('done');setTimeout(()=>{ov.remove();done();},240);},460);};
   let ci=0;
   (function nextLine(){
     if(ci>=changed.length){finish();return;}
@@ -1345,6 +1369,8 @@ function demoReview(t){
 function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「ピクセルハブ」で直そう'}]);}}
 function renderVoices(){
   let h=`<h2>お知らせ</h2><p class="muted small">お客さんの声や、監視からのアラートが届きます</p>`;
+  // その日のお知らせを開いたら、次は「通信」で原因を見る（通信タブにも目印が付く）
+  if(S.phase==='incident'&&S.step==='net')h+=notes(note('次は','<p>読めたら、下の「通信」タブを開こう。何が起きているのか、通信のようすで確かめられるよ。</p>'));
   if(!S.voices.length)h+=`<div class="box"><p class="muted">まだ声は届いていません。</p></div>`;
   else h+=`<div class="box">${S.voices.map(v=>`<div class="voice${v.unread?' new':''}">${voiceIcon(v)}<div><div class="vn">${esc(v.who)}${v.unread?'<span class="tag newtag">新着</span>':''}<span class="tag">${v.sys?'アラート':v.mail?'メール':'投稿'}</span><span class="tag">${v.day}日目</span></div><div>${esc(v.t)}</div></div></div>`).join('')}</div>`;
   $('p-voice').innerHTML=h;
@@ -1374,7 +1400,7 @@ let evPlaying=false,evTimer=null,evT=[],evOnEnd=null,evSn=null,evSteps=null,evI=
 
 // いまの設定で起きることの記録（再生の元になる。再生し終えたら S.last に残す）
 function netSnap(d,c){
-  const r=d.check(c);
+  const r=d.check(CFG());
   return {ok:!!r.ok,blocked:!!r.blocked,https:!!c.https,pkt:r.pkt||'',lines:r.lines.map(l=>({k:l.k,t:dm(l.t),m:l.m,p:l.p}))};
 }
 // 攻撃ログ1行 → パケットの動き。戻り値は「順番に再生するホップ」の配列で、各ホップは同時に動くパケットの配列
@@ -1553,7 +1579,7 @@ function netHopEnd(hop){
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
 let tick=0;
 if(!RM)setInterval(()=>{tick^=1;
-  if(!$('title').hidden)document.querySelectorAll('.ch[data-cast]').forEach(el=>{el.innerHTML=spr(frameRows(CAST[el.dataset.cast].rows,tick),+el.dataset.s,'');});},520);
+  if(!$('title').hidden||!$('ending').hidden||!$('roll').hidden)document.querySelectorAll('.ch[data-cast],.rsp[data-cast]').forEach(el=>{el.innerHTML=spr(frameRows(CAST[el.dataset.cast].rows,tick),+el.dataset.s,'');});},520);
 
 let caBusy=false,relBusy=false,clip='';
 const nr={type:'A',name:'',val:''};
@@ -1561,6 +1587,15 @@ function genToken(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let 
 function normName(n){n=String(n||'').trim().toLowerCase().replace(/\.$/,'');const d=(S.domain||'').toLowerCase();if(d&&n.endsWith('.'+d))n=n.slice(0,-(d.length+1));if(n===d||n==='')n='@';return n;}
 function aRec(){return (S.dns||[]).filter(r=>r.type==='A'&&r.name==='@');}
 const isLive=()=>S.phase!=='intro'&&S.phase!=='setup';
+// ドメイン（Aレコード）の向き先：server＝サーバーに直接／edge＝入口（CDN）／both＝両方／none＝登録なし／other＝どちらでもないアドレス
+function dnsTo(){const a=aRec().map(r=>String(r.value).trim());if(!a.length)return 'none';const sv=a.includes(SERVER_IP),ed=a.includes(EDGE_IP);return a.some(v=>v!==SERVER_IP&&v!==EDGE_IP)?'other':sv&&ed?'both':ed?'edge':'server';}
+// 判定（days*.js の check・where）に渡す設定。ドメインの向き先は S.dns にあるので、ここで写しておく
+const CFG=()=>{S.cfg.dnsTo=isLive()?dnsTo():'server';return S.cfg;};
+// 入口（CDN）が効いているか：作ってあって、ドメインが入口を向いている
+const edgeOn=()=>!!S.cfg.inf.edge&&dnsTo()==='edge';
+// 管理画面の部品：設定のスイッチと選択肢（c.inf の項目を、その場で切り替える）
+const infSw=(k,dis)=>`<button class="sw" id="inf-${k}" data-act="infSw" data-k="${k}" aria-pressed="${!!S.cfg.inf[k]}" ${dis?'disabled':''}>${S.cfg.inf[k]?'オン':'オフ'}</button>`;
+const infSel=(k,opts)=>`<select id="inf-${k}" data-inf="${k}">${opts.map(([v,n])=>`<option value="${v}" ${S.cfg.inf[k]===v?'selected':''}>${n}</option>`).join('')}</select>`;
 function sw(id,on,dis){return `<button class="sw" id="${id}" data-act="${id}" aria-pressed="${on}" ${dis?'disabled':''}>${on?'オン':'オフ'}</button>`;}
 const intro=t=>`<p class="small" style="padding:10px 12px 0;margin:0">${t}</p>`;
 
@@ -1590,18 +1625,26 @@ function registrarHTML(){
       <button class="btn primary" id="domBuy" data-act="domBuy">このドメインを取得</button></div>`;
     return h+'</div>';
   }
-  const recs=S.dns||[],live=isLive();
+  const recs=S.dns||[],live=isLive(),i=S.cfg.inf,to=dnsTo(),frozen=live&&i.dnsFreeze;
   h+=`<div class="sec"><h3>契約中のドメイン</h3><div class="row"><div class="desc">${esc(S.domain)}<span class="note">${S.whois?'WHOIS公開代行あり':'WHOIS公開代行なし'}</span></div>${S.whois?'<span class="msg-ok small">保護中</span>':''}</div>${whoisBox()}</div>
     <div class="sec"><h3>DNS設定</h3>${intro(esc(S.domain)+' へ来た人を、どこへ案内するかを登録します。')}
     <div class="drow dhead" style="margin-top:8px"><span>タイプ</span><span>名前</span><span>値</span><span></span></div>
-    ${recs.length?recs.map((r,i)=>{const lock=live&&r.type==='A'&&r.name==='@'&&r.value===SERVER_IP;return `<div class="drow"><span>${esc(r.type)}</span><span>${esc(r.name)}</span><span>${esc(r.value)}</span>${lock?'<span class="small muted">公開中</span>':`<button class="link" data-act="dnsDel" data-i="${i}">削除</button>`}</div>`;}).join(''):'<p class="small muted" style="padding:8px 12px;margin:0">レコードはまだありません</p>'}
-    <div class="domrow"><select id="nrType" aria-label="タイプ">${['A','TXT','CNAME'].map(t=>`<option ${nr.type===t?'selected':''}>${t}</option>`).join('')}</select>
+    ${recs.length?recs.map((r,n)=>{
+      // お店の住所（A @）は、公開中は消せない。入口（CDN）を作ったあとは、入口へ向け終わるまで書き換えられる
+      const lock=live&&r.type==='A'&&r.name==='@'&&(i.edge?to==='edge':r.value===SERVER_IP);
+      return `<div class="drow"><span>${esc(r.type)}</span><span>${esc(r.name)}</span><span>${esc(r.value)}</span>${frozen?'<span class="small muted">凍結中</span>':lock?'<span class="small muted">公開中</span>':`<button class="link" data-act="dnsDel" data-i="${n}">削除</button>`}</div>`;}).join(''):'<p class="small muted" style="padding:8px 12px;margin:0">レコードはまだありません</p>'}
+    ${frozen?'<p class="res small muted" style="padding-top:10px">DNSの変更を凍結中です。レコードの追加・削除はできません。</p>':`<div class="domrow"><select id="nrType" aria-label="タイプ">${['A','TXT','CNAME'].map(t=>`<option ${nr.type===t?'selected':''}>${t}</option>`).join('')}</select>
       <input type="text" id="nrName" placeholder="名前（ドメインそのものは @）" aria-label="名前" value="${esc(nr.name)}" autocomplete="off" autocapitalize="off" spellcheck="false">
       <input type="text" id="nrVal" placeholder="値" aria-label="値" value="${esc(nr.val)}" autocomplete="off" autocapitalize="off" spellcheck="false">
       <button class="btn" data-act="dnsAdd">追加</button></div>
     ${clip?'<p class="res"><button class="link" data-act="paste">コピーした値を「値」に貼り付け</button></p>':''}
-    ${S.dnsAddMsg?`<p class="res small msg-err">${S.dnsAddMsg}</p>`:''}</div>`;
+    ${S.dnsAddMsg?`<p class="res small msg-err">${S.dnsAddMsg}</p>`:''}`}</div>`;
+  if(live&&i.edge&&to!=='edge'&&!frozen)cNotes.push(note('解説：ドメインの向き先を、入口に変える',`<p>DNS設定の <b>Aレコード（名前 @）</b> が、お店の住所です。いまの値はサーバー（${SERVER_IP}）で、お客さんはサーバーに直接来ています。</p><p>値が入口のIPアドレス（${EDGE_IP}）の Aレコードを追加して、古いレコードを削除しましょう。</p>`));
   if(DAYS[S.day]&&DAYS[S.day].demo&&DAYS[S.day].demo.kind==='domain')h+=domainDemoHTML();
+  if(live&&S.day>=23)h+=`<div class="sec"><h3>ドメインの保護</h3>
+    <div class="row"><div class="desc">移管ロック<span class="note">ほかの会社や、ほかの持ち主へ移す申請を、受け付けません</span></div>${infSw('regLock')}</div>
+    <div class="row"><div class="desc">アカウントの2段階認証<span class="note">ログインのとき、パスワードに加えて、手元の端末に届く確認コードが要ります</span></div>${infSw('reg2fa')}</div>
+    <div class="row"><div class="desc">DNSの変更を凍結<span class="note">レコードの追加・変更・削除を、すべて受け付けません</span></div>${infSw('dnsFreeze')}</div></div>`;
   return h;
 }
 
@@ -1621,32 +1664,96 @@ function caHTML(){
     <div class="row"><div class="desc">設置はサーバー側で行います</div><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">ピクセルクラウドの「証明書」を開く</button></div></div>`;
 }
 
-/* --- サーバー（ピクセルクラウド） --- */
+/* --- ピクセルクラウド：サーバーや、その周りの設備を借りるサービス。使い始めたサービスが、小メニューに並ぶ ---
+   サーバー／証明書／通信設定（1日目〜）／入口（CDN）・WAF（12日目〜）／ファイアウォール（17日目〜）／シークレット（22日目〜）／監視（24日目〜） */
 function osInfo(){
-  const upd=S.cfg.code.os==='update';
+  const upd=!!S.cfg.inf.patched;
   return {name:upd?'Ubuntu 24.04 LTS':'Ubuntu 14.04 LTS',
     pkg:upd?'OpenSSL 3.0.13 ／ OpenSSH 9.6 ／ nginx 1.26':'OpenSSL 1.0.1f ／ OpenSSH 6.6 ／ nginx 1.10',
     upd};
 }
+function cloudSubs(){
+  const live=isLive(),d=S.day,subs=[['server','サーバー']];
+  if(live&&d>=1)subs.push(['cert','証明書'],['net','通信設定']);
+  if(live&&d>=12)subs.push(['edge','入口（CDN）'],['waf','WAF']);
+  if(live&&d>=17)subs.push(['fw','ファイアウォール']);
+  if(live&&d>=22)subs.push(['secret','シークレット']);
+  if(live&&d>=24)subs.push(['mon','監視']);
+  return subs;
+}
 function cloudServerHTML(){
-  const live=isLive(),os=osInfo();
+  const live=isLive(),os=osInfo(),d=S.day,dd=DAYS[d],k=live&&dd&&dd.demo?dd.demo.kind:'';
   let h=`<div class="sec"><h3>サーバー</h3><div class="row"><div class="desc">shop-server-01<span class="note">IPアドレス ${SERVER_IP}</span></div><span class="small ${live?'msg-ok':'muted'}">${live?'公開中':'準備中'}</span></div>
     <div class="row"><div class="desc">OS<span class="note">${os.name}</span></div><span class="small ${os.upd?'msg-ok':'muted'}">${os.upd?'最新':'稼働中'}</span></div>
     <div class="row"><div class="desc">主なソフトウェア<span class="note">${os.pkg}</span></div></div>`;
+  if(live&&d>=14)h+=`<div class="row"><label class="desc" for="inf-size">サーバーの大きさ<span class="note">大きいほど、同時にさばける量が増えます</span></label>${infSel('size',[['s','小（1コア・1GB）'],['l','大（8コア・32GB）']])}</div>`;
   if(!live)h+=`<div class="row"><div class="desc">サイトを公開する<span class="note">${S.domain?'ドメインがこのサーバーを指していれば公開できます':'先にドメインを取得してください'}</span></div><button class="btn primary" data-act="publish" ${S.domain&&!relBusy?'':'disabled'}>リリースする</button></div>
     ${S.relMsg?`<p class="res small ${relBusy?'muted':'msg-err'}">${S.relMsg}</p>`:''}`;
   h+='</div>';
-  const dd=DAYS[S.day];
-  if(live&&dd&&dd.demo){const k=dd.demo.kind;
-    if(k==='store')h+=storeDemoHTML();
-    else if(k==='dos')h+=dosDemoHTML();
-    else if(k==='waf')h+=wafDemoHTML();
-    else if(k==='vuln')h+=vulnDemoHTML();
-    else if(k==='exfil')h+=exfilDemoHTML();
-    else if(k==='scrape')h+=scrapeDemoHTML();
-    else if(k==='fw')h+=fwDemoHTML();}
+  if(k==='store')h+=storeDemoHTML();
+  else if(k==='dos')h+=dosDemoHTML();
+  else if(k==='fw')h+=fwLogHTML();
+  if(live&&d>=19)h+=patchHTML();
   if(live&&S.day<1)cNotes.push(note('解説','<p>今のところ、ここで設定することはありません。</p>'));
   return h;
+}
+// 入口（CDN）：お店の手前で通信を受け、サーバーへ取り次ぐ。作ったあと、ドメインの向き先（ネームヤのDNS）を入口に変えると通るようになる
+function cloudEdgeHTML(){
+  const i=S.cfg.inf,to=dnsTo();
+  let h=`<div class="sec"><h3>入口（CDN）</h3>`;
+  if(!i.edge)return h+intro('お店のサーバーの手前に置く、通信の入口です。お客さんの通信はまず入口に届き、入口がサーバーへ取り次ぎます。')
+    +`<div class="row"><div class="desc">入口を作る<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><button class="btn primary" data-act="edgeMake">作成する</button></div></div>`;
+  h+=`<div class="row"><div class="desc">pixeldo-edge<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><span class="small msg-ok">稼働中</span></div>
+    <div class="row"><div class="desc">入口のIPアドレス<span class="note">${EDGE_IP}</span></div><button class="btn" data-act="copyEdge">${clip===EDGE_IP?'コピーしました':'コピー'}</button></div>
+    <div class="row"><div class="desc">${esc(S.domain)} の向き先<span class="note">${to==='edge'?'入口（'+EDGE_IP+'）':to==='server'?'サーバー（'+SERVER_IP+'）に直接':to==='both'?'入口とサーバーの両方':to==='none'?'登録がありません':'入口でもサーバーでもないアドレス'}</span></div>${to==='edge'?'<span class="small msg-ok">入口を通っています</span>':'<button class="btn" data-act="svc" data-s="registrar">ネームヤを開く</button>'}</div>`;
+  if(S.day>=14)h+=`<div class="row"><div class="desc">キャッシュ<span class="note">商品ページや画像など、誰が見ても同じ内容は、入口が覚えておいて代わりに返します</span></div>${infSw('cache')}</div>`;
+  if(to!=='edge')cNotes.push(note('解説：入口は、作っただけでは通らない',`<p>お客さんはいまも、サーバー（${SERVER_IP}）に直接来ています。ドメインの向き先（DNSの Aレコード）を入口のIPアドレスに書き換えると、通信が入口を通るようになります。</p><p>DNSは、ドメインを取った「ネームヤ」で設定します。入口のIPアドレスをコピーしてから、ネームヤを開きましょう。</p>`));
+  return h+'</div>';
+}
+// WAF：入口に届いた通信を検査して、通す・止めるを決める。ルールは日が進むごとに増える
+function cloudWafHTML(){
+  const i=S.cfg.inf,d=S.day,dd=DAYS[d],k=dd&&dd.demo?dd.demo.kind:'';
+  if(!i.edge)return `<div class="sec"><h3>WAF</h3>${intro('入口（CDN）に取り付けて、届いた通信を検査します。先に、入口を作ってください。')}<div class="row"><span></span><button class="btn" data-act="sub" data-sub="edge">入口（CDN）を開く</button></div></div>`;
+  let h=k==='waf'?wafDemoHTML():k==='scrape'?scrapeDemoHTML():'';
+  if(d>=16)h+=`<div class="sec"><h3>ボット対策</h3>
+    <div class="row"><label class="desc" for="inf-bot">ボットの見分け方<span class="note">人が使うブラウザか、自動のプログラムか</span></label>${infSel('bot',[['off','見分けない'],['ua','名乗り（User-Agent）で判定'],['challenge','ブラウザか確かめる（チャレンジ）']])}</div>
+    <div class="row"><label class="desc" for="inf-crawler">確認済みの検索エンジン<span class="note">検索サービスが、お店のページを集めに来るボット</span></label>${infSel('crawler',[['allow','通す'],['block','止める']])}</div></div>`;
+  h+=`<div class="sec"><h3>WAF のルール</h3>${intro('取り付け先：pixeldo-edge。入口に届いた通信を、ここのルールで検査します。')}
+    <div class="row"><label class="desc" for="inf-wafSignup">会員登録（/signup）への送信<span class="note">登録フォームに届いた送信の扱い</span></label>${infSel('wafSignup',[['allow','そのまま通す'],['count','数えるだけ'],['captcha','人間か確かめる（CAPTCHA）'],['block','すべてブロック']])}</div>`;
+  if(d>=13)h+=`<div class="row"><label class="desc" for="inf-wafLogin">ログイン（/login）の回数<span class="note">同じ相手から、5分あたり。超えた分はブロック</span></label>${infSel('wafLogin',[['0','制限なし'],['10000','10,000回まで'],['20','20回まで'],['2','2回まで']])}</div>`;
+  if(d>=14)h+=`<div class="row"><label class="desc" for="inf-wafRate">サイト全体の回数<span class="note">同じ相手から、5分あたり。超えた分はブロック</span></label>${infSel('wafRate',[['0','制限なし'],['200000','200,000回まで'],['2000','2,000回まで'],['20','20回まで']])}</div>`;
+  if(d>=15)h+=`<div class="row"><div class="desc">よくある攻撃の型<span class="note">SQLインジェクションなど、既知の型に合う入力をブロック</span></div><span class="small msg-ok">有効</span></div>
+    <div class="row"><div class="desc">検査の前に、入力をデコードする<span class="note">%27 のように書き換えた文字を、元に戻してから検査します</span></div>${infSw('wafDecode')}</div>`;
+  h+='</div>';
+  if(dnsTo()!=='edge')cNotes.push(note('解説：ルールは、まだ効いていない','<p>ドメインが入口を向いていないので、通信が入口を通っていません。「入口（CDN）」で向き先を確かめましょう。</p>'));
+  return h;
+}
+// ファイアウォール：サーバーが、どこからの接続を受け付け、どこへ接続してよいか
+function cloudFwHTML(){
+  let h=`<div class="sec"><h3>インバウンド（入ってくる通信）</h3>${intro('shop-server-01 が、どこからの接続を受け付けるかを決めます。')}
+    <div class="row"><label class="desc" for="inf-fwWeb">Web（80・443番）<span class="note">お店のサイト</span></label>${infSel('fwWeb',[['any','すべての相手'],['edge','入口（CDN）からだけ'],['admin','管理者のIPアドレスだけ']])}</div>
+    <div class="row"><label class="desc" for="inf-fwSsh">SSH（22番）<span class="note">サーバーの管理用ログイン</span></label>${infSel('fwSsh',[['any','すべての相手'],['port','すべての相手（番号を2222に変える）'],['admin','管理者のIPアドレスだけ']])}</div></div>`;
+  if(S.day>=24)h+=`<div class="sec"><h3>アウトバウンド（出ていく通信）</h3>${intro('shop-server-01 から、外のどこへ接続してよいかを決めます。')}
+    <div class="row"><label class="desc" for="inf-fwOut">宛先<span class="note">決済サービス・メール・ソフトウェアの更新は、お店の運営に必要です</span></label>${infSel('fwOut',[['any','すべて許可'],['allow','必要な宛先だけ許可'],['none','すべて拒否']])}</div></div>`;
+  return h;
+}
+// シークレット：外に出してはいけない値を、サーバー側で保管する。漏れたキーは、ここで入れ替える
+function cloudSecretHTML(){
+  const c=S.cfg,i=c.inf,inCode=c.code.apikey!=='server';
+  let h=`<div class="sec"><h3>シークレット</h3>${intro('APIキーやパスワードなど、外に出してはいけない値を、サーバー側で保管します。')}
+    <div class="row"><div class="desc">PAY_API_KEY<span class="note">決済サービスのAPIキー　${i.keyRotated?'sk_live_c71e…':'sk_live_9f2a…'}</span></div><span class="small ${i.keyRotated?'msg-ok':'msg-err'}">${i.keyRotated?'入れ替え済み':'漏えいの疑い'}</span></div>
+    <div class="row"><div class="desc">読み出し元<span class="note">${inCode?'アプリはまだ、コードに書かれたキーを使っています':'shop-server-01 のアプリが、起動時にここから読みます'}</span></div></div>`;
+  h+=i.keyRotated?`<div class="row"><div class="desc">古いキー　sk_live_9f2a…<span class="note">失効済み。もう使えません</span></div></div>`
+    :`<div class="row"><div class="desc">キーを入れ替える<span class="note">いまのキーを失効し、新しいキーを発行して、ここに保管します</span></div><button class="btn primary" data-act="keyRotate">失効して入れ替える</button></div>`;
+  return h+'</div>';
+}
+// 監視：記録と、ふだんと違うことが起きたときの通知（お知らせのアラートは、ここから届いている）
+function cloudMonHTML(){
+  const k=DAYS[S.day]&&DAYS[S.day].demo?DAYS[S.day].demo.kind:'';
+  return (k==='exfil'?exfilDemoHTML():'')+`<div class="sec"><h3>アラーム</h3>${intro('ふだんと違うことが起きたら、「お知らせ」に通知します。')}
+    <div class="row"><div class="desc">アクセス数の急増<span class="note">平常の10倍を超えたら通知</span></div><span class="small msg-ok">有効</span></div>
+    <div class="row"><div class="desc">ログイン失敗の急増<span class="note">5分で100回を超えたら通知</span></div><span class="small msg-ok">有効</span></div>
+    <div class="row"><div class="desc">外向き通信の異常<span class="note">見覚えのない宛先への送信や、遮断された送信を通知</span></div>${infSw('alarmOut')}</div></div>`;
 }
 function certCloudHTML(){
   const c=S.cfg,D=esc(S.domain);
@@ -1691,36 +1798,40 @@ function cloudNetHTML(){
       ${ci.map(([k,n,note])=>`<label class="chk"><input type="checkbox" id="ci-${k}" data-ci="${k}" ${c.ciph[k]?'checked':''}><span>${n}</span><span class="note">${note}</span></label>`).join('')}</div>`;
   }
   if(d>=3){
-    h+=`<div class="sec"><h3>セキュリティヘッダー</h3>
+    h+=`<div class="sec"${d===21&&S.phase!=='clear'?' data-focus':''}><h3>セキュリティヘッダー</h3>
       <div class="row"><div class="desc">HSTS（HTTPSだけで開くよう記憶させる）<span class="note">${c.https&&c.redirect?'Strict-Transport-Security ヘッダーを返します':'HTTPSと転送を先に有効にしてください'}</span></div>${sw('hsts',c.hsts,!(c.https&&c.redirect))}</div>
       <div class="row"><label class="desc" for="hstsAge">記憶させる期間（max-age）</label>
-      <select id="hstsAge" data-act="hstsAge" ${c.hsts?'':'disabled'}>${[['300','5分'],['86400','1日'],['31536000','1年']].map(([v,n])=>`<option value="${v}" ${c.hstsAge===v?'selected':''}>${n}</option>`).join('')}</select></div></div>`;
+      <select id="hstsAge" data-act="hstsAge" ${c.hsts?'':'disabled'}>${[['300','5分'],['86400','1日'],['31536000','1年']].map(([v,n])=>`<option value="${v}" ${c.hstsAge===v?'selected':''}>${n}</option>`).join('')}</select></div>
+      ${d>=21?`<div class="row"><label class="desc" for="inf-csp">CSP（読み込み元と送り先を絞る）<span class="note">Content-Security-Policy ヘッダー。ブラウザが、許可した場所以外のスクリプトを動かさず、送信もしません</span></label>${infSel('csp',[['none','付けない'],['allow','お店と決済サービスだけ許可'],['strict','お店だけ許可']])}</div>`:''}</div>`;
   }
   return h;
 }
 function cloudHTML(g){
-  const live=isLive(),subs=[['server','サーバー']];
-  if(live&&S.day>=1)subs.push(['cert','証明書'],['net','通信設定']);
-  if(!subs.some(s=>s[0]===S.sub))S.sub='server';
-  const gs=g&&g.svc==='cloud'&&g.sub!==S.sub&&subs.some(s=>s[0]===g.sub)?g.sub:'';   // 小メニューに立てる矢印
-  let h=`<div class="subs${gs?' has-guide':''}" role="tablist" aria-label="ピクセルクラウドのメニュー">${subs.map(s=>`<button role="tab" class="sub" data-act="sub" data-sub="${s[0]}" aria-selected="${s[0]===S.sub}">${s[1]}${gs===s[0]?GUIDE:''}</button>`).join('')}</div>`;
-  h+=S.sub==='cert'?certCloudHTML():S.sub==='net'?cloudNetHTML():cloudServerHTML();
-  return h;
+  const subs=cloudSubs();
+  if(!subs.some(x=>x[0]===S.sub))S.sub='server';
+  const gs=g&&g.svc==='cloud'&&g.sub!==S.sub&&subs.some(x=>x[0]===g.sub)?g.sub:'';   // 小メニューに立てる矢印
+  let h=`<div class="subs${gs?' has-guide':''}" role="tablist" aria-label="ピクセルクラウドのメニュー">${subs.map(x=>`<button role="tab" class="sub" data-act="sub" data-sub="${x[0]}" aria-selected="${x[0]===S.sub}">${x[1]}${gs===x[0]?GUIDE:''}</button>`).join('')}</div>`;
+  let pg=({cert:certCloudHTML,net:cloudNetHTML,edge:cloudEdgeHTML,waf:cloudWafHTML,fw:cloudFwHTML,secret:cloudSecretHTML,mon:cloudMonHTML}[S.sub]||cloudServerHTML)();
+  // 入口・WAFなど12日目からの画面は、最初の設定が小メニューのすぐ下に来る位置から見せる（その日の記録があれば、記録から）
+  if(['edge','waf','fw','secret','mon'].includes(S.sub)&&!pg.includes('data-focus'))pg=pg.replace('<div class="sec"','<div class="sec" data-focus');
+  return h+pg;
 }
-/* --- ピクセルハブ（コード共有）：修正案を選ぶ --- */
+/* --- ピクセルハブ（コード共有）：お店のコードの置き場所。修正は、プルリクエストの中身を見てマージする。入れた修正はコミット履歴に残る --- */
+const codeDays=()=>Object.keys(DAYS).map(Number).filter(n=>DAYS[n].fix).sort((a,b)=>a-b);
 function hubHTML(){
-  const d=DAYS[S.day],fx=d&&d.fix;
-  if(!fx){cNotes.push(note('解説','<p>今日はここで入れる対策はありません。</p>'));return '';}
-  const done=S.cfg.code[fx.key]===fx.value;
-  let h=`<div class="sec"><h3>ソースの修正</h3>
-    <p class="small" style="padding:10px 12px 0;margin:0">ピクセルハブが、この店のコードに対策を入れてくれます。</p>`;
-  if(done){
-    h+=`<div class="row"><div class="desc">${esc(fx.label)}<span class="note">${esc(fx.done)}</span></div><span class="msg-ok small">適用済み</span></div>
-      <div class="row" style="border-bottom:0"><button class="link" data-act="undoFix" data-key="${fx.key}">元に戻す</button></div>`;
-  }else{
-    h+=`<div class="row" style="border-bottom:0"><div class="desc">まだ対策が入っていません。</div><button class="btn primary" data-act="applyFix" data-key="${fx.key}" data-v="${fx.value}">${esc(fx.label)}</button></div>`;
-  }
+  const d=DAYS[S.day],fx=d&&d.fix,c=S.cfg,days=codeDays(),num=n=>days.indexOf(n)+1;
+  const done=!!fx&&c.code[fx.key]===fx.value,open=!!fx&&!done&&!demoOff();
+  let h=d&&d.demo&&d.demo.kind==='deps'?depsHTML():'';
+  h+=`<div class="sec"${open?' data-focus':''}><h3>プルリクエスト</h3>`;
+  h+=open?`<div class="row"><div class="desc">#${num(S.day)}　${esc(fx.label)}<span class="note">作成：シロ　／　変更するファイル：${esc(SNIP[fx.key].file)}</span></div><button class="btn primary" data-act="applyFix" data-key="${fx.key}" data-v="${fx.value}">変更を見て、マージする</button></div>`
+    :'<p class="small muted" style="padding:10px 12px;margin:0">未対応のプルリクエストはありません</p>';
   h+='</div>';
+  // コミット履歴：これまでにマージした修正（新しい順）。その日の修正だけ、取り消せる
+  const merged=days.filter(n=>n<=S.day&&c.code[DAYS[n].fix.key]===DAYS[n].fix.value).reverse(),show=merged.slice(0,4);
+  h+=`<div class="sec"><h3>コミット履歴</h3>${show.map(n=>`<div class="row"><div class="desc">${esc(DAYS[n].fix.label)}<span class="note">#${num(n)} をマージ　／　${n}日目</span></div>${n===S.day&&S.phase==='fix'?`<button class="link" data-act="undoFix" data-key="${DAYS[n].fix.key}">取り消す</button>`:''}</div>`).join('')}
+    ${merged.length>show.length?`<p class="small muted" style="padding:8px 12px;margin:0">…ほか ${merged.length-show.length} 件</p>`:''}
+    <div class="row"><div class="desc">よろず屋ピクセル堂を公開<span class="note">最初のコミット　／　0日目</span></div></div></div>`;
+  if(!fx)cNotes.push(note('解説','<p>ピクセルハブは、お店のコードの置き場所です。今日は、ここで入れる修正はありません。</p>'));
   return h;
 }
 // 次に開くとよい管理画面（そのタブに矢印を立てる）。対策がそろっている・まだ攻撃を見ていないときは null
@@ -1730,7 +1841,8 @@ function guideTarget(){
     if(!S.domain||!aRec().some(r=>r.value===SERVER_IP))return {svc:'registrar'};   // ドメインを取る → サーバーの住所を登録する
     return {svc:'cloud',sub:'server'};                                             // リリースする
   }
-  if(S.phase!=='fix'||!d||!d.check||d.check(c).ok)return null;
+  if(S.phase!=='fix'||!d||!d.check||d.check(CFG()).ok)return null;
+  if(d.where)return d.where(CFG());
   if(d.fix)return {svc:'hub'};
   if(S.day<=3){   // 通信編：証明書を用意して、HTTPSにする手順を順に
     if(!c.ca||!c.keyMade)return {svc:'cloud',sub:'cert'};
@@ -1748,7 +1860,7 @@ function guideTarget(){
 // 管理タブ：「あなたのパソコン」のブラウザに、会社ごとのタブが並ぶ。次に開くとよいタブには矢印が立つ
 const SITE={
   registrar:{name:'ネームヤ',role:'ドメイン会社',url:()=>'https://nameya.example/'+(S.domain?'domains/'+S.domain:'search')},
-  cloud:{name:'ピクセルクラウド',role:'サーバー',url:()=>'https://console.pixelcloud.example/'+({cert:'certificates',net:'network'}[S.sub]||'servers/shop-server-01')},
+  cloud:{name:'ピクセルクラウド',role:'クラウド',url:()=>'https://console.pixelcloud.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
   ca:{name:'',role:'認証局',url:()=>'https://freessl.example/orders'},
   hub:{name:'ピクセルハブ',role:'コード共有',url:()=>'https://pixelhub.example/pixeldo/shop'}
 };
@@ -1756,8 +1868,7 @@ function renderConsole(){
   const c=S.cfg,p=$('p-console');
   const ids=['registrar','cloud'];
   if(c.ca&&c.ca!=='self')ids.push('ca');
-  const dd=DAYS[S.day];
-  if(dd&&dd.fix)ids.push('hub');
+  if(isLive()&&S.day>=4)ids.push('hub');   // 4日目から、お店のコードをピクセルハブで管理する
   if(!ids.includes(S.svc))S.svc='cloud';
   const nm=id=>id==='ca'?CAS[c.ca].n:SITE[id].name,sv=S.svc,g=guideTarget();
   cNotes=[];
@@ -1768,6 +1879,9 @@ function renderConsole(){
       tabs:ids.map(id=>({id,title:nm(id),fav:spr(IC['logo_'+id],2,''),on:id===sv,guide:!!g&&g.svc===id&&id!==sv}))},page),'あなたのパソコン',true)
     +notes(...cNotes)+'<p class="shop-foot"></p>';
   pcRestore(p);
+  // ピクセルクラウドの小メニューは横に送れる。次に開くメニュー（矢印）か、いま開いているメニューが見える位置へ寄せる
+  const sb=p.querySelector('.subs'),gd=sb&&sb.querySelector('.sub .guide'),tg=sb&&(gd?gd.parentNode:sb.querySelector('.sub[aria-selected="true"]'));
+  if(tg)sb.scrollLeft=Math.max(0,tg.offsetLeft-(sb.clientWidth-tg.offsetWidth)/2);
 }
 
 /* ---------- 進行 ---------- */
@@ -1776,7 +1890,13 @@ function setTab(t){
   if(S.tab==='voice'&&t!=='voice')S.voices.forEach(v=>{v.unread=false;});
   if(t==='voice')hideToast();
   S.tab=t;S.badge[t]=false;save();render();
-  if(t==='net'&&S.phase==='incident'&&!evPlaying)firstAttack();
+  if(S.phase!=='incident')return;
+  // 朝は、まず「お知らせ」を読んでから「通信」で原因を見る
+  if(t==='voice')readNotices();
+  else if(t==='net'&&!evPlaying){
+    if(S.step==='net')watchAttack();
+    else if(S.step==='read')say([{who:SHIRO,t:'先に「お知らせ」を読もう。何が起きているか分かってから、原因を見にいこう'}]);
+  }
 }
 function startIntro(){
   say([
@@ -1788,7 +1908,7 @@ function startIntro(){
 }
 // その日の準備：前の日のデモの結果を消して、その日の管理画面を開いておく
 function initDay(n){
-  S.day=n;S.phase='incident';S.last=null;netStop();pcScroll={};
+  S.day=n;S.phase='incident';S.last=null;netStop();pcScroll={};S.step=null;S.advSaid=false;S.saidEdge=false;S.voices=(S.voices||[]).filter(v=>v.day!==n);
   const d=DAYS[n];
   S.cfg.tasks={};S.shopRes=null;S.shopQ='';S.seenLeak=false;S.orderPrice=null;S.orderQty=null;S.buyQty=1;S.orderRes=null;S.seenTamper=false;S.reviewQ='';S.reviewRes=null;S.seenXss=false;S.storeRes=null;S.seenStore=false;S.csrfRes=null;S.seenCsrf=false;S.idorRes=null;S.idorId=null;S.seenIdor=false;S.couponRes=null;S.seenCoupon=false;S.sessionRes=null;S.seenSession=false;S.botRes=null;S.seenBot=false;S.bruteN=0;S.bruteRes=null;S.seenBrute=false;S.dosRes=null;S.seenDos=false;S.wafRes=null;S.wafEnc=false;S.seenWaf=false;S.vulnShown=false;S.seenVuln=false;S.skimRes=null;S.seenSkim=false;S.keyRes=null;S.seenKey=false;S.domRes=null;S.seenDom=false;S.exfilRes=null;S.seenExfil=false;S.scrapeRes=null;S.seenScrape=false;S.fwRes=null;S.seenFw=false;
   if(d.svc)S.svc=d.svc;
@@ -1796,19 +1916,37 @@ function initDay(n){
 }
 function startDay(n){
   initDay(n);
-  const d=DAYS[n];
   save();render();
-  say(d.start,()=>{
-    const reports=d.voices.filter(v=>v.who!==SHIRO),advice=d.voices.filter(v=>v.who===SHIRO);
-    reports.forEach((v,i)=>setTimeout(()=>{
-      S.voices.unshift(Object.assign({day:n,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);
-    },RM?0:i*1200));
-    setTimeout(()=>{S.badge.net=S.tab!=='net';save();render();
-      const mon=reports.some(v=>v.sys);
-      // すでに「通信」タブを開いているなら、説明のあとそのまま再生する
-      say(advice.concat([{who:SHIRO,t:mon?'監視からアラートが出てる。「通信」タブで何が起きてるか見てみよう':'お客さんから声が届いてる。原因は「通信」タブで見てみよう'}]),()=>{if(S.tab==='net'&&S.phase==='incident'&&S.day===n&&!evPlaying)firstAttack();});
-    },RM?0:reports.length*1200+300);
-  });
+  say(DAYS[n].start,()=>deliver(n));
+}
+// その日のお知らせ（お客さんの声・監視のアラート）を届ける。シロは、まず「お知らせ」を読むように案内する
+function deliver(n){
+  const d=DAYS[n],reports=d.voices.filter(v=>v.who!==SHIRO),mine=()=>S.day===n&&S.phase==='incident';
+  reports.forEach((v,i)=>setTimeout(()=>{if(!mine())return;
+    S.voices.unshift(Object.assign({day:n,unread:true},v,{t:dm(v.t)}));save();render();if(S.tab!=='voice')showToast(S.voices[0]);
+  },RM?0:i*1200));
+  setTimeout(()=>{if(!mine())return;
+    S.step='read';save();render();
+    if(S.tab==='voice'){readNotices();return;}
+    say([{who:SHIRO,t:reports.some(v=>v.sys)?'監視からアラートが届いた。まず「お知らせ」タブを開いて、何が起きているか読んでみよう':'お客さんから声が届いてる。まず「お知らせ」タブを開いて、読んでみよう'}]);
+  },RM?0:reports.length*1200+300);
+}
+// 「お知らせ」を開いた：次は「通信」で原因を見る（通信タブに目印が付き、お知らせの上にシロのメモが出る）
+function readNotices(){
+  if(S.phase!=='incident'||S.step!=='read')return;
+  S.step='net';S.badge.net=true;save();render();
+}
+// 「通信」を開いた：シロがひとこと添えてから、何が起きているかを再生する
+function watchAttack(){
+  const adv=S.advSaid?[]:DAYS[S.day].voices.filter(v=>v.who===SHIRO);
+  if(!adv.length){firstAttack();return;}
+  S.advSaid=true;const n=S.day;
+  say(adv,()=>{if(S.day===n&&S.tab==='net'&&S.phase==='incident'&&!evPlaying)firstAttack();});
+}
+// 12日目：ドメインが入口（CDN）を向いたら、シロが次（WAF）を案内する
+function edgeSaid(){
+  if(!S.cfg.inf.edge||S.saidEdge||S.phase!=='fix'||dnsTo()!=='edge')return;
+  S.saidEdge=true;save();say([{who:SHIRO,t:'これで、お客さんの通信は入口を通るようになった'},{who:SHIRO,t:'ピクセルクラウドに戻って、「WAF」のルールを決めよう'}]);
 }
 function firstAttack(){
   const d=DAYS[S.day];
@@ -1817,13 +1955,15 @@ function firstAttack(){
 function verify(){
   if(evPlaying||S.phase!=='fix')return;
   S.tab='net';S.badge.net=false;save();render();   // 先に「通信」タブへ切り替えてから再生する
-  const d=DAYS[S.day],r=d.check(S.cfg);
+  const d=DAYS[S.day],r=d.check(CFG());
   netPlay(()=>{
     if(r.ok){S.phase='clear';S.cleared=Math.max(S.cleared,S.day);save();render();say(d.success(S.cfg),showLearn);}
     else{
-      render();
-      (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v));save();render();if(S.tab!=='voice')showToast(v);},RM?0:i*1200));
-      say([{who:SHIRO,t:r.blocked?'攻撃は防げたけど……お客さんが困ってる！':'まだ防げていない……'},{who:SHIRO,t:r.why}]);
+      // 引っかかった設定は覚えておく（エンドロールで、ゲスト出演と一覧になる）
+      if(r.trap&&!S.traps.some(x=>x.day===S.day&&x.t===r.trap))S.traps.push({day:S.day,t:r.trap,guest:r.guest||null});
+      save();render();
+      (r.voices||[]).forEach((v,i)=>setTimeout(()=>{S.voices.unshift(Object.assign({day:S.day,unread:true},v,{t:dm(v.t)}));save();render();if(S.tab!=='voice')showToast(S.voices[0]);},RM?0:i*1200));
+      say([{who:SHIRO,t:r.lead||(r.blocked?'攻撃は防げたけど……お客さんが困ってる！':'まだ防げていない……')},{who:SHIRO,t:r.why}].concat(r.voices&&r.voices.length?[{who:SHIRO,t:'「お知らせ」に、新しい声が届いてる。読んでから直そう'}]:[]));
     }
   });
 }
@@ -1839,9 +1979,12 @@ function cfgForDay(n){
   if(n>1)Object.assign(c,{ca:'free',keyMade:true,token:S.cfg.token||'DONE-DONE',issued:true,installed:'fullchain',cert:true,https:true,redirect:true});
   if(n>2)Object.assign(c,{tlsMin:'1.2',ciph:{aes:true,chacha:true,des3:false,rc4:false}});
   if(n>3)Object.assign(c,{hsts:true,hstsAge:'31536000'});
-  for(let i=4;i<n;i++){const d=DAYS[i];if(d.fix)c.code[d.fix.key]=d.fix.value;if(d.demo&&d.demo.kind==='cert')c.autoRenew=true;}
+  for(let i=4;i<n&&i<=LAST_DAY;i++){const d=DAYS[i];if(d.fix)c.code[d.fix.key]=d.fix.value;if(d.solve)d.solve(c);}
   return c;
 }
+// n日目の朝の、ドメインの向き先：入口（CDN）を作った日（dnsEdge）を過ぎていれば、入口を向いている
+function dnsForDay(n){let e=false;for(let i=1;i<n&&i<=LAST_DAY;i++)if(DAYS[i].dnsEdge)e=true;return e?EDGE_IP:SERVER_IP;}
+const setDnsForDay=n=>{S.dns=[{type:'A',name:'@',value:dnsForDay(n)}].concat((S.dns||[]).filter(r=>!(r.type==='A'&&r.name==='@')));};
 function daySheet(){
   const name=n=>n===0?'0日目　オープン準備':DAYS[n].title;
   let h=`<div class="loghd"><h2 id="mTitle" style="margin:0">日を選ぶ</h2><button class="btn" data-act="${daysFromTitle?'toTitle':'close'}">${daysFromTitle?'タイトルへ戻る':'閉じる'}</button></div>
@@ -1855,6 +1998,7 @@ function daySheet(){
       h+=`<button class="dayrow" data-act="jump" data-day="${n}" ${ok?'':'disabled'}><span class="dn">${ok?esc(name(n)):n+'日目'}</span>${st}</button>`;
     }
   });
+  if(DEBUG||S.cleared>=LAST_DAY)h+=`<p class="logsec" style="margin:8px 0 2px">おわりに</p><button class="dayrow" data-act="ending"><span class="dn">エンディングとエンドロール</span><span class="ds"></span></button>`;
   return h+'</div>';
 }
 function showDays(fromTitle){
@@ -1869,7 +2013,7 @@ function jumpDay(n,toFix){
   hideModal();hideToast();netStop();Q=[];showing=false;clearInterval(typing);typing=null;setTalking(false);resetDemoRes();
   if(n===0){S=Object.assign(fresh(),{cleared:S.cleared,chatLog:S.chatLog||[]});save();render();startIntro();return;}
   if(!S.domain){S.domain='pixeldo.shop';S.whois=true;}
-  if(!(S.dns||[]).some(r=>r.type==='A'&&r.value===SERVER_IP))S.dns=[{type:'A',name:'@',value:SERVER_IP}].concat(S.dns||[]);
+  setDnsForDay(n);clip='';
   S.dnsOk=true;S.relMsg='';S.cfg=cfgForDay(n);
   S.voices=(S.voices||[]).filter(v=>v.day<n);S.badge={};S.tab='shop';
   if(toFix){initDay(n);S.phase='fix';S.badge.console=true;save();render();}
@@ -1898,7 +2042,7 @@ function chatLogSheet(){
   else L.forEach(m=>{h+=logLine(m.who,m.t);});
   return h;
 }
-const toast=$('toast');let toastT=null;
+const toast=$('toast'),rollEl=$('roll');let toastT=null;
 function showToast(v){
   $('toastIcon').innerHTML=voiceIcon(v);
   $('toastTitle').innerHTML='<span class="tag newtag">新着</span>'+esc(v.who+'（'+(v.sys?'アラート':v.mail?'メール':'投稿')+'）');
@@ -1914,7 +2058,7 @@ function showLearn(){
   showModal(`<p class="muted small">${S.day}日目 クリア</p><h2 id="mTitle">${l.title}</h2>
     <ul>${l.points.map(p=>`<li>${p}</li>`).join('')}</ul>
     <p class="real small">${l.real}</p>
-    <div class="acts"><button class="btn primary" data-act="nextDay">${S.day<LAST_DAY?(S.day+1)+'日目へ進む':'まとめを見る'}</button></div>`);
+    <div class="acts"><button class="btn primary" data-act="nextDay">${S.day<LAST_DAY?(S.day+1)+'日目へ進む':'エンディングへ'}</button></div>`);
 }
 function reportSheet(id){
   return `<p class="muted small">個人情報保護委員会</p><h2 id="mTitle">個人情報漏えいの報告</h2>
@@ -1930,6 +2074,7 @@ function noticeSheet(id){
     <p class="real small">黙ってやり過ごす選択肢はありません。事実と対応、お客さまへのお願いを、正直に伝えます。</p>
     <div class="acts"><button class="btn primary" data-act="taskDone" data-id="${id}">このお知らせを出す</button><button class="btn" data-act="close">やめる</button></div>`;
 }
+// 全部クリアしたあとに「つづきから」で開く、まとめ。エンディングとエンドロールは、ここからもう一度見られる
 function showEnd(){
   S.phase='end';save();render();
   showModal(`<h2 id="mTitle">全${LAST_DAY}日、守りきった！</h2>
@@ -1938,14 +2083,83 @@ function showEnd(){
     <ul>
       <li>通信編：HTTPS・暗号の更新・HSTS</li>
       <li>アプリ編：SQLi・パスワード保存・価格・XSS・セッション・CSRF・IDOR・クーポン</li>
-      <li>防壁編：bot登録・総当たり・DoS・WAFと多層防御・スクレイピング・ファイアウォール</li>
-      <li>運用編：証明書更新・OS/ライブラリ更新・外部JS・APIキー・ドメイン・情報持ち出し</li>
+      <li>防壁編：入口（CDN）とWAF・レート制限・多層防御・ボット対策・ファイアウォール</li>
+      <li>運用編：証明書更新・OS/ライブラリ更新・CSP・APIキー・ドメイン・情報持ち出し</li>
     </ul>
     <p class="small">共通していたのは「悪用される前に気づいて、根本からふさぐ」こと。おつかれさま！</p>
-    <div class="acts"><button class="btn primary" data-act="toTitle">タイトルへ戻る</button><button class="btn" data-act="close">閉じる</button></div>`);
+    <div class="acts"><button class="btn primary" data-act="ending">エンディングをもう一度見る</button><button class="btn" data-act="toTitle">タイトルへ戻る</button><button class="btn" data-act="close">閉じる</button></div>`);
+}
+/* ---------- エンディングとエンドロール ----------
+   エンディング：夜の街角（タイトルと同じジオラマ）で、店長とシロが話す。物陰にいた攻撃者は、もういない。
+   エンドロール：主演 → 案内役 → お客さん →（ゲスト出演）→ 攻撃者のみなさん（登場順。役名はここで初めて明かす）→ 協力 → スペシャルサンクス → 引っかかったトラップ →「そして、お店は今日も営業中」 */
+const END_CAST=[['houjin',43,19],['yamada',33.5,24.5],['tencho',17.5,24.5],['shiro',26,25,4],['suzuki',30,27.5],['tanaka',12.5,27.5],['tomo',21.5,29]];
+function castAt(list,sc){
+  return list.map(([id,gx,gy,z,cls])=>{
+    const x=Math.round(TS.ox+(gx-gy)*2-8),y=Math.round(TS.oy+gx+gy-(z||0)-15);
+    return `<span class="ch${cls?' '+cls:''}" data-cast="${id}" data-s="${sc}" style="left:${x*sc}px;top:${y*sc}px">${spr(frameRows(CAST[id].rows,tick),sc,'')}</span>`;
+  }).join('');
+}
+// done＝24日目をクリアして、はじめて見るとき（記録に「全部クリア」を残す）。見返すときは記録を変えない
+function startEnding(done){
+  if(busy)return;
+  hideModal();hideToast();netStop();title.hidden=true;rollEl.hidden=true;
+  if(done){S.phase='end';S.cleared=Math.max(S.cleared,LAST_DAY);save();render();}
+  const vw=window.innerWidth,vh=window.innerHeight,st=(window.devicePixelRatio||1)>=2?2:1;
+  const sc=Math.max(1,Math.min(4,Math.floor(Math.min((vw-32)/TS.w,(vh-250)/TS.h)*st)/st));
+  $('ending').innerHTML=`<div class="ebox"><p class="ekick">${LAST_DAY}日目の夜</p>
+    <div class="scene" style="width:${TS.w*sc}px;height:${TS.h*sc}px" role="img" aria-label="夜の街角。よろず屋ピクセル堂の前に、店長とシロ、お客さんたちが並んでいる"><img src="title.png" alt="" width="${TS.w*sc}" height="${TS.h*sc}">${castAt(END_CAST,sc)}</div></div>`;
+  $('ending').hidden=false;document.body.classList.add('ending-on');
+  const n=S.traps.length;
+  say([
+    {who:'',t:LAST_DAY+'日目の夜。よろず屋ピクセル堂は、今日も無事に店じまいをした'},
+    {who:YOU,t:'お店を公開したら、それで完成だと思ってたよ'},
+    {who:SHIRO,t:'公開は、はじまりだったね。通信、アプリ、防壁、運用。ぜんぶ、きみが自分の手で直した'},
+    {who:SHIRO,t:n?'まちがえた設定も、'+n+'回あった。でも、お知らせを読んで、気づいて、直した。それでいいんだ':'設定をまちがえて、お客さんを困らせることもなかった。たいしたものだよ'},
+    {who:SHIRO,t:'攻撃は、これからも来る。でも、気づいて、確かめて、直す。そのやり方を、きみはもう知ってる'},
+    {who:YOU,t:'うん。……シロ、明日も来てくれる？'},
+    {who:SHIRO,t:'もちろん。今度は、お客さんとしてね'}
+  ],startRoll);
+}
+const rollLine=(id,role,who)=>`<div class="cr">${id?`<span class="rsp" data-cast="${id}" data-s="4">${spr(frameRows(CAST[id].rows,tick),4,'')}</span>`:''}${role?`<div class="rrole">${esc(role)}</div>`:''}<div class="rwho">${esc(who)}</div></div>`;
+function rollHTML(){
+  const sect=t=>`<div class="rsect">${t}</div>`;
+  let h=`<div class="rtitle">Getting Secure It</div>`;
+  h+=sect('主演')+rollLine('tencho','店長','あなた');
+  h+=sect('案内役')+rollLine('shiro','ホワイトハッカー','シロ');
+  h+=sect('お客さん')+['tanaka','suzuki','yamada','houjin','tomo','kenkyu'].map(id=>rollLine(id,CAST[id].role,CAST[id].name)).join('');
+  // ゲスト出演：設定をまちがえたときに、困らせてしまったお客さん
+  const guests=[];S.traps.forEach(x=>{if(x.guest&&!guests.some(g=>g.t===x.guest.t))guests.push(x.guest);});
+  if(guests.length)h+=sect('ゲスト出演')+guests.map(g=>rollLine(g.id,'',g.t)).join('');
+  // 攻撃者のみなさん（登場順）。本編では「攻撃者」としか呼ばなかった役名を、ここで初めて明かす
+  const seen=[];
+  for(let n=1;n<=LAST_DAY;n++){const a=DAYS[n].attacker;let e=seen.find(x=>x.id===a);if(!e){e={id:a,days:[]};seen.push(e);}e.days.push(n);}
+  h+=sect('攻撃者のみなさん（登場順）')+seen.map(e=>rollLine(e.id,e.days.join('・')+'日目',CAST[e.id].name)).join('');
+  h+=sect('協力')+[['registrar','ネームヤ'],['cloud','ピクセルクラウド'],['ca',CAS.free.n],['hub','ピクセルハブ']].map(([k,n])=>`<div class="cr"><span class="rlogo">${spr(IC['logo_'+k],4,'')}</span><div class="rwho">${esc(n)}</div></div>`).join('');
+  h+=sect('スペシャルサンクス')+`<div class="cr"><div class="rwho">毎日苦情をくれたお客さんたち</div></div>`;
+  h+=sect('引っかかったトラップ')+(S.traps.length?`<ul class="rtraps">${S.traps.slice().sort((a,b)=>a.day-b.day).map(x=>`<li><span>${x.day}日目</span>${esc(x.t)}</li>`).join('')}</ul>`:`<div class="cr"><div class="rwho">ひとつもなし</div><div class="rrole">おみごと</div></div>`);
+  return h;
+}
+const ROLL_FIN='そして、お店は今日も営業中';
+function startRoll(){
+  $('ending').hidden=true;document.body.classList.remove('ending-on');
+  rollEl.innerHTML=`<button class="rskip" data-act="rollSkip">スキップ</button><div class="rtrack" id="rollTrack">${rollHTML()}</div>
+    <div class="rend" id="rollEnd" hidden><p class="rfin">${ROLL_FIN}</p><div class="acts"><button class="btn primary" data-act="rollTitle">タイトルへ戻る</button><button class="btn" data-act="rollAgain">もう一度見る</button></div></div>`;
+  rollEl.hidden=false;rollEl.scrollTop=0;
+  const tr=$('rollTrack');
+  rollEl.classList.toggle('static',RM);
+  if(RM){$('rollEnd').hidden=false;rollEl.querySelector('.rskip').hidden=true;return;}   // 動きを減らす設定：流さずに、スクロールで読む
+  rollEl.querySelector('.rskip').focus({preventScroll:true});
+  requestAnimationFrame(()=>{tr.style.setProperty('--dur',Math.max(24,(tr.scrollHeight+window.innerHeight)/56)+'s');tr.classList.add('go');});
+  tr.addEventListener('animationend',rollDone,{once:true});
+}
+function rollDone(){
+  const tr=$('rollTrack'),en=$('rollEnd');if(!tr||!en||!en.hidden)return;
+  tr.hidden=true;en.hidden=false;rollEl.querySelector('.rskip').hidden=true;
+  const b=en.querySelector('button');if(b)b.focus({preventScroll:true});
 }
 function reset(){
   try{localStorage.removeItem(KEY);}catch(e){}
+  $('ending').hidden=true;rollEl.hidden=true;document.body.classList.remove('ending-on');
   netStop();S=fresh();pcScroll={};Q=[];showing=false;setTalking(false);busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.name='';nr.val='';
   hideToast();hideModal();render();startIntro();
 }
@@ -1964,7 +2178,11 @@ document.addEventListener('click',e=>{
   else if(a==='jump'){jumpDay(Number(b.dataset.day),DEBUG&&dbgFix);}
   else if(a==='copy'){const s=b.dataset.copy||'',ok=copyText(s),o=b.textContent;if(document.activeElement===document.body&&document.contains(b))b.focus({preventScroll:true});b.textContent=ok?'コピーしました':'選んでコピーしてね';setTimeout(()=>{b.textContent=o;},1400);}
   else if(a==='verify'){verify();}
-  else if(a==='nextDay'){hideModal();if(S.day<LAST_DAY)startDay(S.day+1);else showEnd();}
+  else if(a==='nextDay'){hideModal();if(S.day<LAST_DAY)startDay(S.day+1);else startEnding(true);}
+  else if(a==='ending'){startEnding(false);}
+  else if(a==='rollSkip'){rollDone();}
+  else if(a==='rollAgain'){startRoll();}
+  else if(a==='rollTitle'){rollEl.hidden=true;showTitle(false);}
   else if(a==='ca'){c.ca=b.dataset.ca;save();render();if(c.ca!=='self')say([{who:SHIRO,t:CAS[c.ca].n+'のタブが、ブラウザに増えたよ。まずはこのサーバーで秘密鍵とCSRを作ろう'}]);}
   else if(a==='certRedo'||a==='reinstall'){
     if(a==='certRedo')Object.assign(c,{ca:null,keyMade:false,token:null,issued:false});
@@ -1975,10 +2193,11 @@ document.addEventListener('click',e=>{
   else if(a==='copyToken'){clip=c.token;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
   else if(a==='paste'){nr.val=clip;render();}
   else if(a==='dnsAdd'){
+    if(c.inf.dnsFreeze&&isLive())return;
     const name=normName(nr.name),val=nr.val.trim();
     if(!nr.name.trim()||!val){S.dnsAddMsg='名前と値を入力してください（ドメインそのものは「@」）';render();return;}
-    S.dns=S.dns||[];S.dns.push({type:nr.type,name,value:val});nr.name='';nr.val='';S.dnsAddMsg='';save();render();}
-  else if(a==='dnsDel'){const i=+b.dataset.i;if(i>=0&&S.dns&&S.dns[i]){S.dns.splice(i,1);save();render();}}
+    S.dns=S.dns||[];S.dns.push({type:nr.type,name,value:val});nr.name='';nr.val='';S.dnsAddMsg='';resetDemoRes();save();render();edgeSaid();}
+  else if(a==='dnsDel'){const i=+b.dataset.i;if(c.inf.dnsFreeze&&isLive())return;if(i>=0&&S.dns&&S.dns[i]){S.dns.splice(i,1);resetDemoRes();save();render();edgeSaid();}}
   else if(a==='dcv'){
     if(caBusy)return;caBusy=true;S.dcvMsg='確認しています……';render();
     setTimeout(()=>{
@@ -2050,29 +2269,57 @@ document.addEventListener('click',e=>{
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
     if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのピクセルハブで直そう'}]);}}
-  else if(a==='botRun'){const fixed=S.cfg.code.signup==='verify';const list=[];for(let i=0;i<4;i++)list.push('user'+(1000+Math.floor(Math.random()*8999))+'@tempmail.example');S.botRes=fixed?{blocked:true,made:3,list:[]}:{blocked:false,made:100,list};save();render();if(!fixed&&!S.seenBot){S.seenBot=true;save();say([{who:SHIRO,t:'ほら、人間確認がないから、自動で何件でも作れちゃう'},{who:SHIRO,t:'管理タブのピクセルハブで、登録に人間確認とレート制限を入れよう'}]);}}
-  else if(a==='bruteTry'){const fixed=S.cfg.code.login==='throttle';if(fixed){S.bruteN=5;S.bruteRes={locked:true,at:5};}else{S.bruteN=(S.bruteN||0)+100;S.bruteRes={locked:false};}save();render();if(!fixed&&!S.seenBrute){S.seenBrute=true;save();say([{who:SHIRO,t:'何回失敗しても止まらないから、試し放題だ'},{who:SHIRO,t:'ピクセルハブで、失敗が続いたらロックする仕組みを入れよう'}]);}}
-  else if(a==='dosFire'){const fixed=S.cfg.code.dos==='shield';S.dosRes=fixed?{load:55,down:false}:{load:100,down:true};save();render();pcFocus($('p-console'));if(!fixed&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'ほら、一気に送られるとサーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルハブで、サーバーの手前に入口（CDN）を置いて、レート制限する仕組みを入れよう'}]);}}
+  /* --- 12日目〜のデモ：対策はピクセルクラウドなどの設定（c.inf）を見て決まる --- */
+  else if(a==='botRun'){const mode=edgeOn()?c.inf.wafSignup:'allow',pass=mode==='allow'||mode==='count',list=[];
+    if(pass)for(let i=0;i<4;i++)list.push('user'+(1000+Math.floor(Math.random()*8999))+'@tempmail.example');
+    S.botRes={mode,made:pass?100:0,list};save();render();
+    if(pass&&!S.seenBot){S.seenBot=true;save();say([{who:SHIRO,t:'人間かどうかを確かめないから、プログラムで何件でも作れちゃう'},{who:SHIRO,t:'「管理」タブのピクセルクラウドで、入口（CDN）とWAFを用意して止めよう'}]);}}
+  else if(a==='bruteTry'){const lim=edgeOn()?Number(c.inf.wafLogin||0):0,next=(S.bruteN||0)+100;
+    if(lim&&next>lim){S.bruteN=lim;S.bruteRes={stopped:true,at:lim};}else{S.bruteN=next;S.bruteRes={stopped:false};}save();render();
+    if(!S.bruteRes.stopped&&!S.seenBrute){S.seenBrute=true;save();say([{who:SHIRO,t:'何回失敗しても止まらないから、試し放題だ'},{who:SHIRO,t:'ピクセルクラウドの「WAF」で、ログインの回数を制限しよう'}]);}}
+  else if(a==='dosFire'){const i=c.inf,n=edgeOn()?i.wafRate:'0',held=n==='2000'||n==='20';
+    S.dosRes=held?{load:n==='20'?12:i.cache?30:55,down:false,strict:n==='20'}:{load:100,down:true,big:i.size==='l'};save();render();pcFocus($('p-console'));
+    if(!held&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'一気に送られると、サーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルクラウドの「WAF」で、サイト全体の回数を決めよう'}]);}}
   else if(a==='wafEnc'){S.wafEnc=!S.wafEnc;S.wafRes=null;save();render();}
-  else if(a==='wafSend'){const enc=!!S.wafEnc,layered=S.cfg.code.defense==='layered';S.wafRes={pass:enc};save();render();pcFocus($('p-console'));if(enc&&!layered&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'エンコードを変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。ピクセルハブで、根本対策を重ねて多層防御にしよう'}]);}}
-  else if(a==='vulnScan'){S.vulnShown=true;save();render();pcFocus($('p-console'));if(!S.seenVuln){S.seenVuln=true;save();say([{who:SHIRO,t:'ほら、使ってるソフトのバージョンが、そのまま公開済みの穴になってる'},{who:SHIRO,t:'ピクセルハブで更新しよう'}]);}}
-  else if(a==='skimPay'){const locked=S.cfg.code.thirdparty==='lock';S.skimRes={stolen:!locked};save();render();if(!locked&&!S.seenSkim){S.seenSkim=true;save();say([{who:SHIRO,t:'差し替えられた外部スクリプトが、入力を外へ送っちゃった'},{who:SHIRO,t:'ピクセルハブで、SRIで固定しCSPで制限しよう'}]);}}
-  else if(a==='keyView'){const safe=S.cfg.code.apikey==='server';S.keyRes={abused:!safe};save();render();if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'ピクセルハブで、キーをサーバー側に隠して失効・再発行しよう'}]);}}
-  else if(a==='domTry'){const locked=S.cfg.code.registrar==='lock';S.domRes={hijacked:!locked};save();render();pcFocus($('p-console'));if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'ピクセルハブで、移管ロックと2段階認証をかけよう'}]);}}
-  else if(a==='exfilRun'){const guarded=S.cfg.code.egress==='monitor';S.exfilRes={leaked:!guarded};save();render();pcFocus($('p-console'));if(!guarded&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルハブで、出口を制限して異常を検知しよう'}]);}}
-  else if(a==='scrapeRun'){const fixed=S.cfg.code.bots==='challenge';S.scrapeRes=fixed?{all:false,got:30}:{all:true};save();render();pcFocus($('p-console'));if(!fixed&&!S.seenScrape){S.seenScrape=true;save();say([{who:SHIRO,t:'ゆっくり順番に取るだけだから、量の制限にはかからない。全部持っていかれた'},{who:SHIRO,t:'ピクセルハブで、入口に「相手を見分ける」仕組みを足そう'}]);}}
-  else if(a==='fwTry'){const fixed=S.cfg.code.firewall==='restrict';S.fwRes={open:!fixed};save();render();pcFocus($('p-console'));if(!fixed&&!S.seenFw){S.seenFw=true;save();say([{who:SHIRO,t:'サーバーに直接つなげるから、入口の対策がぜんぶ素通りだ'},{who:SHIRO,t:'ピクセルハブで、ファイアウォールの設定を直そう'}]);}}
-  else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;const go=()=>{c.code[key]=v;resetDemoRes();save();render();say([{who:SHIRO,t:'対策が入ったよ。右下の「防げたか確かめる」で試してみよう'}]);};if(RM)go();else playCodeAnim(key,go);}
+  else if(a==='wafSend'){const enc=!!S.wafEnc,pass=enc&&!c.inf.wafDecode,fixed=c.code.defense==='layered';S.wafRes={pass,enc};save();render();pcFocus($('p-console'));
+    if(pass&&!fixed&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'書き方を変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。ピクセルハブで、届いた先のコードを直そう'}]);}}
+  else if(a==='scrapeRun'){const how=edgeOn()?c.inf.bot:'off',fixed=how==='challenge';S.scrapeRes=fixed?{all:false,got:30}:{all:true,ua:how==='ua'};save();render();pcFocus($('p-console'));
+    if(!fixed&&!S.seenScrape){S.seenScrape=true;save();say([{who:SHIRO,t:'ゆっくり順番に取るだけだから、回数の制限にはかからない。全部持っていかれた'},{who:SHIRO,t:'同じ画面の「ボット対策」で、相手を見分けよう'}]);}}
+  else if(a==='fwTry'){const fixed=c.inf.fwSsh==='admin';S.fwRes={open:!fixed};save();render();pcFocus($('p-console'));
+    if(!fixed&&!S.seenFw){S.seenFw=true;save();say([{who:SHIRO,t:'サーバーに直接つなげるから、入口の対策がぜんぶ素通りだ'},{who:SHIRO,t:'ピクセルクラウドの「ファイアウォール」で、受け付ける相手を絞ろう'}]);}}
+  else if(a==='vulnScan'){S.vulnShown=true;save();render();pcFocus($('p-console'));
+    if(!c.inf.patched&&!S.seenVuln){S.seenVuln=true;save();say([{who:SHIRO,t:'使ってるソフトのバージョンが、そのまま公開済みの穴になってる'},{who:SHIRO,t:'同じ画面の「適用して再起動」で、更新を当てよう'}]);}}
+  else if(a==='patchNow'){c.inf.patched=true;S.vulnShown=true;save();render();pcFocus($('p-console'));say([{who:SHIRO,t:'更新が当たって、サーバーが再起動した。古いバージョンは、もう残ってない'}]);}
+  else if(a==='skimPay'){const pol=c.inf.csp||'none';S.skimRes={stolen:pol==='none',dead:pol==='strict'};save();render();
+    if(pol==='none'&&!S.seenSkim){S.seenSkim=true;save();say([{who:SHIRO,t:'差し替えられた外部スクリプトが、入力を外へ送っちゃった'},{who:SHIRO,t:'ピクセルクラウドの「通信設定」でCSPを付けて、読み込み元と送り先を絞ろう'}]);}}
+  else if(a==='keyView'){const safe=c.code.apikey==='server';S.keyRes={abused:!safe};save();render();
+    if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'ピクセルハブで、キーをコードから消そう。漏れたキーは、ピクセルクラウドの「シークレット」で入れ替える'}]);}}
+  else if(a==='keyRotate'){c.inf.keyRotated=true;S.keyRes=null;save();render();say([{who:SHIRO,t:'古いキーは失効した。コピーされた分は、もう使えない'}]);}
+  else if(a==='domTry'){const locked=!!c.inf.regLock;S.domRes={hijacked:!locked};save();render();pcFocus($('p-console'));
+    if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'この下の「ドメインの保護」で、移管ロックと2段階認証をかけよう'}]);}}
+  else if(a==='exfilRun'){const out=c.inf.fwOut||'any';S.exfilRes={leaked:out==='any',none:out==='none'};save();render();pcFocus($('p-console'));
+    if(out==='any'&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルクラウドの「ファイアウォール」で、出ていく通信の宛先を絞ろう'}]);}}
+  /* --- ピクセルクラウド・ネームヤの設定 --- */
+  else if(a==='infSw'){const k=b.dataset.k,v=S.vulnShown;c.inf[k]=!c.inf[k];resetDemoRes();S.vulnShown=v;save();render();}
+  else if(a==='edgeMake'){c.inf.edge=true;resetDemoRes();save();render();say([{who:SHIRO,t:'入口ができた。でもまだ、誰も入口を通ってない'},{who:SHIRO,t:'ドメインの向き先を、入口のIPアドレスに変えよう。IPアドレスをコピーして、ネームヤのDNSで、Aレコードを書き換えるんだ'}]);}
+  else if(a==='copyEdge'){clip=EDGE_IP;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
+  else if(a==='goCert'){S.svc='cloud';S.sub='cert';setTab('console');}
+  /* --- ピクセルハブ：プルリクエストの中身（コードの差分）を見て、マージする --- */
+  else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;
+    const go=()=>{c.code[key]=v;resetDemoRes();save();render();const r=DAYS[S.day].check(CFG());
+      say([{who:SHIRO,t:'マージできた。お店のコードに、修正が入ったよ'},{who:SHIRO,t:r.ok?'右下の「防げたか確かめる」で試してみよう':r.why}]);};
+    if(RM)go();else playCodeAnim(key,go);}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
   else if(a==='task'){const id=b.dataset.id,kind=b.dataset.kind;if(kind==='report')showModal(reportSheet(id));else showModal(noticeSheet(id));}
   else if(a==='taskDone'){S.cfg.tasks[b.dataset.id]=true;hideModal();save();
     const dd=DAYS[S.day];
-    if(S.phase==='fix'&&dd&&dd.check(S.cfg).ok)verify();else render();}
+    if(S.phase==='fix'&&dd&&dd.check(CFG()).ok)verify();else render();}
 });
 document.addEventListener('change',e=>{
   const t=e.target,c=S.cfg;
   if(t.dataset.fix){c.code[t.dataset.fix]=t.dataset.v;}
   else if(t.dataset.task){c.tasks[t.dataset.task]=t.checked;}
+  else if(t.dataset.inf){const v=S.vulnShown;c.inf[t.dataset.inf]=t.value;resetDemoRes();S.vulnShown=v;}
   else if('buyqty' in t.dataset){S.buyQty=Number(t.value);}
   else if(t.dataset.act==='tlsMin')c.tlsMin=t.value;
   else if(t.dataset.act==='hstsAge')c.hstsAge=t.value;
@@ -2110,7 +2357,11 @@ function resume(){
   else if(S.phase==='end')showEnd();
   else if(S.phase==='day0')startDay(1);
   else if(S.phase==='setup')say([{who:SHIRO,t:'続きから再開するよ。「管理」タブでリリースの準備をしよう'}]);
-  else if(S.phase==='incident'||S.phase==='fix')say([{who:SHIRO,t:'続きから再開するよ'}],()=>{if(S.tab==='net'&&S.phase==='incident'&&!evPlaying)firstAttack();});
+  else if(S.phase==='incident'&&!S.step)startDay(S.day);   // 朝の会話の途中で閉じていた：その日の朝からやり直す
+  else if(S.phase==='incident')say([{who:SHIRO,t:S.step==='read'?'続きから再開するよ。まず「お知らせ」タブを読もう':'続きから再開するよ。「通信」タブで、何が起きているか見てみよう'}],()=>{
+    if(S.phase!=='incident')return;
+    if(S.tab==='voice')readNotices();else if(S.tab==='net'&&S.step==='net'&&!evPlaying)watchAttack();});
+  else if(S.phase==='fix')say([{who:SHIRO,t:'続きから再開するよ'}]);
 }
 
 /* ---------- タイトル画面 ---------- */
@@ -2175,6 +2426,18 @@ title.addEventListener('keydown',e=>{
   window.addEventListener('resize',setH);setH();
   // 会話ウィンドウが出るとログの高さが変わる。最新の行が隠れないよう、末尾へ寄せ直す
   if(window.ResizeObserver)new ResizeObserver(()=>{const l=$('netLog');if(l)l.scrollTop=l.scrollHeight;}).observe($('p-net'));
+}
+if(DEBUG)window.GSI_DEBUG={cfgForDay,dnsForDay,lastDay:LAST_DAY};   // テスト用：n日目の朝の設定を取り出す
+// 版3（12日目以降の対策を、ピクセルクラウドやネームヤの設定に移した）より前の保存データ：
+// 12日目以降は設定の持ち方が違うので、その日の朝からやり直す。全部クリア済みなら、全部の対策が入った状態にする
+if(S.rev<3){
+  ['signup','login','dos','bots','firewall','os','thirdparty','registrar','egress'].forEach(k=>{delete S.cfg.code[k];});
+  if(S.phase==='end'||S.day>=12){
+    const end=S.phase==='end',n=end?LAST_DAY+1:S.day,keep=S.cfg.token;
+    S.cfg=cfgForDay(n);if(keep)S.cfg.token=keep;setDnsForDay(n);
+    if(!end){S.phase='incident';S.step=null;S.last=null;S.voices=(S.voices||[]).filter(v=>v.day<S.day);}
+  }
+  S.rev=3;save();
 }
 render();
 showTitle(false);

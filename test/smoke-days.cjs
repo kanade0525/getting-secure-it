@@ -1,7 +1,8 @@
 // 日を選ぶ・デバッグの確認：
 //   ・一般のプレイヤーは、クリアした日と、その次の日だけ選べる（選んだ日の朝の設定になる）
 //   ・デバッグ（#debug／タイトルの「全4章…」を5回押す）は、どの日でも選べて、対策の場面から始められる
-//   ・16〜17日目（防壁編のインフラ側の2日）を、画面の操作だけで朝からクリアまで通す
+//   ・どの日も「その日の朝の設定」では防げず、「次の日の朝の設定」では防げる（日を選んだ先で、ちゃんと遊べる）
+//   ・古い保存データ（12日目以降の対策がコードだった版）は、その日の朝からやり直しになる
 //   node test/smoke-days.cjs <index.html のあるフォルダ または URL> <スクショの出力先>
 const { chromium } = require('playwright'); const path = require('path');
 const DIR = process.argv[2], OUT = process.argv[3];
@@ -15,7 +16,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   const open = async (hash, st, w, h) => { const p = await b.newPage({ viewport: { width: w || 390, height: h || 844 }, reducedMotion: 'reduce', deviceScaleFactor: 2 }); p.on('pageerror', e => errs.push(String(e))); await p.goto(URL); await p.evaluate(x => { localStorage.clear(); if (x) localStorage.setItem('gsi-demo-v2', x); }, st ? JSON.stringify(st) : null); await p.goto(URL + (hash || '')); await p.reload(); return p; };
   const state = p => p.evaluate(() => JSON.parse(localStorage.getItem('gsi-demo-v2') || 'null'));
   const clear = async p => { for (let i = 0; i < 60; i++) { if (!(await p.locator('#win').isVisible())) return; await p.click('#win', { position: { x: 24, y: 16 } }); await p.waitForTimeout(40); } };
-  const rows = p => p.evaluate(() => [...document.querySelectorAll('.dayrow')].map(r => ({ d: +r.dataset.day, dis: r.disabled, t: r.querySelector('.dn').textContent, s: r.querySelector('.ds').textContent || (r.querySelector('.ds svg') ? 'lock' : '') })));
+  const rows = p => p.evaluate(() => [...document.querySelectorAll('.dayrow[data-day]')].map(r => ({ d: +r.dataset.day, dis: r.disabled, t: r.querySelector('.dn').textContent, s: r.querySelector('.ds').textContent || (r.querySelector('.ds svg') ? 'lock' : '') })));
 
   // 1) 記録なし：日を選ぶ は出ない
   let p = await open('', null);
@@ -48,30 +49,37 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   await p.click('.menu [data-t="days"]');
   r = await rows(p);
   ok('デバッグ：全25日が選べる', r.length === 25 && r.every(x => !x.dis));
+  ok('デバッグ：一覧の最後に「エンディングとエンドロール」がある', await p.locator('.dayrow[data-act="ending"]').count() === 1);
   await p.screenshot({ path: OUT + '/days-debug.png' });
   await p.check('#dbgFix'); await p.click('.dayrow[data-day="17"]'); await p.waitForTimeout(100);
   s = await state(p);
-  ok('デバッグ：17日目の対策の場面から始まる（会話なし・16日目までの対策あり）', s.day === 17 && s.phase === 'fix' && s.cfg.code.bots === 'challenge' && !s.cfg.code.firewall && !(await p.locator('#win').isVisible()) && s.domain === 'pixeldo.shop');
-  // 16日目の朝から、画面の操作だけで17日目のクリアまで通す
-  await p.click('.daybtn'); await p.uncheck('#dbgFix'); await p.click('.dayrow[data-day="16"]');
-  for (const day of [16, 17]) {
-    await clear(p); await p.click('.tabs button[data-tab="net"]');
-    for (let i = 0; i < 80; i++) { await clear(p); if ((await state(p)).phase === 'fix') break; await p.waitForTimeout(100); }
-    await clear(p);
-    ok(day + '日目：攻撃を見て、対策の場面になる', (await state(p)).phase === 'fix' && (await state(p)).day === day);
-    await p.click('.tabs button[data-tab="console"]'); await clear(p);
-    await p.click(day === 16 ? '[data-act="scrapeRun"]' : '[data-act="fwTry"]'); await clear(p);
-    if (day === 16) await p.screenshot({ path: OUT + '/d16-flow.png' });
-    await p.click('#svc-hub'); await p.click('[data-act="applyFix"]'); await clear(p);
-    await p.click('#verifyBtn');
-    for (let i = 0; i < 80; i++) { await clear(p); if (await p.locator('#modal').isVisible()) break; await p.waitForTimeout(100); }
-    s = await state(p);
-    ok(day + '日目：対策を入れて確かめると、クリアになる', s.phase === 'clear' && s.cleared === day);
-    if (day === 17) await p.screenshot({ path: OUT + '/d17-learn.png' });
-    await p.click('[data-act="nextDay"]');
-  }
-  await clear(p); s = await state(p);
-  ok('17日目のあとは、18日目（切れていた鍵）へ進む', s.day === 18 && (await p.locator('#dayLabel').textContent()).includes('切れていた鍵'));
+  ok('デバッグ：17日目の対策の場面から始まる（会話なし・16日目までの対策あり）', s.day === 17 && s.phase === 'fix' && s.cfg.inf.bot === 'challenge' && s.cfg.inf.wafRate === '2000' && s.cfg.inf.fwSsh === 'any' && s.dns.some(x => x.type === 'A' && x.value === '198.51.100.10') && !(await p.locator('#win').isVisible()) && s.domain === 'pixeldo.shop');
+  // どの日も、その日の朝の設定では防げず、次の日の朝の設定では防げる
+  const plan = await p.evaluate(() => { const G = window.GSI_DEBUG, D = window.GSI_DAYS.days, EDGE = '198.51.100.10', out = [];
+    const cfg = n => Object.assign(G.cfgForDay(n), { dnsTo: G.dnsForDay(n) === EDGE ? 'edge' : 'server' });
+    for (let n = 1; n <= G.lastDay; n++) { const a = D[n].check(cfg(n)), b = D[n].check(cfg(n + 1)); if (a.ok || !b.ok || !a.why || !b.lines.length) out.push(n + ':' + a.ok + '/' + b.ok); }
+    return out; });
+  ok('全24日：朝の設定では防げず、正解を入れると防げる' + (plan.length ? '（' + plan.join(' ') + '）' : ''), plan.length === 0);
+  await p.close();
+
+  // 3b) 一般のプレイヤー：全部クリアするまで、一覧に「エンディング」は出ない
+  p = await open('', save6); await p.click('.menu [data-t="days"]');
+  ok('一般：クリア前は「エンディング」が一覧に出ない', await p.locator('.dayrow[data-act="ending"]').count() === 0);
+  await p.close();
+
+  // 3c) 古い保存データ（版2：12日目以降の対策を、ピクセルハブのコードで入れていた）
+  const old14 = Object.assign({}, save6, { day: 14, phase: 'fix', step: undefined, cfg: Object.assign({}, SAFE, { code: { search: 'param', signup: 'verify', login: 'throttle', dos: 'shield' } }), voices: [{ who: '監視', sys: true, t: 'x', day: 13, unread: false }, { who: '監視', sys: true, t: 'y', day: 14, unread: false }] });
+  p = await open('', old14); s = await state(p);
+  ok('古い記録（14日目の途中）：14日目の朝からやり直しになる', s.rev === 3 && s.day === 14 && s.phase === 'incident' && !s.step && s.voices.every(v => v.day < 14));
+  ok('古い記録：13日目までの対策は、新しい設定の形で入っている', s.cfg.inf.edge && s.cfg.inf.wafSignup === 'captcha' && s.cfg.inf.wafLogin === '20' && s.cfg.inf.wafRate === '0' && !s.cfg.code.dos && !s.cfg.code.signup && s.cfg.code.search === 'param' && s.dns.some(x => x.type === 'A' && x.value === '198.51.100.10') && !s.dns.some(x => x.type === 'A' && x.value === '203.0.113.24'));
+  await p.click('.menu button[data-t="cont"]'); await p.waitForTimeout(100);
+  ok('古い記録：つづきからで、14日目の朝の会話が始まる', (await p.locator('#win').isVisible()) && /落ちてる/.test(await p.locator('#winText').innerText()));
+  await p.close();
+  const oldEnd = Object.assign({}, save6, { day: 24, phase: 'end', cfg: Object.assign({}, SAFE, { autoRenew: true, code: { search: 'param', egress: 'monitor', registrar: 'lock' } }) });
+  p = await open('', oldEnd); s = await state(p);
+  ok('古い記録（全部クリア）：クリアのまま、全部の対策が入った設定になる', s.phase === 'end' && s.cleared === 24 && s.cfg.inf.alarmOut && s.cfg.inf.regLock && s.cfg.code.apikey === 'server' && !s.cfg.code.egress);
+  await p.click('.menu [data-t="days"]');
+  ok('全部クリアしたあとは、一般でも「エンディング」を選べる', await p.locator('.dayrow[data-act="ending"]').count() === 1);
   await p.close();
 
   // 4) タイトルの「全4章…」を5回押すと、デバッグの入・切
