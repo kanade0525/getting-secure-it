@@ -257,12 +257,15 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   check('エンドロール：引っかかったトラップの一覧（' + s.traps.length + '件）', (await page.locator('#roll .rtraps li').count()) === s.traps.length && (FROM > 12 || s.traps.length >= 5));
   check('エンドロール：「そして、お店は今日も営業中」と、終わりのボタンがある', roll.includes('そして、お店は今日も営業中') && roll.includes('お店の「穴」から生まれた妖精') && (await page.locator('#roll [data-act="rollTitle"]').count()) === 1);
   check('最後の場面：見える位置に来るまでは始まらない', (await page.locator('#stingCh.in').count()) === 0);
+  const mu = () => page.evaluate(() => window.GSI_DEBUG.music.info());
+  check('曲：エンドロールで鳴り始める（' + JSON.stringify(await mu()) + '）', (await mu()).playing && (await mu()).state === 'running' && (await page.locator('#roll .rsound').isVisible()));
   check('クリアの記録が残る', s.phase === 'end' && s.cleared === 24);
   await shot('roll-top');
   await page.evaluate(() => { const r = document.getElementById('roll'); r.scrollTop = r.scrollHeight; });
   // 最後の場面（動きを減らす設定では、姿の切り替えだけ）：シロ → 黒い姿 → いなくなる
   const seen = []; for (let i = 0; i < 60; i++) { const c = await page.evaluate(() => { const e = document.getElementById('stingCh'); return e.dataset.cast + '|' + e.className; }); if (seen[seen.length - 1] !== c) seen.push(c); if (/kuro/.test(c) && /dark/.test(c) && !/out/.test(c) && !seen.shot) { seen.shot = 1; await shot('roll-kuro'); } if (/out/.test(c)) break; await page.waitForTimeout(100); }
   check('最後の場面：シロが現れ、黒い姿に変わり、いなくなる（' + seen.join(' → ') + '）', seen.some(c => /^shiro\|.*\bin\b/.test(c)) && seen.some(c => /^kuro\|.*dark/.test(c)) && /out/.test(seen[seen.length - 1]));
+  check('曲：最後の場面が始まると止まる', !(await mu()).playing);
   await shot('roll-end');
   await page.click('#roll [data-act="rollTitle"]'); await page.waitForTimeout(100);
   check('エンドロールのあと、タイトルへ戻る', (await page.locator('#title').isVisible()) && /全24日クリア/.test(await page.locator('#title').innerText()));
@@ -283,9 +286,17 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   const mv = await p2.evaluate(() => { const t = document.getElementById('rollTrack'); return { go: t.classList.contains('go'), y: t.getBoundingClientRect().top, h: innerHeight, dur: getComputedStyle(t).animationDuration }; });
   check('エンドロール：下から上へ流れる（' + JSON.stringify(mv) + '）', mv.go && mv.y < mv.h);
   await p2.screenshot({ path: path.join(OUT, 'infra-roll-pc.png') });
+  // 曲：名前が流れているあいだ鳴る。左上のボタンで止められ、次に開いたときも覚えている
+  const mu2 = () => p2.evaluate(() => window.GSI_DEBUG.music.info());
+  const m1 = await mu2();
+  check('曲：鳴っていて、小節が進んでいる（' + JSON.stringify(m1) + '）', m1.playing && m1.state === 'running' && m1.bar >= 1);
+  await p2.click('#roll .rsound'); await p2.waitForTimeout(200);
+  check('曲：「音楽：オフ」で止まり、設定を覚える', !(await mu2()).playing && /オフ/.test(await p2.locator('#roll .rsound').innerText()) && (await p2.evaluate(() => localStorage.getItem('gsi-sound'))) === 'off');
+  await p2.click('#roll .rsound'); await p2.waitForTimeout(300);
+  check('曲：「音楽：オン」で、また鳴る', (await mu2()).playing && (await p2.evaluate(() => localStorage.getItem('gsi-sound'))) === 'on');
   // スキップ：名前の流れを飛ばす →「営業中」→ 最後の場面（シロが震えて、黒い姿に変わり、飛び去る）→ おわり
   await p2.click('#roll .rskip'); await p2.waitForTimeout(1200);
-  check('エンドロール：スキップで「そして、お店は今日も営業中」へ', (await p2.locator('#rollFin').isVisible()) && !(await p2.locator('#rollTrack').isVisible()) && !(await p2.locator('#rollEnd').isVisible()));
+  check('エンドロール：スキップで「そして、お店は今日も営業中」へ。曲は止まる', (await p2.locator('#rollFin').isVisible()) && !(await p2.locator('#rollTrack').isVisible()) && !(await p2.locator('#rollEnd').isVisible()) && !(await mu2()).playing);
   await p2.screenshot({ path: path.join(OUT, 'infra-roll-fin.png') });
   const st = []; let t0 = Date.now();
   for (let i = 0; i < 140 && !(await p2.locator('#rollEnd').isVisible()); i++) {

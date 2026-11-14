@@ -512,7 +512,9 @@ body.ending-on .dim{background:transparent}
 .rfin{margin:0;font-size:clamp(20px,5.5vw,26px);line-height:1.6}
 .rend .acts{justify-content:center}
 .rskip{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:2;font:inherit;font-size:13px;color:#fff;background:#000;border:2px solid #fff;padding:4px 12px;min-height:44px;cursor:pointer}
-.rskip[hidden]{display:none}
+.rskip[hidden],.rsound[hidden]{display:none}
+.rsound{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:2;font:inherit;font-size:13px;color:#fff;background:#000;border:2px solid #fff;padding:4px 12px;min-height:44px;cursor:pointer}
+.rsound[aria-pressed="false"]{color:#a6abd4;border-color:#a6abd4}
 @media (prefers-reduced-motion:no-preference){.rend{animation:rendIn .9s steps(6,end)}}
 @keyframes rendIn{from{opacity:0}to{opacity:1}}
 /* 動きを減らす設定：流さずに、上から順にスクロールで読む */
@@ -2135,7 +2137,7 @@ function castAt(list,sc){
 // done＝24日目をクリアして、はじめて見るとき（記録に「全部クリア」を残す）。見返すときは記録を変えない
 function startEnding(done){
   if(busy)return;
-  hideModal();hideToast();netStop();title.hidden=true;rollStop();rollEl.hidden=true;
+  hideModal();hideToast();netStop();title.hidden=true;rollQuit();
   if(done){S.phase='end';S.cleared=Math.max(S.cleared,LAST_DAY);save();render();}
   const vw=window.innerWidth,vh=window.innerHeight,st=(window.devicePixelRatio||1)>=2?2:1;
   const sc=Math.max(1,Math.min(4,Math.floor(Math.min((vw-32)/TS.w,(vh-250)/TS.h)*st)/st));
@@ -2192,22 +2194,110 @@ function rollHTML(){
   return h;
 }
 const ROLL_FIN='そして、お店は今日も営業中',ROLL_MAKER='kanade0525';   // 制作者の表記
+/* ---------- エンドロールの曲「今日も営業中」 ----------
+   ブラウザの音源（Web Audio）で鳴らす、8ビット風のオリジナル曲。音声ファイルは使わない。
+   ニ長調・1分に138拍。前奏4小節のあと、A（8小節）→ A'（8）→ B（8）→ A'（8）をくり返す。
+   声部：主旋律（幅の狭い矩形波）と、そのこだま／分散和音（高い所で短く鳴る矩形波）／跳ねるベース（三角波）／太鼓（雑音）。
+   音は、押した操作のあとでしか出せない（ブラウザの決まり）。エンドロールは、会話を押して進めた先で始まるので鳴る。 */
+const Music=(()=>{
+  const BPM=138,STEP=60/BPM/4,BAR=STEP*16,KEY=2,VOL=.6;   // 16分音符の長さ／1小節の長さ／ハ長調で書いて、全体を2半音上げる／全体の音量
+  // 和音：b＝ベース（8分音符4つぶん）、a＝分散和音の3音
+  const CH={C:{b:[48,60,55,60],a:[72,76,79]},G:{b:[43,55,50,55],a:[71,74,79]},GB:{b:[47,59,50,55],a:[71,74,79]},Am:{b:[45,57,52,57],a:[72,76,81]},
+    F:{b:[41,53,48,53],a:[72,77,81]},Em:{b:[40,52,47,52],a:[71,76,79]},Bb:{b:[46,58,53,58],a:[70,74,77]}};
+  // 小節：[和音（1つ、または半小節ずつ2つ）, 主旋律]。主旋律は「音名＋オクターブ:長さ（16分音符の数）」、r は休み
+  const A=[['C','g4:2 e4:2 g4:2 c5:4 b4:2 a4:2 g4:2'],['GB','a4:2 g4:2 d4:4 r:2 d4:2 e4:2 g4:2'],['Am','a4:2 e4:2 a4:2 c5:4 b4:2 a4:2 e4:2'],['F','f4:2 a4:2 c5:2 a4:4 g4:2 f4:2 e4:2'],
+    ['C','g4:2 e4:2 g4:2 c5:4 d5:2 e5:2 d5:2'],['G','d5:4 b4:2 g4:2 b4:2 d5:2 c5:2 b4:2']];
+  const A1=A.concat([['F G','a4:2 c5:2 f5:2 e5:2 d5:2 b4:2 g4:2 b4:2'],['C','c5:8 r:2 g4:2 c5:2 e5:2']]);
+  const A2=A.concat([['F G','a4:2 c5:2 f5:2 e5:2 d5:2 e5:2 d5:2 b4:2'],['C','c5:12 r:4']]);
+  const B=[['F','a4:6 c5:2 f5:4 e5:2 d5:2'],['G','d5:6 b4:2 g4:4 a4:2 b4:2'],['Em','g4:6 b4:2 e5:4 d5:2 b4:2'],['Am','c5:6 a4:2 e4:4 a4:2 c5:2'],
+    ['F','a4:6 c5:2 f5:4 g5:2 f5:2'],['G','d5:4 g5:4 f5:2 e5:2 d5:2 b4:2'],['Bb','d5:4 f5:4 bb4:2 d5:2 f5:4'],['G','g5:6 f5:2 e5:2 d5:2 b4:2 g4:2']];
+  const INTRO=[['C',''],['F',''],['C',''],['G','r:10 g4:2 c5:2 e5:2']],LOOP=A1.concat(A2,B,A2);
+  const barAt=n=>n<INTRO.length?{bar:INTRO[n],intro:n}:{bar:LOOP[(n-INTRO.length)%LOOP.length],pos:(n-INTRO.length)%8};
+  const midi=t=>{const m=/^([a-g])(b?)(\d)$/.exec(t);return {c:0,d:2,e:4,f:5,g:7,a:9,b:11}[m[1]]-(m[2]?1:0)+12*(+m[3]+1);};
+  const hz=m=>440*Math.pow(2,(m+KEY-69)/12);
+  // 矩形波（duty＝山の幅）。山が狭いほど、細くて明るい音
+  const pulse=(ctx,duty)=>{const n=24,re=new Float32Array(n+1),im=new Float32Array(n+1);for(let k=1;k<=n;k++)re[k]=2/(k*Math.PI)*Math.sin(k*Math.PI*duty);return ctx.createPeriodicWave(re,im);};
+  function tone(ctx,out,t,dur,m,wave,vol,o){
+    const osc=ctx.createOscillator(),g=ctx.createGain(),a=.004,d=o.dec||.06,sus=o.sus==null?.7:o.sus,rel=o.rel||.04,end=Math.max(t+a+d,t+dur);
+    if(typeof wave==='string')osc.type=wave;else osc.setPeriodicWave(wave);
+    osc.frequency.setValueAtTime(hz(m),t);
+    if(o.vib&&dur>STEP*5){const l=ctx.createOscillator(),lg=ctx.createGain();l.frequency.value=5.5;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(9,t+.3);l.connect(lg).connect(osc.detune);l.start(t+.15);l.stop(end+rel);}
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+a);g.gain.linearRampToValueAtTime(vol*sus,t+a+d);g.gain.setValueAtTime(vol*sus,end);g.gain.linearRampToValueAtTime(0,end+rel);
+    osc.connect(g).connect(out);osc.start(t);osc.stop(end+rel+.02);
+  }
+  function hit(ctx,out,noise,t,kind){
+    const g=ctx.createGain();g.connect(out);
+    if(kind==='kick'){const o=ctx.createOscillator();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(48,t+.09);g.gain.setValueAtTime(.55,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);o.start(t);o.stop(t+.18);return;}
+    const src=ctx.createBufferSource(),f=ctx.createBiquadFilter();src.buffer=noise;f.type='highpass';f.frequency.value=kind==='hat'?7000:1400;
+    const len=kind==='hat'?.035:.12,vol=kind==='hat'?.07:kind==='hatlo'?.035:.22;
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+len);src.connect(f).connect(g);src.start(t,Math.random()*.5,len+.02);
+    if(kind==='snare')tone(ctx,out,t,.05,57-KEY,'triangle',.12,{dec:.04,sus:0,rel:.02});
+  }
+  // n小節目を、t0 から鳴らす
+  function playBar(ctx,out,kit,n,t0){
+    const {bar,intro,pos}=barAt(n),chs=bar[0].split(' ').map(k=>CH[k]),at=i=>t0+i*STEP;
+    for(let h=0;h<2;h++){const c=chs[Math.min(h,chs.length-1)];
+      for(let i=0;i<4;i++){const st=h*8+i*2;
+        tone(ctx,out,at(st),STEP*1.7,c.b[i],'triangle',intro!=null&&intro<2?.2:.3,{dec:.1,sus:.55,rel:.03});   // 前奏の頭は、ベースをひかえめに
+        tone(ctx,out,at(st),STEP*1.1,c.a[[0,1,2,1][i]],kit.arp,intro!=null?.18:.07,{dec:.09,sus:.2,rel:.05});}}
+    let st=0;(bar[1]?bar[1].split(' '):[]).forEach(tok=>{const [nm,len]=tok.split(':'),L=+len;
+      if(nm!=='r'){const m=midi(nm);tone(ctx,out,at(st),L*STEP*.9,m,kit.lead,.2,{dec:.07,sus:.72,rel:.05,vib:true});
+        tone(ctx,out,at(st+3),L*STEP*.8,m,kit.lead,.055,{dec:.07,sus:.6,rel:.05});}   // こだま（16分音符3つ遅れ）
+      st+=L;});
+    if(intro!=null){[2,6,10,14].forEach(i=>hit(ctx,out,kit.noise,at(i),'hatlo'));if(intro===3)[12,14,15].forEach(i=>hit(ctx,out,kit.noise,at(i),'snare'));return;}
+    [0,8,10].forEach(i=>hit(ctx,out,kit.noise,at(i),'kick'));
+    (pos===7?[4,12,14,15]:[4,12]).forEach(i=>hit(ctx,out,kit.noise,at(i),'snare'));
+    for(let i=0;i<16;i+=2)hit(ctx,out,kit.noise,at(i),i%4===2?'hat':'hatlo');
+  }
+  function build(ctx){
+    const master=ctx.createGain(),comp=ctx.createDynamicsCompressor(),nb=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate),d=nb.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    comp.threshold.value=-12;comp.ratio.value=6;master.gain.value=VOL;master.connect(comp).connect(ctx.destination);
+    return {master,kit:{lead:pulse(ctx,.25),arp:pulse(ctx,.125),noise:nb}};
+  }
+  let ctx=null,rig=null,timer=0,next=0,bar=0,on=true;
+  try{on=localStorage.getItem('gsi-sound')!=='off';}catch(e){}
+  function pump(){while(next<ctx.currentTime+.7){playBar(ctx,rig.master,rig.kit,bar,next);next+=BAR;bar++;}}
+  function start(){
+    stop(0);if(!on)return;
+    try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+      ctx=new AC();rig=build(ctx);if(ctx.state==='suspended')ctx.resume().catch(()=>{});
+      rig.master.gain.setValueAtTime(0,ctx.currentTime);rig.master.gain.linearRampToValueAtTime(VOL,ctx.currentTime+.6);
+      next=ctx.currentTime+.12;bar=0;pump();timer=setInterval(pump,200);
+    }catch(e){ctx=null;}
+  }
+  // fade 秒かけて小さくして止める
+  function stop(fade){
+    clearInterval(timer);timer=0;const c=ctx,r=rig;ctx=null;rig=null;if(!c)return;
+    try{const t=c.currentTime,f=fade||.05;r.master.gain.cancelScheduledValues(t);r.master.gain.setValueAtTime(r.master.gain.value,t);r.master.gain.linearRampToValueAtTime(0,t+f);setTimeout(()=>{try{c.close();}catch(e){}},f*1000+200);}catch(e){}
+  }
+  function setOn(v){on=!!v;try{localStorage.setItem('gsi-sound',on?'on':'off');}catch(e){}if(!on)stop(.2);}
+  // 確認用：曲を secs 秒ぶん、音を出さずに書き出す（テストと、音声ファイルへの書き出しに使う）
+  function render(secs){
+    const sr=44100,oc=new OfflineAudioContext(1,Math.ceil(sr*secs),sr),r=build(oc);
+    for(let n=0,t=.05;t<secs;n++,t+=BAR)playBar(oc,r.master,r.kit,n,t);
+    return oc.startRendering().then(b=>b.getChannelData(0));
+  }
+  return {start,stop,setOn,render,isOn:()=>on,info:()=>({on,playing:!!ctx,state:ctx?ctx.state:'',bar,bars:INTRO.length+LOOP.length,barSec:BAR})};
+})();
 // エンドロールの進み具合：roll＝名前が流れている／fin＝「営業中」／sting＝最後の場面／end＝おわり（static＝動きを減らす設定。流さずに読む）
 let rollStage='',rollT=[],rollIO=null;
 const rollLater=(ms,fn)=>{rollT.push(setTimeout(fn,ms));};
 function rollStop(){rollT.forEach(clearTimeout);rollT=[];if(rollIO){rollIO.disconnect();rollIO=null;}}
+function rollQuit(){rollStop();Music.stop(.3);rollEl.hidden=true;}   // エンドロールを閉じる（曲も止める）
 function startRoll(){
   rollStop();
   $('ending').hidden=true;document.body.classList.remove('ending-on');
   const sc=Math.max(4,Math.min(8,Math.floor(Math.min(window.innerWidth,window.innerHeight)/90)));
-  rollEl.innerHTML=`<button class="rskip" data-act="rollSkip">スキップ</button><div class="rtrack" id="rollTrack">${rollHTML()}</div>
+  rollEl.innerHTML=`<button class="rsound" data-act="rollSound" aria-pressed="${Music.isOn()}">${Music.isOn()?'音楽：オン':'音楽：オフ'}</button><button class="rskip" data-act="rollSkip">スキップ</button><div class="rtrack" id="rollTrack">${rollHTML()}</div>
     <div class="rcard" id="rollFin" hidden><p class="rfin">${ROLL_FIN}</p></div>
     <div class="rsting" id="rollSting" aria-hidden="true" hidden><span class="sting-ch" id="stingCh" data-s="${sc}" style="--o:${sc}px"></span></div>
     <div class="rend" id="rollEnd" hidden><div class="acts"><button class="btn primary" data-act="rollTitle">タイトルへ戻る</button><button class="btn" data-act="rollAgain">もう一度見る</button></div></div>`;
   rollEl.hidden=false;rollEl.scrollTop=0;rollEl.classList.toggle('static',RM);
+  Music.start();   // 曲は、名前が流れているあいだ鳴らす。「営業中」で小さくして止め、最後の場面は無音
   if(RM){   // 動きを減らす設定：流さずに、上から順に読む。最後の場面は、見える位置まで来たら始める
     rollStage='static';['rollFin','rollSting','rollEnd'].forEach(id=>{$(id).hidden=false;});rollEl.querySelector('.rskip').hidden=true;
-    if(window.IntersectionObserver){rollIO=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){rollIO.disconnect();rollIO=null;stingPlay(true);}},{root:rollEl,threshold:.6});rollIO.observe($('rollSting'));}
+    if(window.IntersectionObserver){rollIO=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){rollIO.disconnect();rollIO=null;Music.stop(1.5);stingPlay(true);}},{root:rollEl,threshold:.6});rollIO.observe($('rollSting'));}
     else stingPlay(true);
     return;
   }
@@ -2222,9 +2312,9 @@ function rollNext(){
   if(rollEl.hidden||!$('rollEnd'))return;
   rollStop();
   const tr=$('rollTrack'),fin=$('rollFin'),st=$('rollSting'),en=$('rollEnd');
-  if(rollStage==='roll'){rollStage='fin';tr.hidden=true;fin.hidden=false;rollLater(3600,rollNext);}
-  else if(rollStage==='fin'){rollStage='sting';fin.hidden=true;st.hidden=false;stingPlay(false,rollNext);}
-  else if(rollStage==='sting'){rollStage='end';st.hidden=true;en.hidden=false;rollEl.querySelector('.rskip').hidden=true;const b=en.querySelector('button');if(b)b.focus({preventScroll:true});}
+  if(rollStage==='roll'){rollStage='fin';tr.hidden=true;fin.hidden=false;Music.stop(2.6);rollLater(3600,rollNext);}
+  else if(rollStage==='fin'){rollStage='sting';fin.hidden=true;st.hidden=false;Music.stop(.3);stingPlay(false,rollNext);}
+  else if(rollStage==='sting'){rollStage='end';st.hidden=true;en.hidden=false;rollEl.querySelector('.rskip').hidden=true;rollEl.querySelector('.rsound').hidden=true;const b=en.querySelector('button');if(b)b.focus({preventScroll:true});}
 }
 // 最後の場面：シロがひとりで現れる → 体が震える → 黒い姿に変わる → 飛び去る。still＝動きを減らす設定（震えと飛ぶ動きは出さず、姿の切り替えだけ）
 function stingPlay(still,done){
@@ -2240,7 +2330,7 @@ function stingPlay(still,done){
 }
 function reset(){
   try{localStorage.removeItem(KEY);}catch(e){}
-  $('ending').hidden=true;rollStop();rollEl.hidden=true;document.body.classList.remove('ending-on');
+  $('ending').hidden=true;rollQuit();document.body.classList.remove('ending-on');
   netStop();S=fresh();pcScroll={};Q=[];showing=false;setTalking(false);busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.name='';nr.val='';
   hideToast();hideModal();render();startIntro();
 }
@@ -2263,7 +2353,8 @@ document.addEventListener('click',e=>{
   else if(a==='ending'){startEnding(false);}
   else if(a==='rollSkip'){rollNext();}
   else if(a==='rollAgain'){startRoll();}
-  else if(a==='rollTitle'){rollStop();rollEl.hidden=true;showTitle(false);}
+  else if(a==='rollTitle'){rollQuit();showTitle(false);}
+  else if(a==='rollSound'){const v=!Music.isOn();Music.setOn(v);b.setAttribute('aria-pressed',v);b.textContent=v?'音楽：オン':'音楽：オフ';if(v&&(rollStage==='roll'||rollStage==='static'))Music.start();}
   else if(a==='ca'){c.ca=b.dataset.ca;save();render();if(c.ca!=='self')say([{who:SHIRO,t:CAS[c.ca].n+'のタブが、ブラウザに増えたよ。まずはこのサーバーで秘密鍵とCSRを作ろう'}]);}
   else if(a==='certRedo'||a==='reinstall'){
     if(a==='certRedo')Object.assign(c,{ca:null,keyMade:false,token:null,issued:false});
@@ -2509,7 +2600,7 @@ title.addEventListener('keydown',e=>{
   // 会話ウィンドウが出るとログの高さが変わる。最新の行が隠れないよう、末尾へ寄せ直す
   if(window.ResizeObserver)new ResizeObserver(()=>{const l=$('netLog');if(l)l.scrollTop=l.scrollHeight;}).observe($('p-net'));
 }
-if(DEBUG)window.GSI_DEBUG={cfgForDay,dnsForDay,lastDay:LAST_DAY};   // テスト用：n日目の朝の設定を取り出す
+if(DEBUG)window.GSI_DEBUG={cfgForDay,dnsForDay,lastDay:LAST_DAY,music:Music};   // テスト用：n日目の朝の設定を取り出す
 // 版3（12日目以降の対策を、ピクセルクラウドやネームヤの設定に移した）より前の保存データ：
 // 12日目以降は設定の持ち方が違うので、その日の朝からやり直す。全部クリア済みなら、全部の対策が入った状態にする
 if(S.rev<3){
