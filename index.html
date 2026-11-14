@@ -263,8 +263,8 @@ button.nav:hover{background:var(--br-strip)}
 .viewport{--bg:#f3ead6;--surface:#fffaf0;--ink:#2b2236;--muted:#6d6478;--line:#2b2236;--soft:#efe3c9;--gold:#9a6500;--danger:#c42f3c;--safe:#1f7a3a;--accent:#c2373f;--on-accent:#fff8ec;
   color-scheme:light;position:relative;flex:none;min-height:170px;max-height:min(62vh,540px);overflow-y:auto;overscroll-behavior:auto;background:var(--surface);color:var(--ink);scrollbar-width:thin;scrollbar-color:#b3a68a transparent}
 .pc.fill .viewport{flex:1 1 0;min-height:0;max-height:none}
-/* 管理画面は、会社ごとに配色が違う（おなまえや.com＝金／良えWS＝青／認証局＝緑／キットハブ＝暗い紫） */
-/* 会社ごとの配色は、元ネタのテーマカラーに寄せる（おなまえや.com＝青／良えWS＝紺とオレンジ／レッツ暗号＝紺と黄／キットハブ＝黒と緑）。ロゴは自作のまま */
+/* 管理画面は、会社ごとに配色が違う（おなまえや.com＝金／良えWS＝青／認証局＝緑／Cithub＝暗い紫） */
+/* 会社ごとの配色は、元ネタのテーマカラーに寄せる（おなまえや.com＝青／良えWS＝紺とオレンジ／レッツ暗号＝紺と黄／Cithub＝黒と緑）。ロゴは自作のまま */
 .viewport[data-site="registrar"]{--bg:#edf3fa;--surface:#ffffff;--ink:#17263a;--muted:#55657a;--line:#17263a;--soft:#dbe7f5;--accent:#0b5fbf;--on-accent:#ffffff;--site:#0b5fbf;--on-site:#ffffff}
 .viewport[data-site="cloud"]{--bg:#f2f3f3;--surface:#ffffff;--ink:#16191f;--muted:#5f6b7a;--line:#232f3e;--soft:#e9ebed;--accent:#ff9900;--on-accent:#16191f;--site:#232f3e;--on-site:#ffffff}
 .viewport[data-site="ca"]{--bg:#eef1f6;--surface:#ffffff;--ink:#1a2238;--muted:#57607a;--line:#1a2238;--soft:#dfe4ee;--accent:#f6a01a;--on-accent:#1a1a1a;--site:#1f3a68;--on-site:#ffffff}
@@ -1051,7 +1051,7 @@ function cpnFinish(r){
   cpnT=0;r.done=true;save();render();pcFocus($('p-shop'));
   if(S.cfg.code.coupon!=='atomic'&&r.n>1&&!S.seenCoupon){S.seenCoupon=true;save();
     const o=DAYS[S.day].demo;
-    say([{who:SHIRO,t:`いまの連打で、1回限りのクーポンが${r.n}回も効いた。合計は${yenS(o.product.price-o.coupon.off*r.n)}だよ`},{who:SHIRO,t:'1回目を「使用済み」と記録し終える前に、次が届いたからなんだ。「管理」タブのキットハブで直そう'}]);}
+    say([{who:SHIRO,t:`いまの連打で、1回限りのクーポンが${r.n}回も効いた。合計は${yenS(o.product.price-o.coupon.off*r.n)}だよ`},{who:SHIRO,t:'1回目を「使用済み」と記録し終える前に、次が届いたからなんだ。「管理」タブのCithubで直そう'}]);}
 }
 function couponApply(){
   const atomic=S.cfg.code.coupon==='atomic';let r=cpnRes();
@@ -1257,7 +1257,7 @@ function patchHTML(){
   }
   return h+`<div class="row"><div class="desc">セキュリティ更新を自動で適用<span class="note">新しい更新が出たら、深夜に適用して再起動します</span></div>${infSw('autoPatch')}</div></div>`;
 }
-// 20日目：キットハブのセキュリティ警告（使っているライブラリの、公開済みの穴）
+// 20日目：Cithubのセキュリティ警告（使っているライブラリの、公開済みの穴）
 function depsHTML(){
   const o=DAYS[S.day].demo;if(demoOff())return '';
   const fixed=S.cfg.code.deps==='update';
@@ -1363,7 +1363,7 @@ function playCodeAnim(key,done){
 }
 function idorSeen(){
   const o=DAYS[S.day].demo;
-  if(S.idorId!==o.myId&&o.orders[S.idorId]&&S.cfg.code.access!=='owner'&&!S.seenIdor){S.seenIdor=true;save();say([{who:SHIRO,t:'ほら、番号を変えただけで、他のお客さんの注文と住所が見えちゃった'},{who:SHIRO,t:'「本人のものか」を確かめてないんだ。「管理」タブのキットハブで直そう'}]);}
+  if(S.idorId!==o.myId&&o.orders[S.idorId]&&S.cfg.code.access!=='owner'&&!S.seenIdor){S.seenIdor=true;save();say([{who:SHIRO,t:'ほら、番号を変えただけで、他のお客さんの注文と住所が見えちゃった'},{who:SHIRO,t:'「本人のものか」を確かめてないんだ。「管理」タブのCithubで直そう'}]);}
 }
 function computeOrder(src){
   const o=DAYS[S.day].demo,real=o.product.price;
@@ -1407,7 +1407,7 @@ function demoReview(t){
   const safe=S.cfg.code.review==='escape';
   return safe?{safe:true,text:t}:{xss:true,redir:false,text:t};
 }
-function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「キットハブ」で直そう'}]);}}
+function sqliSeen(){if(S.shopRes&&S.shopRes.leak&&!S.seenLeak){S.seenLeak=true;save();say([{who:SHIRO,t:'ほら、検索窓から会員の一覧がぞろっと出てきた'},{who:SHIRO,t:'まだ誰にも悪用されてない。今のうちに「管理」タブの「Cithub」で直そう'}]);}}
 function renderVoices(){
   let h=`<h2>お知らせ</h2><p class="muted small">お客さんの声や、監視からのアラートが届きます</p>`;
   // その日のお知らせを開いたら、次は「通信」で原因を見る（通信タブにも目印が付く）
@@ -1861,7 +1861,7 @@ function cloudHTML(g){
   if(['edge','waf','fw','secret','mon'].includes(S.sub)&&!pg.includes('data-focus'))pg=pg.replace('<div class="sec"','<div class="sec" data-focus');
   return h+pg;
 }
-/* --- キットハブ（コード共有）：お店のコードの置き場所。修正は、プルリクエストの中身を見てマージする。入れた修正はコミット履歴に残る --- */
+/* --- Cithub（コード共有）：お店のコードの置き場所。修正は、プルリクエストの中身を見てマージする。入れた修正はコミット履歴に残る --- */
 const codeDays=()=>Object.keys(DAYS).map(Number).filter(n=>DAYS[n].fix).sort((a,b)=>a-b);
 function hubHTML(){
   const d=DAYS[S.day],fx=d&&d.fix,c=S.cfg,days=codeDays(),num=n=>days.indexOf(n)+1;
@@ -1876,7 +1876,7 @@ function hubHTML(){
   h+=`<div class="sec"><h3>コミット履歴</h3>${show.map(n=>`<div class="row"><div class="desc">${esc(DAYS[n].fix.label)}<span class="note">#${num(n)} をマージ　／　${n}日目</span></div>${n===S.day&&S.phase==='fix'?`<button class="link" data-act="undoFix" data-key="${DAYS[n].fix.key}">取り消す</button>`:''}</div>`).join('')}
     ${merged.length>show.length?`<p class="small muted" style="padding:8px 12px;margin:0">…ほか ${merged.length-show.length} 件</p>`:''}
     <div class="row"><div class="desc">よろず屋ピクセル堂を公開<span class="note">最初のコミット　／　0日目</span></div></div></div>`;
-  if(!fx)cNotes.push(note('解説','<p>キットハブは、お店のコードの置き場所です。今日は、ここで入れる修正はありません。</p>'));
+  if(!fx)cNotes.push(note('解説','<p>Cithubは、お店のコードの置き場所です。今日は、ここで入れる修正はありません。</p>'));
   return h;
 }
 // 次に開くとよい管理画面（そのタブに矢印を立てる）。対策がそろっている・まだ攻撃を見ていないときは null
@@ -1907,13 +1907,13 @@ const SITE={
   registrar:{name:'おなまえや.com',role:'ドメイン会社',url:()=>'https://onamaeya.example/'+(S.domain?'domains/'+S.domain:'search')},
   cloud:{name:'良えWS',role:'クラウド',url:()=>'https://console.eews.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
   ca:{name:'',role:'認証局',url:()=>'https://letsangou.example/orders'},
-  hub:{name:'キットハブ',role:'コード共有',url:()=>'https://kithub.example/pixeldo/shop'}
+  hub:{name:'Cithub',role:'コード共有',url:()=>'https://cithub.example/pixeldo/shop'}
 };
 function renderConsole(){
   const c=S.cfg,p=$('p-console');
   const ids=['registrar','cloud'];
   if(c.ca&&c.ca!=='self')ids.push('ca');
-  if(isLive()&&S.day>=4)ids.push('hub');   // 4日目から、お店のコードをキットハブで管理する
+  if(isLive()&&S.day>=4)ids.push('hub');   // 4日目から、お店のコードをCithubで管理する
   if(!ids.includes(S.svc))S.svc='cloud';
   const nm=id=>id==='ca'?CAS[c.ca].n:SITE[id].name,sv=S.svc,g=guideTarget();
   cNotes=[];
@@ -2205,7 +2205,7 @@ function rollHTML(){
   const seen=[];
   for(let n=1;n<=LAST_DAY;n++){const a=DAYS[n].attacker;let e=seen.find(x=>x.id===a);if(!e){e={id:a,days:[]};seen.push(e);}e.days.push(n);}
   h+=sect('攻撃者のみなさん（登場順）')+seen.map(e=>rollLine(e.id,e.days.join('・')+'日目',CAST[e.id].name)).join('');
-  h+=sect('協力')+[['registrar','おなまえや.com'],['cloud','良えWS'],['ca',CAS.free.n],['hub','キットハブ']].map(([k,n])=>`<div class="cr"><span class="rlogo">${spr(IC['logo_'+k],4,'')}</span><div class="rwho">${esc(n)}</div></div>`).join('');
+  h+=sect('協力')+[['registrar','おなまえや.com'],['cloud','良えWS'],['ca',CAS.free.n],['hub','Cithub']].map(([k,n])=>`<div class="cr"><span class="rlogo">${spr(IC['logo_'+k],4,'')}</span><div class="rwho">${esc(n)}</div></div>`).join('');
   h+=sect('スペシャルサンクス')+`<div class="cr"><div class="rwho">毎日苦情をくれたお客さんたち</div></div>`;
   h+=sect('制作')+`<div class="cr"><div class="rwho">${esc(ROLL_MAKER)}</div></div>`;
   // 引っかかったトラップ。trapsFrom＝数え始めた日（トラップを数える前の版で遊んだ記録は、途中から、または全部が「記録なし」）
@@ -2443,27 +2443,27 @@ document.addEventListener('click',e=>{
   else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(a==='postReview'){const el=$('reviewQ');S.reviewQ=el?el.value:'';S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
-      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのキットハブで直そう'}]);}}}
+      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのCithubで直そう'}]);}}}
   else if(a==='xssPlay'){xssNav(S.day);}
   else if(a==='xssBack'){if(S.reviewRes){S.reviewRes.redir=false;save();render();}}
   else if(a==='storeRead'){S.storeRes={read:true};save();render();pcFocus($('p-console'));
-    if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、保存ファイルを開いただけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのキットハブで直そう'}]);}}
+    if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、保存ファイルを開いただけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのCithubで直そう'}]);}}
   else if(a==='csrfOpen'){S.csrfRes={open:true};save();render();
-    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、裏でこのお店にお届け先の変更が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのキットハブで直そう'}]);}}
+    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、裏でこのお店にお届け先の変更が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのCithubで直そう'}]);}}
   else if(a==='csrfBack'){if(S.csrfRes)S.csrfRes.open=false;save();render();}
   else if(a==='idorOpen'){S.idorRes={open:true};S.idorId=DAYS[S.day].demo.myId;save();render();}
   else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
   else if(a==='idorGo'){const el=$('idorUrl');const m=(el?el.value:'').match(/id=(\d+)/);S.idorId=m?Number(m[1]):0;save();render();idorSeen();}
   else if(a==='sessOpen'){S.sessionRes={open:true};save();render();}
   else if(a==='sessShare'){S.sessionRes={open:true,shared:true};save();render();
-    if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのキットハブで直そう'}]);}}
+    if(S.cfg.code.session!=='secure'&&!S.seenSession){S.seenSession=true;save();say([{who:SHIRO,t:'ほら、URLを渡しただけで、その人があなたとしてログインできた'},{who:SHIRO,t:'合言葉がURLに入ってるのが原因。「管理」タブのCithubで直そう'}]);}}
   else if(a==='sessBack'){S.sessionRes=null;save();render();}
   else if(a==='couponApply'){couponApply();}
   else if(a==='couponReset'){clearTimeout(cpnT);cpnT=0;S.couponRes=null;save();render();window.scrollTo(0,0);pcFocus($('p-shop'));}
   else if(a==='ordSet'){if(b.dataset.p!=null)S.orderPrice=Number(b.dataset.p);if(b.dataset.q!=null)S.orderQty=Number(b.dataset.q);save();render();pcReveal('.devtools');}
   else if(a==='ordBuy'){S.orderRes=computeOrder('buy');save();render();}
   else if(a==='ordSend'){S.orderRes=computeOrder('send');save();render();
-    if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのキットハブで直そう'}]);}}
+    if(S.orderRes.tampered&&!S.seenTamper){S.seenTamper=true;save();say([{who:SHIRO,t:'ほら、画面では変えられない価格が、送信データを書き換えただけで通っちゃった'},{who:SHIRO,t:'お店が客の送ってきた金額を信じてるんだ。「管理」タブのCithubで直そう'}]);}}
   /* --- 12日目〜のデモ：対策は良えWSなどの設定（c.inf）を見て決まる --- */
   else if(a==='botRun'){const mode=edgeOn()?c.inf.wafSignup:'allow',pass=mode==='allow'||mode==='count',list=[];
     if(pass)for(let i=0;i<4;i++)list.push('user'+(1000+Math.floor(Math.random()*8999))+'@tempmail.example');
@@ -2477,7 +2477,7 @@ document.addEventListener('click',e=>{
     if(!held&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'一気に送られると、サーバーが落ちちゃう'},{who:SHIRO,t:'良えWSの「WAF」で、サイト全体の回数を決めよう'}]);}}
   else if(a==='wafEnc'){S.wafEnc=!S.wafEnc;S.wafRes=null;save();render();}
   else if(a==='wafSend'){const enc=!!S.wafEnc,pass=enc&&!c.inf.wafDecode,fixed=c.code.defense==='layered';S.wafRes={pass,enc};save();render();pcFocus($('p-console'));
-    if(pass&&!fixed&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'書き方を変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。キットハブで、届いた先のコードを直そう'}]);}}
+    if(pass&&!fixed&&!S.seenWaf){S.seenWaf=true;save();say([{who:SHIRO,t:'書き方を変えただけで、WAFをすり抜けて届いた'},{who:SHIRO,t:'WAFは補助。Cithubで、届いた先のコードを直そう'}]);}}
   else if(a==='scrapeRun'){const how=edgeOn()?c.inf.bot:'off',fixed=how==='challenge';S.scrapeRes=fixed?{all:false,got:30}:{all:true,ua:how==='ua'};save();render();pcFocus($('p-console'));
     if(!fixed&&!S.seenScrape){S.seenScrape=true;save();say([{who:SHIRO,t:'ゆっくり順番に取るだけだから、回数の制限にはかからない。全部持っていかれた'},{who:SHIRO,t:'同じ画面の「ボット対策」で、相手を見分けよう'}]);}}
   else if(a==='fwTry'){const fixed=c.inf.fwSsh==='admin';S.fwRes={open:!fixed};save();render();pcFocus($('p-console'));
@@ -2488,7 +2488,7 @@ document.addEventListener('click',e=>{
   else if(a==='skimPay'){const pol=c.inf.csp||'none';S.skimRes={stolen:pol==='none',dead:pol==='strict'};save();render();
     if(pol==='none'&&!S.seenSkim){S.seenSkim=true;save();say([{who:SHIRO,t:'差し替えられた外部スクリプトが、入力を外へ送っちゃった'},{who:SHIRO,t:'良えWSの「通信設定」でCSPを付けて、読み込み元と送り先を絞ろう'}]);}}
   else if(a==='keyView'){const safe=c.code.apikey==='server';S.keyRes={abused:!safe};save();render();
-    if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'キットハブで、キーをコードから消そう。漏れたキーは、良えWSの「シークレット」で入れ替える'}]);}}
+    if(!safe&&!S.seenKey){S.seenKey=true;save();say([{who:SHIRO,t:'ブラウザに届くコードに書いてあるキーは、誰でも読めて使える'},{who:SHIRO,t:'Cithubで、キーをコードから消そう。漏れたキーは、良えWSの「シークレット」で入れ替える'}]);}}
   else if(a==='keyRotate'){c.inf.keyRotated=true;S.keyRes=null;save();render();say([{who:SHIRO,t:'古いキーは失効した。コピーされた分は、もう使えない'}]);}
   else if(a==='domTry'){const locked=!!c.inf.regLock;S.domRes={hijacked:!locked};save();render();pcFocus($('p-console'));
     if(!locked&&!S.seenDom){S.seenDom=true;save();say([{who:SHIRO,t:'本人確認が甘いと、なりすましの移管が通ってしまう'},{who:SHIRO,t:'この下の「ドメインの保護」で、移管ロックと2段階認証をかけよう'}]);}}
@@ -2499,7 +2499,7 @@ document.addEventListener('click',e=>{
   else if(a==='edgeMake'){c.inf.edge=true;resetDemoRes();save();render();say([{who:SHIRO,t:'入口ができた。でもまだ、誰も入口を通ってない'},{who:SHIRO,t:'ドメインの向き先を、入口のアドレスに変えよう。アドレスをコピーして、おなまえや.comのDNSに「ALIAS」のレコードを足す。古い「A」レコードは消すんだ'}]);}
   else if(a==='copyEdge'){clip=EDGE_HOST;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
   else if(a==='goCert'){S.svc='cloud';S.sub='cert';setTab('console');}
-  /* --- キットハブ：プルリクエストの中身（コードの差分）を見て、マージする --- */
+  /* --- Cithub：プルリクエストの中身（コードの差分）を見て、マージする --- */
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;
     const go=()=>{c.code[key]=v;resetDemoRes();save();render();const r=DAYS[S.day].check(CFG());
       say([{who:SHIRO,t:'マージできた。お店のコードに、修正が入ったよ'},{who:SHIRO,t:r.ok?'右下の「防げたか確かめる」で試してみよう':r.why}]);};
@@ -2542,7 +2542,7 @@ document.addEventListener('keydown',e=>{
   else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(e.target.id==='reviewQ'){e.preventDefault();const el=$('reviewQ');S.reviewQ=el.value;S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
-      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのキットハブで直そう'}]);}}}
+      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのCithubで直そう'}]);}}}
 });
 
 /* ---------- 再開 ---------- */

@@ -502,7 +502,7 @@ icons: {
   server: ["................","..KKKKKKKKKKKK..","..KLLLLLLLLLLK..","..KLgLLLLnnnLK..","..KLLLLLLLLLLK..","..KNNNNNNNNNNK..","..KLLLLLLLLLLK..","..KLgLLLLnnnLK..","..KLLLLLLLLLLK..","..KNNNNNNNNNNK..","..KLLLLLLLLLLK..","..KLgLLLLnnnLK..","..KLLLLLLLLLLK..","..KKKKKKKKKKKK..","...KK......KK...","................"],
   monitor: ["........","..KKKK..",".KWWWWK.","KWKbbKWK","KWKbbKWK",".KWWWWK.","..KKKK..","........"],
   mail: ["KKKKKKKKKK","KKWWWWWWKK","KWKWWWWKWK","KWWKWWKWWK","KWWWKKWWWK","KWWWWWWWWK","KKKKKKKKKK"],
-  // 会社のロゴ：形は自作、色は元ネタのテーマカラー（おなまえや.com＝青／良えWS＝オレンジ／レッツ暗号＝紺と黄／キットハブ＝白1色）
+  // 会社のロゴ：形は自作、色は元ネタのテーマカラー（おなまえや.com＝青／良えWS＝オレンジ／レッツ暗号＝紺と黄／Cithub＝白1色）
   logo_registrar: ["..KKKK..",".KBBBBK.","KBbKKbBK","KBbbbbBK","KBBBBBBK","KBBBBBBK",".KBBBBK.","..KKKK.."],
   router: ["................","................","...n........n...","...n........n...","...n........n...","...n........n...",".KKKKKKKKKKKKKK.",".KLLLLLLLLLLLLK.",".KLLLLLLLLLLLLK.",".KnnnnnnnnnnnnK.",".KngnynnnnNNNnK.",".KnnnnnnnnnnnnK.",".KKKKKKKKKKKKKK.","..KK........KK..","................","................"],
   cloud: ["................","................","................","......KKKK......",".....KbbbbK.....","..KKKbbbbbbK....",".KbbbKbbbbbbKK..",".KbWWbbbbbbbbbK.","KbbWbbbbbbbbbbbK","KbbbbbbbbbbbbbbK","KbbbbbbbbbbbbbbK",".KBBBBBBBBBBBBK.","..KKKKKKKKKKKK..","................","................","................"],

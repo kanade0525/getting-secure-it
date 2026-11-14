@@ -67,7 +67,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   ok('一般：クリア前は「エンディング」が一覧に出ない', await p.locator('.dayrow[data-act="ending"]').count() === 0);
   await p.close();
 
-  // 3c) 古い保存データ（版2：12日目以降の対策を、キットハブのコードで入れていた）
+  // 3c) 古い保存データ（版2：12日目以降の対策を、Cithubのコードで入れていた）
   const old14 = Object.assign({}, save6, { day: 14, phase: 'fix', step: undefined, cfg: Object.assign({}, SAFE, { code: { search: 'param', signup: 'verify', login: 'throttle', dos: 'shield' } }), voices: [{ who: '監視', sys: true, t: 'x', day: 13, unread: false }, { who: '監視', sys: true, t: 'y', day: 14, unread: false }] });
   p = await open('', old14); s = await state(p);
   ok('古い記録（14日目の途中）：14日目の朝からやり直しになる', s.rev === 3 && s.day === 14 && s.phase === 'incident' && !s.step && s.voices.every(v => v.day < 14));

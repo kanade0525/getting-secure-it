@@ -34,7 +34,7 @@ const DAYS = {
   18: { steps: [] },
   21: { steps: [async p => { await p.click('[data-act="skimPay"]'); }] },
   22: { steps: [async p => { await p.click('[data-act="keyView"]'); }] },
-  // 管理タブに出るデモ（良えWS・キットハブ・おなまえや.comの画面）
+  // 管理タブに出るデモ（良えWS・Cithub・おなまえや.comの画面）
   5: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'svc-hub', steps: [async p => { await p.click('[data-act="storeRead"]'); }] },
   14: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'sub-waf', steps: [async p => { await p.click('[data-act="dosFire"]'); }] },
   15: { tab: 'console', svc: 'cloud', sub: 'waf', guide: 'svc-hub', steps: [async p => { await p.click('[data-act="wafEnc"]'); }, async p => { await p.click('[data-act="wafSend"]'); }] },

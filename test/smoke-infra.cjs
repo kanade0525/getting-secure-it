@@ -1,7 +1,7 @@
 // 12〜24日目とエンディングの通し確認：朝の会話 →「お知らせ」→「通信」→ 管理画面で設定 →「防げたか確かめる」→ クリア、を画面の操作だけで進める。
 // 確かめること：
 //   ・シロの案内どおり「お知らせ」を読んでからでないと、「通信」で再生が始まらない
-//   ・対策は、それがある場所で入れる（良えWSの入口・WAF・ファイアウォールなど／おなまえや.com／キットハブ）。案内の矢印が次の場所に立つ
+//   ・対策は、それがある場所で入れる（良えWSの入口・WAF・ファイアウォールなど／おなまえや.com／Cithub）。案内の矢印が次の場所に立つ
 //   ・まちがえた設定（ゆるすぎ・きつすぎ）ではクリアにならず、トラップとして記録される
 //   ・24日目のあとにエンディングが流れ、エンドロール（攻撃者の役名・ゲスト出演・引っかかったトラップ）が出る
 //   node test/smoke-infra.cjs <index.html のあるフォルダ または URL> <スクショの出力先> [開始日（既定12）]
@@ -89,7 +89,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       check('伏線：お店の棚に、売りものでない「古い銀の鈴」がある', await (async () => { await tab('shop'); const t = await page.locator('#p-shop .viewport').innerText(); return /古い銀の鈴/.test(t) && /非売品/.test(t) && (await page.locator('#p-shop .item').count()) === 6 && (await page.locator('#p-shop .item [data-act="cart"]').count()) === 5; })());
       await tab('shop'); await click('[data-act="botRun"]'); check('12日目：未対策は、自動登録が通る', (await notes()).some(n => /^danger/.test(n))); await clearWin();
       await tab('console');
-      check('12日目：キットハブに、今日のプルリクエストはない', await (async () => { await svc('hub'); const t = await page.locator('#p-console .viewport').innerText(); return /未対応のプルリクエストはありません/.test(t) && (await page.locator('[data-act="applyFix"]').count()) === 0; })());
+      check('12日目：Cithubに、今日のプルリクエストはない', await (async () => { await svc('hub'); const t = await page.locator('#p-console .viewport').innerText(); return /未対応のプルリクエストはありません/.test(t) && (await page.locator('[data-act="applyFix"]').count()) === 0; })());
       check('12日目：矢印は良えWSへ', (await arrow()) === 'svc-cloud');
       await svc('cloud');
       check('12日目：小メニューに「入口（CDN）」と「WAF」がある', /入口（CDN）/.test(await page.locator('.subs').innerText()) && /WAF/.test(await page.locator('.subs').innerText()));
@@ -148,10 +148,10 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
     },
     15: async () => {
       await tab('console'); await click('[data-act="wafEnc"]'); await click('[data-act="wafSend"]'); check('15日目：エンコードした攻撃は、WAFを通過する', (await notes()).some(n => /^danger/.test(n))); await clearWin();
-      check('15日目：矢印はキットハブ（コードを直す日）', (await arrow()) === 'svc-hub');
+      check('15日目：矢印はCithub（コードを直す日）', (await arrow()) === 'svc-hub');
       await sw('wafDecode'); await verify(15, false, null);   // WAFを強めるだけでは足りない
       await tab('console'); await svc('hub'); await shot('15-hub');
-      check('15日目：キットハブにプルリクエストと、これまでのコミット履歴がある', /プルリクエスト/.test(await page.locator('#p-console .viewport').innerText()) && /コミット履歴/.test(await page.locator('#p-console .viewport').innerText()) && /ほか \d+ 件/.test(await page.locator('#p-console .viewport').innerText()));
+      check('15日目：Cithubにプルリクエストと、これまでのコミット履歴がある', /プルリクエスト/.test(await page.locator('#p-console .viewport').innerText()) && /コミット履歴/.test(await page.locator('#p-console .viewport').innerText()) && /ほか \d+ 件/.test(await page.locator('#p-console .viewport').innerText()));
       await click('[data-act="applyFix"]'); await clearWin();
       await verify(15, true);
     },
@@ -187,7 +187,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       await verify(19, true);
     },
     20: async () => {
-      await tab('console'); check('20日目：キットハブにセキュリティ警告が出ている', (await state()).svc === 'hub' && /セキュリティ警告/.test(await page.locator('#p-console .viewport').innerText()) && (await notes()).some(n => /^danger/.test(n)));
+      await tab('console'); check('20日目：Cithubにセキュリティ警告が出ている', (await state()).svc === 'hub' && /セキュリティ警告/.test(await page.locator('#p-console .viewport').innerText()) && (await notes()).some(n => /^danger/.test(n)));
       await shot('20-hub'); await click('[data-act="applyFix"]'); await clearWin();
       await verify(20, true);
     },
@@ -199,7 +199,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       await verify(21, true);
     },
     22: async () => {
-      await tab('console'); check('22日目：矢印はキットハブ（今いる場所なので立たない）', (await state()).svc === 'hub' && (await arrow()) === '');
+      await tab('console'); check('22日目：矢印はCithub（今いる場所なので立たない）', (await state()).svc === 'hub' && (await arrow()) === '');
       await click('[data-act="applyFix"]'); await clearWin();
       check('22日目：マージしたあと、シロがシークレットへ案内する', /シークレット/.test((await state()).chatLog.slice(-1)[0].t));
       check('22日目：矢印は良えWSへ', (await arrow()) === 'svc-cloud');
