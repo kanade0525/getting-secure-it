@@ -78,7 +78,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   // 入口をIPアドレスで向けていた版（版3の最初）の記録は、名前（ALIAS）に直る
   const ipEdge = Object.assign({}, save6, { rev: 3, day: 15, phase: 'fix', traps: [], dns: [{ type: 'A', name: '@', value: '198.51.100.10' }, { type: 'TXT', name: '_acme-challenge', value: 'ABCD-EFGH' }], cfg: Object.assign({}, SAFE, { inf: { edge: true, wafSignup: 'captcha' } }) });
   p = await open('', ipEdge); s = await state(p); await p.click('.menu button[data-t="cont"]'); await clear(p); await p.click('.tabs button[data-tab="console"]'); await p.click('#svc-cloud'); await p.click('.sub[data-sub="edge"]');
-  ok('入口をIPアドレスで向けていた記録：ALIAS に直り、入口を通っている扱いになる', /入口を通っています/.test(await p.locator('#p-console .viewport').innerText()) && (await state(p)).dns.some(x => x.type === 'ALIAS' && x.value === 'pixeldo-edge.eews-cdn.example'));
+  ok('入口をIPアドレスで向けていた記録：ALIAS に直り、入口を通っている扱いになる', !/作っただけでは通らない/.test(await p.locator('#p-console').innerText()) && (await state(p)).dns.some(x => x.type === 'ALIAS' && x.value === 'pixeldo-edge.eews-cdn.example'));
   await p.close();
   const oldEnd = Object.assign({}, save6, { day: 24, phase: 'end', cfg: Object.assign({}, SAFE, { autoRenew: true, code: { search: 'param', egress: 'monitor', registrar: 'lock' } }) });
   p = await open('', oldEnd); s = await state(p);

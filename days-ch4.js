@@ -53,8 +53,8 @@ const D={
     {who:SHIRO,t:'同じ画面で、更新を適用しよう。次から忘れないように、自動で当てる設定もあるよ'}
   ],
   demo:{kind:'patch',
-    items:[{name:'OpenSSL 3.0.2',note:'未適用の更新 4件。暗号の通信を扱う部品に、公開済みの穴'},{name:'OpenSSH 8.9',note:'未適用の更新 2件'},{name:'Linux カーネル',note:'未適用の更新 6件。権限を奪われる恐れ'}],
-    after:[{name:'OpenSSL 3.0.2',note:'更新をすべて適用（バージョンの数字は同じでも、中身は直っている）'},{name:'OpenSSH 8.9',note:'更新をすべて適用'},{name:'Linux カーネル',note:'更新をすべて適用'}]},
+    items:[{name:'openssl 3.0.2-0ubuntu1.10',note:'セキュリティ更新 4件（重要度：高）　→ 3.0.2-0ubuntu1.18'},{name:'openssh-server 8.9p1-3ubuntu0.4',note:'セキュリティ更新 2件（重要度：中）　→ 8.9p1-3ubuntu0.10'},{name:'linux-image 5.15.0-91',note:'セキュリティ更新 6件（重要度：高）　→ 5.15.0-125'}],
+    after:[{name:'openssl 3.0.2-0ubuntu1.18',note:'最新'},{name:'openssh-server 8.9p1-3ubuntu0.10',note:'最新'},{name:'linux-image 5.15.0-125',note:'最新'}]},
   where:()=>({svc:'cloud',sub:'server'}),
   solve(c){c.inf.patched=true;c.inf.autoPatch=true;},
   success:c=>{const m=[{who:SHIRO,t:'土台の既知の穴はふさがった。19日目クリア！'}];if(!inf(c).autoPatch)m.push({who:SHIRO,t:'「セキュリティ更新を自動で適用」もオンにしておこう。穴は毎月のように見つかる。手作業だと、いつか忘れるからね'});return m;},

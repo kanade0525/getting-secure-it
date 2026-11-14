@@ -74,6 +74,7 @@ node test/smoke.cjs       <フォルダ または URL> <スクショの出力先
 node test/smoke-infra.cjs <フォルダ または URL> <スクショの出力先> [開始日]   # 12〜24日目とエンディングを、画面の操作だけで通す（トラップも踏む）
 node test/smoke-net.cjs   <フォルダ または URL> <スクショの出力先> [日,日,…]  # 通信タブ：全24日
 node test/smoke-site.cjs  <フォルダ または URL> <スクショの出力先> [日,日,…]  # サイトタブ・管理タブのデモ
+node test/smoke-console.cjs <フォルダ または URL>                          # 管理画面の現実味：各社の画面に、ほかの会社の名前やゲームの言葉が出ないこと（全日・全メニュー）
 node test/smoke-days.cjs  <フォルダ または URL> <スクショの出力先>            # 日を選ぶ・デバッグ・古い保存データの引き継ぎ・「はじめから」で何も残らないこと
 ```
 

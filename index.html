@@ -1273,7 +1273,7 @@ function domainDemoHTML(){
     :note('結果',`<p><b>拒否された</b></p><p>移管ロックが、なりすましの申請を止めた${i.reg2fa?'。アカウントも、2段階認証で守られている':''}</p>`,'ok'));
   cNotes.push(note('再現：なりすましの移管申請','<p>攻撃者が持ち主のふりをして、ドメインの移管を申請します。</p><div class="acts"><button class="btn primary" data-act="domTry">なりすましの移管申請が来た場合を再現する</button></div>'));
   return `<div class="sec" data-focus><h3>登録者変更・移管の申請</h3>
-    <div class="dbdump" style="padding:8px 12px"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：${esc(DOM())} を別の管理者へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認の返信待ち（期限までに断らなければ、自動で承認）'}</div></div></div>`;
+    <div class="dbdump" style="padding:8px 12px"><div>受付　：本日 03:12</div><div>申請者：${S.whois?'（登録者情報：公開代行）':'山田 太郎'}</div><div>内容　：${esc(DOM())} を他社へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認の返信待ち（期限までに断らなければ、自動で承認）'}</div></div></div>`;
 }
 // 24日目：良えWS「監視」の、夜間の通信ログ
 function exfilDemoHTML(){
@@ -1645,15 +1645,16 @@ const infSel=(k,opts)=>`<select id="inf-${k}" data-inf="${k}">${opts.map(([v,n])
 function sw(id,on,dis){return `<button class="sw" id="${id}" data-act="${id}" aria-pressed="${on}" ${dis?'disabled':''}>${on?'オン':'オフ'}</button>`;}
 const intro=t=>`<p class="small" style="padding:10px 12px 0;margin:0">${t}</p>`;
 
-/* --- WHOIS：公開代行なしなら、その場で持ち主情報の露出を見せて回収 --- */
+/* --- WHOIS：公開代行なしなら、いま公開されている持ち主情報をそのまま見せる（危ない理由はシロのメモで） --- */
 function whoisBox(){
-  if(S.whois)return '<div class="box" style="margin:10px 12px 12px"><p class="small" style="margin:0">WHOISを引いても、出てくるのは代行会社の情報だけ。あなたの氏名・住所・連絡先は隠れています。</p></div>';
+  if(S.whois)return '';
   const d=esc(S.domain);
-  return '<div class="box" style="margin:10px 12px 12px;border-color:var(--danger)">'
-    +'<p class="small" style="margin:0 0 6px"><b>WHOISで '+d+' を検索した結果</b></p>'
+  cNotes.push(note('解説：持ち主の情報が、誰でも見られる','<p>WHOISは、ドメインの持ち主を誰でも調べられる仕組みです。いまは、きみの氏名・住所・電話番号がそのまま出ています。</p><p>攻撃者は、この情報でドメイン会社に本人のふりをして連絡し、<b>ドメインごと乗っ取る</b>きっかけにします。</p>','danger'));
+  return '<div class="box" style="margin:10px 12px 12px">'
+    +'<p class="small" style="margin:0 0 6px"><b>現在のWHOIS公開情報</b></p>'
     +'<div class="dbdump"><div>登録者　山田 太郎</div><div>住所　　東京都○○区△△ 1-2-3</div><div>電話　　090-1234-5678</div><div>メール　tencho@'+d+'</div></div>'
-    +'<p class="small" style="margin:8px 0 0">誰でもこれが見られます。攻撃者がこの情報でドメイン会社になりすませば、<b>ドメインごと乗っ取られる</b>きっかけになります。</p>'
-    +'<button class="btn primary" data-act="whoisOn" style="margin-top:8px">WHOIS公開代行をオンにする</button></div>';
+    +'<p class="small muted" style="margin:8px 0 0">WHOIS情報公開代行を設定すると、登録者の欄に当社の情報が表示されます（無料）。</p>'
+    +'<button class="btn primary" data-act="whoisOn" style="margin-top:8px">WHOIS情報公開代行を設定する</button></div>';
 }
 /* --- ドメイン会社（おなまえや.com） --- */
 function registrarHTML(){
@@ -1678,14 +1679,14 @@ function registrarHTML(){
     ${recs.length?recs.map((r,n)=>{
       // お店の住所（A @）は、公開中は消せない。入口（CDN）を作ったあとは、入口へ向け終わるまで書き換えられる
       const lock=live&&r.name==='@'&&(i.edge?to==='edge'&&toEdge(r):toServer(r));
-      return `<div class="drow"><span>${esc(r.type)}</span><span>${esc(r.name)}</span><span>${esc(r.value)}</span>${frozen?'<span class="small muted">凍結中</span>':lock?'<span class="small muted">公開中</span>':`<button class="link" data-act="dnsDel" data-i="${n}">削除</button>`}</div>`;}).join(''):'<p class="small muted" style="padding:8px 12px;margin:0">レコードはまだありません</p>'}
+      return `<div class="drow"><span>${esc(r.type)}</span><span>${esc(r.name)}</span><span>${esc(r.value)}</span>${frozen?'<span class="small muted">凍結中</span>':lock?'<span></span>':`<button class="link" data-act="dnsDel" data-i="${n}">削除</button>`}</div>`;}).join(''):'<p class="small muted" style="padding:8px 12px;margin:0">レコードはまだありません</p>'}
     ${frozen?'<p class="res small muted" style="padding-top:10px">DNSの変更を凍結中です。レコードの追加・削除はできません。</p>':`<div class="domrow"><select id="nrType" aria-label="タイプ">${['A','ALIAS','CNAME','TXT'].map(t=>`<option ${nr.type===t?'selected':''}>${t}</option>`).join('')}</select>
       <input type="text" id="nrName" placeholder="名前（ドメインそのものは @）" aria-label="名前" value="${esc(nr.name)}" autocomplete="off" autocapitalize="off" spellcheck="false">
       <input type="text" id="nrVal" placeholder="値" aria-label="値" value="${esc(nr.val)}" autocomplete="off" autocapitalize="off" spellcheck="false">
       <button class="btn" data-act="dnsAdd">追加</button></div>
-    ${clip?'<p class="res"><button class="link" data-act="paste">コピーした値を「値」に貼り付け</button></p>':''}
     ${S.dnsAddMsg?`<p class="res small msg-err">${S.dnsAddMsg}</p>`:''}`}</div>`;
   if(live&&i.edge&&to!=='edge'&&!frozen)cNotes.push(note('解説：ドメインの向き先を、入口に変える',`<p>DNS設定の <b>A レコード（名前 @）</b> が、お店の住所です。いまはサーバーのIPアドレス（${SERVER_IP}）を指していて、お客さんはサーバーに直接来ています。</p><p>タイプ <b>ALIAS</b>・名前 <b>@</b>・値が入口のアドレス（${EDGE_HOST}）のレコードを追加して、古い A レコードを削除しましょう。</p><p class="muted">ドメインそのもの（@）は、CNAME では別の名前へ向けられない決まりです。その代わりに使うのが ALIAS です。</p>`));
+  if(clip&&!frozen)cNotes.push(note('コピーした値',`<div class="dbdump"><div>${esc(clip)}</div></div><div class="acts"><button class="btn" data-act="paste">「値」に貼り付ける</button></div>`));
   if(DAYS[S.day]&&DAYS[S.day].demo&&DAYS[S.day].demo.kind==='domain')h+=domainDemoHTML();
   if(live&&S.day>=23)h+=`<div class="sec"><h3>ドメインの保護</h3>
     <div class="row"><div class="desc">移管ロック<span class="note">ほかの会社や、ほかの持ち主へ移す申請を、受け付けません</span></div>${infSw('regLock')}</div>
@@ -1698,8 +1699,8 @@ function registrarHTML(){
 function caHTML(){
   const c=S.cfg,ca=CAS[c.ca],D=esc(S.domain);
   let h=`<div class="sec"><h3>証明書の申請</h3>`;
-  if(!c.keyMade)return h+intro('申請には CSR（証明書の申請書）が必要です。先にサーバー側で秘密鍵とCSRを作ってください。')+'<div class="row"><span></span><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">良えWSの「証明書」を開く</button></div></div>';
-  if(!c.token)return h+`<div class="row"><div class="desc">server.csr を提出する<span class="note">対象：${D}。秘密鍵はサーバーに置いたまま、CSRだけを送ります</span></div><button class="btn primary" data-act="apply">提出する</button></div></div>`;
+  if(!c.keyMade)return h+intro('申請には CSR（証明書署名要求）が必要です。お使いのサーバーで秘密鍵とCSRを作成し、CSRのファイルを用意してください。')+'</div>';
+  if(!c.token)return h+`<div class="row"><div class="desc">CSRをアップロード<span class="note">ファイル：server.csr　／　対象：${D}<br>秘密鍵は送らないでください</span></div><button class="btn primary" data-act="apply">提出する</button></div></div>`;
   if(!c.issued)return h+`<div class="capanel"><p class="small muted" style="margin:0">ドメインの所有確認</p>
       <p>${D} の持ち主であることを確認します。このドメインのDNSに次のレコードを追加してから、確認を依頼してください。</p>
       <div class="kv"><span>タイプ</span><b>TXT</b><span>名前</span><b>_acme-challenge</b><span>値</span><b>${c.token}</b></div>
@@ -1707,7 +1708,7 @@ function caHTML(){
       ${S.dcvMsg?`<p class="small ${caBusy?'muted':'msg-err'}" style="margin:10px 0 0">${S.dcvMsg}</p>`:''}</div></div>`;
   return h+`<div class="row"><div class="desc">${D}<span class="note">発行済み・有効期間 ${ca.v}・中間CA：${ca.ica}</span></div><span class="msg-ok small">発行済み</span></div>
     <div class="row"><div class="desc">ダウンロードできるファイル<span class="note">server.crt（サーバー証明書）／chain.crt（中間証明書）／fullchain.crt（両方をまとめたもの）</span></div></div>
-    <div class="row"><div class="desc">設置はサーバー側で行います</div><button class="btn" data-act="svc" data-s="cloud" data-sub="cert">良えWSの「証明書」を開く</button></div></div>`;
+    <div class="row"><div class="desc">設置について<span class="note">ダウンロードしたファイルを、お使いのサーバーに設置してください</span></div></div></div>`;
 }
 
 /* --- 良えWS：サーバーや、その周りの設備を借りるサービス。使い始めたサービスが、小メニューに並ぶ ---
@@ -1732,7 +1733,7 @@ function cloudServerHTML(){
     <div class="row"><div class="desc">OS<span class="note">${os.name}</span></div><span class="small ${os.upd?'msg-ok':'muted'}">${os.upd?'更新済み':'稼働中'}</span></div>
     <div class="row"><div class="desc">主なソフトウェア<span class="note">${os.pkg}</span></div></div>`;
   if(live&&d>=14)h+=`<div class="row"><label class="desc" for="inf-size">サーバーの大きさ<span class="note">大きいほど、同時にさばける量が増えます</span></label>${infSel('size',[['s','小（1コア・1GB）'],['l','大（8コア・32GB）']])}</div>`;
-  if(!live)h+=`<div class="row"><div class="desc">サイトを公開する<span class="note">${S.domain?'ドメインがこのサーバーを指していれば公開できます':'先にドメインを取得してください'}</span></div><button class="btn primary" data-act="publish" ${S.domain&&!relBusy?'':'disabled'}>リリースする</button></div>
+  if(!live)h+=`<div class="row"><div class="desc">サイトを公開する<span class="note">独自ドメイン：${S.domain?esc(S.domain)+'（A レコードが、このサーバーのIPアドレスを指していること）':'未設定'}</span></div><button class="btn primary" data-act="publish" ${S.domain&&!relBusy?'':'disabled'}>リリースする</button></div>
     ${S.relMsg?`<p class="res small ${relBusy?'muted':'msg-err'}">${S.relMsg}</p>`:''}`;
   h+='</div>';
   if(k==='store')h+=storeDemoHTML();
@@ -1750,9 +1751,9 @@ function cloudEdgeHTML(){
     +`<div class="row"><div class="desc">入口を作る<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><button class="btn primary" data-act="edgeMake">作成する</button></div></div>`;
   h+=`<div class="row"><div class="desc">pixeldo-edge<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><span class="small msg-ok">稼働中</span></div>
     <div class="row"><div class="desc">入口のアドレス<span class="note">${EDGE_HOST}</span></div><button class="btn" data-act="copyEdge">${clip===EDGE_HOST?'コピーしました':'コピー'}</button></div>
-    <div class="row"><div class="desc">${esc(S.domain)} の向き先<span class="note">${to==='edge'?'入口（'+EDGE_HOST+'）':to==='server'?'サーバー（'+SERVER_IP+'）に直接':to==='both'?'入口とサーバーの両方':to==='none'?'登録がありません':'入口でもサーバーでもない宛先'}</span></div>${to==='edge'?'<span class="small msg-ok">入口を通っています</span>':'<button class="btn" data-act="svc" data-s="registrar">おなまえや.comを開く</button>'}</div>`;
+    <div class="row"><div class="desc">代替ドメイン名<span class="note">${esc(S.domain)}（このドメインで来た通信を受け付けます）</span></div></div>`;
   if(S.day>=14)h+=`<div class="row"><div class="desc">キャッシュ<span class="note">商品ページや画像など、誰が見ても同じ内容は、入口が覚えておいて代わりに返します</span></div>${infSw('cache')}</div>`;
-  if(to!=='edge')cNotes.push(note('解説：入口は、作っただけでは通らない',`<p>お客さんはいまも、サーバー（${SERVER_IP}）に直接来ています。ドメインの向き先（DNS）を入口のアドレスに変えると、通信が入口を通るようになります。</p><p>入口は世界中に置かれていて、IPアドレスは場所や時間で変わります。だから、IPアドレスではなく<b>名前</b>で向けます。DNSは、ドメインを取った「おなまえや.com」で設定します。アドレスをコピーしてから、おなまえや.comを開きましょう。</p>`));
+  if(to!=='edge')cNotes.push(note('解説：入口は、作っただけでは通らない',`<p>${to==='both'?'いまは、ドメインが入口とサーバーの両方を向いています。サーバーに直接来るお客さんが残ります。':'お客さんはいまも、サーバー（'+SERVER_IP+'）に直接来ています。'}ドメインの向き先（DNS）を入口のアドレスに変えると、通信が入口を通るようになります。</p><p>入口は世界中に置かれていて、IPアドレスは場所や時間で変わります。だから、IPアドレスではなく<b>名前</b>で向けます。DNSは、ドメインを取った「おなまえや.com」で設定します。アドレスをコピーしてから、おなまえや.comを開きましょう。</p>`));
   return h+'</div>';
 }
 // WAF：入口に届いた通信を検査して、通す・止めるを決める。ルールは日が進むごとに増える
@@ -1779,54 +1780,52 @@ function cloudFwHTML(){
     <div class="row"><label class="desc" for="inf-fwWeb">Web（80・443番）<span class="note">お店のサイト</span></label>${infSel('fwWeb',[['any','すべての相手'],['edge','入口（CDN）からだけ'],['admin','管理者のIPアドレスだけ']])}</div>
     <div class="row"><label class="desc" for="inf-fwSsh">SSH（22番）<span class="note">サーバーの管理用ログイン</span></label>${infSel('fwSsh',[['any','すべての相手'],['port','すべての相手（番号を2222に変える）'],['admin','管理者のIPアドレスだけ']])}</div></div>`;
   if(S.day>=24)h+=`<div class="sec"><h3>アウトバウンド（出ていく通信）</h3>${intro('shop-server-01 から、外のどこへ接続してよいかを決めます。')}
-    <div class="row"><label class="desc" for="inf-fwOut">宛先<span class="note">決済サービス・メール・ソフトウェアの更新は、お店の運営に必要です</span></label>${infSel('fwOut',[['any','すべて許可'],['allow','必要な宛先だけ許可'],['none','すべて拒否']])}</div></div>`;
+    <div class="row"><label class="desc" for="inf-fwOut">宛先<span class="note">許可リスト：決済サービス（api.payments.example）・メール（smtp.mail.example）・OSの更新（archive.ubuntu.com）</span></label>${infSel('fwOut',[['any','すべて許可'],['allow','許可リストの宛先だけ'],['none','すべて拒否']])}</div></div>`;
   return h;
 }
 // シークレット：外に出してはいけない値を、サーバー側で保管する。漏れたキーは、ここで入れ替える
 function cloudSecretHTML(){
   const c=S.cfg,i=c.inf,inCode=c.code.apikey!=='server';
   let h=`<div class="sec"><h3>シークレット</h3>${intro('APIキーやパスワードなど、外に出してはいけない値を、サーバー側で保管します。')}
-    <div class="row"><div class="desc">PAY_API_KEY<span class="note">決済サービスのAPIキー　${i.keyRotated?'sk_live_c71e…':'sk_live_9f2a…'}</span></div><span class="small ${i.keyRotated?'msg-ok':'msg-err'}">${i.keyRotated?'入れ替え済み':'漏えいの疑い'}</span></div>
-    <div class="row"><div class="desc">読み出し元<span class="note">${inCode?'アプリはまだ、コードに書かれたキーを使っています':'shop-server-01 のアプリが、起動時にここから読みます'}</span></div></div>`;
+    <div class="row"><div class="desc">PAY_API_KEY<span class="note">決済サービスのAPIキー　${i.keyRotated?'sk_live_c71e…':'sk_live_9f2a…'}</span></div><span class="small msg-ok">有効</span></div>
+    <div class="row"><div class="desc">最後に読み出された日時<span class="note">${inCode?'読み出されたことはありません':'今日　shop-server-01'}</span></div></div>
+    <div class="row"><div class="desc">最後に入れ替えた日<span class="note">${i.keyRotated?'今日':'入れ替えたことはありません（作成から420日）'}</span></div></div>`;
   h+=i.keyRotated?`<div class="row"><div class="desc">古いキー　sk_live_9f2a…<span class="note">失効済み。もう使えません</span></div></div>`
-    :`<div class="row"><div class="desc">キーを入れ替える<span class="note">いまのキーを失効し、新しいキーを発行して、ここに保管します</span></div><button class="btn primary" data-act="keyRotate">失効して入れ替える</button></div>`;
+    :`<div class="row"><div class="desc">キーを入れ替える<span class="note">決済サービスで、いまのキーを失効し、新しいキーを発行して、ここに保管します</span></div><button class="btn primary" data-act="keyRotate">失効して入れ替える</button></div>`;
   return h+'</div>';
 }
 // 監視：記録と、ふだんと違うことが起きたときの通知（お知らせのアラートは、ここから届いている）
 function cloudMonHTML(){
   const k=DAYS[S.day]&&DAYS[S.day].demo?DAYS[S.day].demo.kind:'';
-  return (k==='exfil'?exfilDemoHTML():'')+`<div class="sec"><h3>アラーム</h3>${intro('ふだんと違うことが起きたら、「お知らせ」に通知します。')}
+  return (k==='exfil'?exfilDemoHTML():'')+`<div class="sec"><h3>アラーム</h3>${intro('ふだんと違うことが起きたら、登録したメールアドレスに通知します。')}
     <div class="row"><div class="desc">アクセス数の急増<span class="note">平常の10倍を超えたら通知</span></div><span class="small msg-ok">有効</span></div>
     <div class="row"><div class="desc">ログイン失敗の急増<span class="note">5分で100回を超えたら通知</span></div><span class="small msg-ok">有効</span></div>
     <div class="row"><div class="desc">外向き通信の異常<span class="note">見覚えのない宛先への送信や、遮断された送信を通知</span></div>${infSw('alarmOut')}</div></div>`;
 }
+// 良えWSの「証明書」：このサーバーで鍵とCSRを作り、証明書を設置する。認証局は別の会社なので、ここからは開けない（CSRをダウンロードして、自分で提出する）
 function certCloudHTML(){
-  const c=S.cfg,D=esc(S.domain);
+  const c=S.cfg,D=esc(S.domain),self=c.ca==='self',ca=c.ca?CAS[c.ca]:null;
   let h=`<div class="sec"><h3>SSL/TLS証明書</h3>`;
-  if(!c.ca){
-    h+=intro('HTTPSには、お店が本物であることを示す証明書が必要です。証明書をどこで用意するか選びましょう。');
-    h+=Object.entries(CAS).map(([k,v])=>`<div class="row"><div class="desc">${v.n}<span class="note">${v.p}・有効期間 ${v.v}<br>${v.d}</span></div><button class="btn" data-act="ca" data-ca="${k}">これにする</button></div>`).join('');
-    return h+'</div>';
-  }
-  const ca=CAS[c.ca],self=c.ca==='self';
-  h+=`<div class="row"><div class="desc">発行元<span class="note">${ca.n}（${ca.p}・有効期間 ${ca.v}）</span></div><button class="link" data-act="certRedo">選び直す</button></div>`;
-  if(!c.keyMade)return h+`<div class="row"><div class="desc">1. 秘密鍵とCSRを作る<span class="note">秘密鍵はこのサーバーの中だけに保管します。CSRは「この名前の証明書がほしい」という申請書です</span></div><button class="btn" data-act="keygen">作成する</button></div></div>`;
-  h+=`<div class="row"><div class="desc">1. 秘密鍵とCSR<span class="note">server.key（サーバー内に保管）／server.csr（対象：${D}）</span></div><span class="msg-ok small">作成済み</span></div>`;
+  if(!c.keyMade)return h+intro('HTTPSには、お店が本物であることを示す証明書が必要です。まず、このサーバーで秘密鍵とCSRを作ります。')
+    +`<div class="row"><div class="desc">1. 秘密鍵とCSRを作る<span class="note">秘密鍵はこのサーバーの中だけに保管します。CSRは「この名前の証明書がほしい」という申請書です</span></div><button class="btn" data-act="keygen">作成する</button></div></div>`;
+  h+=`<div class="row"><div class="desc">1. 秘密鍵とCSR<span class="note">server.key（サーバー内に保管）／server.csr（対象：${D}）</span></div><button class="link" data-act="certRedo">作り直す</button></div>`;
+  if(!ca)return h+`<div class="row" style="border-bottom:0"><div class="desc">2. 証明書を用意する<span class="note">CSRに署名すると、証明書になります。だれが署名するかを選びます</span></div></div>
+    <div class="row"><div class="desc">認証局に署名してもらう<span class="note">server.csr をダウンロードして、認証局に提出します</span></div><button class="btn" data-act="ca" data-ca="free">CSRをダウンロード</button></div>
+    <div class="row"><div class="desc">自分で署名する（自己署名）<span class="note">このサーバーの秘密鍵で、CSRに署名します</span></div><button class="btn" data-act="ca" data-ca="self">署名する</button></div></div>`;
   if(self){
-    if(!c.issued)return h+`<div class="row"><div class="desc">2. 自分の秘密鍵で署名する<span class="note">CSRに自分で署名して、証明書を作ります</span></div><button class="btn" data-act="selfsign">署名する</button></div></div>`;
-    h+=`<div class="row"><div class="desc">2. 署名<span class="note">自分で署名しました</span></div><span class="msg-ok small">完了</span></div>`;
-  }else{
-    if(!c.issued)return h+`<div class="row"><div class="desc">2. 認証局に発行してもらう<span class="note">${c.token?'申請済み。認証局の指示に従って、ドメインの所有を確認してもらいましょう':'server.csr を'+ca.n+'に提出します'}</span></div><button class="btn" data-act="svc" data-s="ca">${ca.n}を開く</button></div></div>`;
-    h+=`<div class="row"><div class="desc">2. 認証局で発行<span class="note">${ca.n}から証明書を受け取りました</span></div><span class="msg-ok small">完了</span></div>`;
-  }
-  h+=`<div class="capanel"><p class="small muted" style="margin:0 0 6px">証明書の中身</p><div class="kv"><span>対象</span><b>${D}</b><span>発行者</span><b>${self?D+'（自分）':ca.n+'（中間CA：'+ca.ica+'）'}</b><span>有効期間</span><b>${self?'10年（自分で決めた）':ca.v}</b></div></div>`;
-  if(!c.installed)return h+`<div class="row" style="border-bottom:0"><div class="desc">3. サーバーに設置する<span class="note">どのファイルを設置しますか？</span></div></div>
-      <label class="chk"><input type="radio" name="inst" value="cert"><span>server.crt</span><span class="note">サーバー証明書だけ</span></label>
-      ${self?'':'<label class="chk"><input type="radio" name="inst" value="fullchain"><span>fullchain.crt</span><span class="note">サーバー証明書＋中間証明書</span></label>'}
-      <div class="row"><span class="small msg-err">${S.instMsg||''}</span><button class="btn" data-act="install">設置する</button></div></div>`;
-  h+=`<div class="row"><div class="desc">3. 設置<span class="note">${c.installed==='fullchain'?'fullchain.crt':'server.crt'} を秘密鍵といっしょに設置済み</span></div><button class="link" data-act="reinstall">設置し直す</button></div>`;
-  if(!self)h+=`<div class="row"><div class="desc">自動更新<span class="note">期限が切れる前に、申請から設置までを自動でやり直します</span></div>${sw('autorenew',!!c.autoRenew,false)}</div>`;
-  if(c.installed)h+=`<div class="row"><div class="desc">HTTPSの有効化は「通信設定」で行います</div><button class="btn" data-act="sub" data-sub="net">通信設定を開く</button></div>`;
+    if(!c.issued)return h+`<div class="row"><div class="desc">2. 自分で署名する（自己署名）<span class="note">このサーバーの秘密鍵で、CSRに署名します</span></div><button class="btn" data-act="selfsign">署名する</button></div></div>`;
+    h+=`<div class="row"><div class="desc">2. 署名<span class="note">このサーバーの秘密鍵で署名しました（自己署名）</span></div><span class="msg-ok small">完了</span></div>`;
+  }else h+=`<div class="row"><div class="desc">2. CSRのダウンロード<span class="note">server.csr をダウンロードしました。認証局に提出し、発行された証明書のファイルを受け取ってください</span></div><span class="msg-ok small">完了</span></div>`;
+  // 設置：パソコンにある証明書のファイルを選んでアップロードする（自己署名なら、サーバーの中で作ったもの）
+  const files=self?[['cert','server.crt','サーバー証明書（自己署名）']]:c.issued?[['cert','server.crt','サーバー証明書だけ'],['fullchain','fullchain.crt','サーバー証明書＋中間証明書']]:[];
+  if(!c.installed)return h+`<div class="row" style="border-bottom:0"><div class="desc">3. 証明書を設置する<span class="note">${self?'作った証明書を、秘密鍵といっしょに設置します':'受け取った証明書のファイルを、パソコンから選んでアップロードします'}</span></div></div>
+      ${files.length?files.map(([v,f,n])=>`<label class="chk"><input type="radio" name="inst" value="${v}"><span>${f}</span><span class="note">${n}</span></label>`).join(''):'<p class="small muted" style="padding:0 12px 8px;margin:0">選べる証明書のファイルがありません</p>'}
+      <div class="row"><span class="small msg-err">${S.instMsg||''}</span><button class="btn" data-act="install" ${files.length?'':'disabled'}>アップロードして設置</button></div></div>`;
+  // 設置した証明書の中身（ファイルに書かれている情報）
+  h+=`<div class="row"><div class="desc">3. 設置<span class="note">秘密鍵といっしょに設置済み</span></div><button class="link" data-act="reinstall">設置し直す</button></div>`;
+  h+=`<div class="capanel"><p class="small muted" style="margin:0 0 6px">設置した証明書</p><div class="kv"><span>対象</span><b>${D}</b><span>発行者</span><b>${self?D+'（自己署名）':ca.n+'（中間CA：'+ca.ica+'）'}</b><span>有効期間</span><b>${self?'10年':ca.v}</b><span>ファイル</span><b>${c.installed==='fullchain'?'fullchain.crt':'server.crt'}</b></div></div>`;
+  if(!self)h+=`<div class="row"><div class="desc">自動更新（ACME）<span class="note">期限が切れる前に、このサーバーが認証局へ申請し直し、設置までやり直します</span></div>${sw('autorenew',!!c.autoRenew,false)}</div>`;
+  h+=`<div class="row"><div class="desc">HTTPSの有効化は「通信設定」で行います</div><button class="btn" data-act="sub" data-sub="net">通信設定を開く</button></div>`;
   return h+'</div>';
 }
 function cloudNetHTML(){
@@ -1863,6 +1862,7 @@ function cloudHTML(g){
 }
 /* --- Cithub（コード共有）：お店のコードの置き場所。修正は、プルリクエストの中身を見てマージする。入れた修正はコミット履歴に残る --- */
 const codeDays=()=>Object.keys(DAYS).map(Number).filter(n=>DAYS[n].fix).sort((a,b)=>a-b);
+const ago=n=>{const k=S.day-n;return k<=0?'今日':k===1?'昨日':k+'日前';};
 function hubHTML(){
   const d=DAYS[S.day],fx=d&&d.fix,c=S.cfg,days=codeDays(),num=n=>days.indexOf(n)+1;
   const done=!!fx&&c.code[fx.key]===fx.value,open=!!fx&&!done&&!demoOff();
@@ -1873,9 +1873,9 @@ function hubHTML(){
   h+='</div>';
   // コミット履歴：これまでにマージした修正（新しい順）。その日の修正だけ、取り消せる
   const merged=days.filter(n=>n<=S.day&&c.code[DAYS[n].fix.key]===DAYS[n].fix.value).reverse(),show=merged.slice(0,4);
-  h+=`<div class="sec"><h3>コミット履歴</h3>${show.map(n=>`<div class="row"><div class="desc">${esc(DAYS[n].fix.label)}<span class="note">#${num(n)} をマージ　／　${n}日目</span></div>${n===S.day&&S.phase==='fix'?`<button class="link" data-act="undoFix" data-key="${DAYS[n].fix.key}">取り消す</button>`:''}</div>`).join('')}
+  h+=`<div class="sec"><h3>コミット履歴</h3>${show.map(n=>`<div class="row"><div class="desc">${esc(DAYS[n].fix.label)}<span class="note">#${num(n)} をマージ　／　${ago(n)}</span></div>${n===S.day&&S.phase==='fix'?`<button class="link" data-act="undoFix" data-key="${DAYS[n].fix.key}">取り消す</button>`:''}</div>`).join('')}
     ${merged.length>show.length?`<p class="small muted" style="padding:8px 12px;margin:0">…ほか ${merged.length-show.length} 件</p>`:''}
-    <div class="row"><div class="desc">よろず屋ピクセル堂を公開<span class="note">最初のコミット　／　0日目</span></div></div></div>`;
+    <div class="row"><div class="desc">よろず屋ピクセル堂を公開<span class="note">最初のコミット　／　${ago(0)}</span></div></div></div>`;
   if(!fx)cNotes.push(note('解説','<p>Cithubは、お店のコードの置き場所です。今日は、ここで入れる修正はありません。</p>'));
   return h;
 }
@@ -1904,10 +1904,10 @@ function guideTarget(){
 }
 // 管理タブ：「あなたのパソコン」のブラウザに、会社ごとのタブが並ぶ。次に開くとよいタブには矢印が立つ
 const SITE={
-  registrar:{name:'おなまえや.com',role:'ドメイン会社',url:()=>'https://onamaeya.example/'+(S.domain?'domains/'+S.domain:'search')},
-  cloud:{name:'良えWS',role:'クラウド',url:()=>'https://console.eews.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
-  ca:{name:'',role:'認証局',url:()=>'https://letsangou.example/orders'},
-  hub:{name:'Cithub',role:'コード共有',url:()=>'https://cithub.example/pixeldo/shop'}
+  registrar:{name:'おなまえや.com',role:'ドメイン会社',tag:'ドメインナビ',url:()=>'https://onamaeya.example/'+(S.domain?'domains/'+S.domain:'search')},
+  cloud:{name:'良えWS',role:'クラウド',tag:'マネジメントコンソール',url:()=>'https://console.eews.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
+  ca:{name:'',role:'認証局',tag:'証明書の注文',url:()=>'https://letsangou.example/orders'},
+  hub:{name:'Cithub',role:'コード共有',tag:'pixeldo / shop',url:()=>'https://cithub.example/pixeldo/shop'}
 };
 function renderConsole(){
   const c=S.cfg,p=$('p-console');
@@ -1918,7 +1918,7 @@ function renderConsole(){
   const nm=id=>id==='ca'?CAS[c.ca].n:SITE[id].name,sv=S.svc,g=guideTarget();
   cNotes=[];
   const body=sv==='registrar'?registrarHTML():sv==='ca'?caHTML():sv==='hub'?hubHTML():cloudHTML(g);
-  const page=`<div class="site-head">${spr(IC['logo_'+sv],3,'')}<span>${esc(nm(sv))}<small>${SITE[sv].role}の管理画面</small></span></div><div class="site-body">${body}</div>`;
+  const page=`<div class="site-head">${spr(IC['logo_'+sv],3,'')}<span>${esc(nm(sv))}<small>${SITE[sv].tag}</small></span></div><div class="site-body">${body}</div>`;
   p.innerHTML=`<div class="shop-hd"><h2>管理</h2><p class="muted small">お店に関わるサービスの管理画面です</p></div>`
     +pcHTML(browserWin({k:'c-'+sv+(sv==='cloud'?'-'+S.sub:''),site:sv,url:SITE[sv].url(),sec:'ok',
       tabs:ids.map(id=>({id,title:nm(id),fav:spr(IC['logo_'+id],2,''),on:id===sv,guide:!!g&&g.svc===id&&id!==sv}))},page),'あなたのパソコン',true)
@@ -2377,11 +2377,13 @@ document.addEventListener('click',e=>{
   else if(a==='rollAgain'){startRoll();}
   else if(a==='rollTitle'){rollQuit();showTitle(false);}
   else if(a==='rollSound'){const v=!Music.isOn();Music.setOn(v);b.setAttribute('aria-pressed',v);b.textContent=v?'音楽：オン':'音楽：オフ';if(v&&(rollStage==='roll'||rollStage==='static'))Music.start();}
-  else if(a==='ca'){c.ca=b.dataset.ca;save();render();if(c.ca!=='self')say([{who:SHIRO,t:CAS[c.ca].n+'のタブが、ブラウザに増えたよ。まずはこのサーバーで秘密鍵とCSRを作ろう'}]);}
+  else if(a==='ca'){c.ca=b.dataset.ca;if(c.ca==='self')c.issued=true;
+    if(c.ca!=='self'){S.svc='ca';save();render();say([{who:SHIRO,t:'CSRをダウンロードできた。無料で証明書を出してくれる認証局「'+CAS[c.ca].n+'」のサイトを、新しいタブで開いたよ'},{who:SHIRO,t:'ここにCSRを提出しよう'}]);}
+    else{save();render();}}
   else if(a==='certRedo'||a==='reinstall'){
     if(a==='certRedo')Object.assign(c,{ca:null,keyMade:false,token:null,issued:false});
     Object.assign(c,{installed:null,cert:false,https:false,redirect:false,hsts:false});S.dcvMsg='';S.instMsg='';save();render();}
-  else if(a==='keygen'){c.keyMade=true;save();render();say([{who:SHIRO,t:'秘密鍵は、お店だけが持つ「本物の証」。絶対に外へ出さないでね'}]);}
+  else if(a==='keygen'){c.keyMade=true;save();render();say([{who:SHIRO,t:'秘密鍵は、お店だけが持つ「本物の証」。絶対に外へ出さないでね'},{who:SHIRO,t:'次は、CSRに署名してもらって証明書にする。署名をだれに頼むかで、信用されるかが決まるよ'}]);}
   else if(a==='selfsign'){c.issued=true;save();render();}
   else if(a==='apply'){c.token=genToken();S.dcvMsg='';save();render();say([{who:SHIRO,t:'認証局は「本当にこのドメインの持ち主？」を確かめてから証明書を出すんだ'},{who:SHIRO,t:'指定された目印をDNSに置いて、持ち主だと証明しよう'}]);}
   else if(a==='copyToken'){clip=c.token;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
@@ -2398,10 +2400,10 @@ document.addEventListener('click',e=>{
     setTimeout(()=>{
       caBusy=false;const tk=c.token,recs=S.dns||[],has=r=>String(r.value).trim().toUpperCase()===tk;
       if(recs.some(r=>r.type==='TXT'&&r.name==='_acme-challenge'&&has(r))){c.issued=true;S.dcvMsg='';save();render();say([{who:SHIRO,t:'持ち主だと認められて、証明書が発行された！ 次はサーバーに設置しよう'}]);return;}
-      S.dcvMsg=recs.some(r=>r.type!=='TXT'&&has(r))?'確認用のレコードが見つかりません。タイプが違うようです。確認用の文字列は TXT レコードで登録します'
-        :recs.some(r=>r.type==='TXT'&&has(r))?'確認用のレコードが見つかりません。名前が違うようです。「_acme-challenge」で登録しましょう'
+      S.dcvMsg=recs.some(r=>r.type!=='TXT'&&has(r))?'確認用のTXTレコードが見つかりません。指定の値が、TXT以外のタイプで登録されています'
+        :recs.some(r=>r.type==='TXT'&&has(r))?'確認用のTXTレコードが見つかりません。指定の値が、「_acme-challenge」以外の名前で登録されています'
         :recs.some(r=>r.type==='TXT'&&r.name==='_acme-challenge')?'_acme-challenge のTXTレコードはありますが、値が一致しません'
-        :'DNSに確認用のTXTレコードが見つかりません。ドメインを取ったサービスのDNS設定で追加しましょう';
+        :'DNSに確認用のTXTレコードが見つかりません。お使いのDNSサービスで、指定のレコードを追加してください';
       save();render();
     },RM?200:1400);
   }
@@ -2423,7 +2425,7 @@ document.addEventListener('click',e=>{
     S.ds={name,tld,full,status,msg};save();render();
   }
   else if(a==='domBuy'){if(!S.ds||S.ds.status!=='ok')return;S.domain=S.ds.full;S.ds=null;save();render();
-    const w=S.whois?[{who:SHIRO,t:'WHOIS公開代行にしたんだね。持ち主情報が隠れるから安心だ'}]:[{who:SHIRO,t:'公開代行を使わなかったね。試しに今のWHOISを引いてみた。この画面の下に出てるよ'},{who:SHIRO,t:'きみの氏名も住所も丸見えだ。攻撃者がこれでドメイン会社になりすますと、ドメインごと乗っ取られる。公開代行はオンにしておこう'}];
+    const w=S.whois?[{who:SHIRO,t:'WHOIS公開代行にしたんだね。持ち主情報が隠れるから安心だ'}]:[{who:SHIRO,t:'公開代行を使わなかったね。この画面の下に、いま公開されているWHOISの情報が出てるよ'},{who:SHIRO,t:'きみの氏名も住所も丸見えだ。攻撃者がこれでドメイン会社になりすますと、ドメインごと乗っ取られる。公開代行はオンにしておこう'}];
     say([{who:SHIRO,t:S.domain+'、いい住所だね！'}].concat(w).concat([{who:SHIRO,t:'次は、このドメインをサーバーにつなごう。サーバーのIPアドレスは「良えWS（ええダブリューエス）」で確認できるよ。サーバーを貸してくれる会社だ'},{who:SHIRO,t:'つなぐ設定（DNS）は、ドメインを取ったこの「おなまえや.com」でやるんだ'}]));}
   else if(a==='whoisOn'){S.whois=true;save();render();say([{who:SHIRO,t:'公開代行をオンにしたよ。これでWHOISからは代行会社の情報しか出ない。乗っ取りの手がかりを一つ消せた'}]);}
   else if(a==='publish'){
@@ -2431,8 +2433,8 @@ document.addEventListener('click',e=>{
     relBusy=true;S.relMsg='ドメインの向き先を確認しています……';render();
     setTimeout(()=>{
       relBusy=false;const as=aRec();
-      if(!as.length)S.relMsg=esc(S.domain)+' に A レコード（名前 @）がありません。ドメインを取ったサービスのDNS設定で、このサーバーのIPアドレスを登録しましょう';
-      else if(!as.some(r=>r.value===SERVER_IP))S.relMsg=esc(S.domain)+' は '+esc(as[0].value)+' を指していて、このサーバー（'+SERVER_IP+'）につながりません';
+      if(!as.length)S.relMsg=esc(S.domain)+' に A レコード（名前 @）がありません。DNSに、このサーバーのIPアドレス（'+SERVER_IP+'）を登録してください';
+      else if(!as.some(r=>r.value===SERVER_IP))S.relMsg=esc(S.domain)+' の A レコードは '+esc(as[0].value)+' です。このサーバーのIPアドレス（'+SERVER_IP+'）にしてください';
       else{S.relMsg='';S.dnsOk=true;S.phase='day0';S.cleared=Math.max(S.cleared,0);save();render();
         say([{who:SHIRO,t:'リリースおめでとう！ これで誰でも '+S.domain+' からお店に来られる'},{who:SHIRO,t:'……ところで、そのお店、ちゃんと守れてる？'},{who:YOU,t:'守る？ 何から？'},{who:SHIRO,t:'まあ、すぐにわかるよ'}],()=>startDay(1));return;}
       save();render();
