@@ -192,6 +192,7 @@ select:disabled{opacity:.45}
 .item{background:var(--surface);border:3px solid var(--line);padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .item .iname{line-height:1.3}
 .item .iprice{color:var(--gold)}
+.item .inote{color:var(--muted);min-height:34px;display:flex;align-items:center}
 .btn.mini{font-size:12px;min-height:34px;padding:4px 8px;box-shadow:2px 2px 0 var(--line)}
 .leak{border:3px solid var(--danger);background:var(--surface);padding:10px 12px;margin:10px 0}
 .leakhd{color:var(--danger);font-size:14px;margin-bottom:8px}
@@ -772,7 +773,8 @@ const CATALOG=[
   {icon:'item_mug',name:'レトロなマグカップ',price:'¥980'},
   {icon:'item_sign',name:'ホーローの看板',price:'¥3,200'},
   {icon:'item_bottle',name:'すりガラスのびん',price:'¥600'},
-  {icon:'item_cat',name:'まねき猫の貯金箱',price:'¥1,200'}
+  {icon:'item_cat',name:'まねき猫の貯金箱',price:'¥1,200'},
+  {icon:'item_bell',name:'古い銀の鈴',price:'非売品',nfs:true}   // 売りものではない。シロが宿っている（エンディングで明かす）
 ];
 /* ---------- サイトタブ：パソコンのディスプレイに映るブラウザ ----------
    画面の中（pcHTML の中身）＝ゲームの世界で実際に見えているもの。お店のページ・検証ツール・別サイトなど
@@ -1367,7 +1369,7 @@ function computeOrder(src){
 // 検索結果。page＝お店のページに出るもの／notes＝シロのメモ
 function searchResult(){
   const r=S.shopRes;
-  const card=p=>`<div class="item">${spr(IC[p.icon],3,p.name)}<div class="iname small">${esc(p.name)}</div><div class="iprice small">${esc(p.price)}</div><button class="btn mini" data-act="cart">カートに入れる</button></div>`;
+  const card=p=>`<div class="item">${spr(IC[p.icon],3,p.name)}<div class="iname small">${esc(p.name)}</div><div class="iprice small">${esc(p.price)}</div>${p.nfs?'<span class="inote small">お店のお守りです</span>':'<button class="btn mini" data-act="cart">カートに入れる</button>'}</div>`;
   const grid=rows=>`<div class="grid">${rows.map(card).join('')}</div>`;
   if(!r)return {page:grid(CATALOG)};
   const q=r.q==null?(S.shopQ||''):r.q;
@@ -1935,6 +1937,8 @@ function startIntro(){
   say([
     {who:YOU,t:'ついに自作のネットショップ「よろず屋ピクセル堂」ができたぞ！'},
     {who:SHIRO,t:'おめでとう。ホワイトハッカーのシロだよ。困ったら相談して'},
+    {who:YOU,t:'わっ。……きみ、いつからそこにいたの？'},
+    {who:SHIRO,t:'ずっと前から、ここにいたよ。まあ、それはいいじゃない'},
     {who:SHIRO,t:'でも、まだきみのパソコンの中にあるだけだね。ネットに公開するには、まずドメイン（お店の住所）が必要だよ'},
     {who:SHIRO,t:'「管理」タブのドメイン会社「ネームヤ」で取ってみよう'}
   ],()=>{S.phase='setup';S.badge.console=true;save();render();});
@@ -2124,7 +2128,9 @@ function showEnd(){
 }
 /* ---------- エンディングとエンドロール ----------
    エンディング：夜の街角（タイトルと同じジオラマ）で、店長とシロが話す。物陰にいた攻撃者は、もういない。
-     シロは正体（お店の「穴」から生まれた妖精）を明かし、穴がなくなったので消える。「セキュリティ対策に終わりはない」もここで伝える。
+     シロは正体（お店の棚にある、売りものでない「古い銀の鈴」に宿る守り神）を明かし、姿が見えなくなる。「セキュリティ対策に終わりはない」もここで伝える。
+     もとは祟るほうで、店長に「お店のお守り」として迎えられて守るほうになった（悪さをしていた腕利きが、雇われてホワイトハッカーになるのと同じ筋）。
+     伏線：冒頭の「ずっと前から、ここにいたよ」／お店の棚の「古い銀の鈴（非売品）」／12日目の「シロって、何者なの？」／冒頭の名乗り「ホワイトハッカーのシロだよ」
    エンドロール：主演 → 案内役 → お客さん →（ゲスト出演）→ 攻撃者のみなさん（登場順。役名はここで初めて明かす）→ 協力 → スペシャルサンクス → 制作 → 引っかかったトラップ
      →「そして、お店は今日も営業中」→ 最後の場面（シロがひとりで現れ、震えて、黒い姿に変わって飛び去る。言葉はない）→ おわり */
 const END_CAST=[['houjin',43,19],['yamada',33.5,24.5],['tencho',17.5,24.5],['shiro',26,25,4],['suzuki',30,27.5],['tanaka',12.5,27.5],['tomo',21.5,29]];
@@ -2146,24 +2152,30 @@ function startEnding(done){
   $('ending').hidden=false;document.body.classList.add('ending-on');
   const n=S.traps.length,known=(S.trapsFrom||0)<=1;   // known＝最初からトラップを数えている記録
   const shiro=()=>$('ending').querySelector('.ch[data-cast="shiro"]');
-  // シロの正体：お店の「穴」から生まれた妖精。穴を全部ふさいだので、もういられない。途中の {fn} は、場面のシロを薄れさせ、消す
+  // シロの正体：お店の棚にある「古い銀の鈴」（非売品）に宿る守り神。もとは祟るほうだったが、店長に「お店のお守り」として迎えられて、守るほうになった。
+  // 悪さをしていた腕利きが、雇われて守る側に回る（クラッカー → ホワイトハッカー）のと同じ筋。祟るものを神として迎えて納める、という考え方（御霊信仰）にならう。
+  // エンドロール後の黒い姿は、その「祟るほう」の姿。理由は語らない。途中の {fn} は、場面のシロを薄れさせ、消す
   say([
     {who:'',t:LAST_DAY+'日目の夜。よろず屋ピクセル堂は、今日の営業を終えた'},
     {who:YOU,t:'お店を公開したら、それで完成だと思ってたよ'},
     {who:SHIRO,t:'公開は、はじまりだったね。通信、アプリ、防壁、運用。ぜんぶ、きみが自分の手で直した'}
   ].concat(n?[{who:SHIRO,t:'まちがえた設定も、'+n+'回あった。でも、お知らせを読んで、気づいて、直した。それでいいんだ'}]:known?[{who:SHIRO,t:'設定をまちがえて、お客さんを困らせることもなかった。たいしたものだよ'}]:[]).concat([
-    {who:SHIRO,t:'でもね、セキュリティ対策に終わりはないんだ。新しい部品、新しいページ、まだ誰も知らない手口。穴は、明日もどこかで生まれる'},
+    {who:SHIRO,t:'でもね、セキュリティ対策に終わりはないんだ。新しい部品、新しいページ、まだ誰も知らない手口。手入れをやめた所から、また穴があく'},
     {who:YOU,t:'そのときは、また教えてよ。いつもみたいに'},
     {who:SHIRO,t:'……それが、もうできないんだ'},
-    {who:SHIRO,t:'黙っててごめん。ぼくは、人間じゃない。このお店の「穴」から生まれた妖精なんだ'},
-    {who:SHIRO,t:'筒抜けの通信、文字をつなげただけの検索、開けっぱなしの裏口。お店に穴があるあいだだけ、ぼくはここにいられた'},
-    {who:YOU,t:'だから、どこに穴があるのか、いつも知ってたのか……'},
+    {who:SHIRO,t:'黙っててごめん。ぼくは、人間じゃない。棚にある、売りものじゃない古い銀の鈴。あそこに、ずっと宿っていたんだ'},
+    {who:YOU,t:'あの鈴に……。だから最初の日、「ずっと前からいた」って言ったのか'},
+    {who:SHIRO,t:'昔のぼくは、祟るほうだった。持ち主に悪さばかりして、店から店へ、たらい回しにされてきた'},
+    {who:SHIRO,t:'でもきみは、あの鈴を磨いて、「お店のお守りだ」って棚に置いてくれた。迎えてもらえたから、守るほうになれたんだ'},
+    {who:SHIRO,t:'悪さをしていた腕利きが、雇われて守る側に回ることがあるでしょ。「ホワイトハッカー」って名乗ったのは、そういうわけ'},
+    {who:YOU,t:'手口をぜんぶ知ってたのも、そういうことか……'},
     {fn:()=>{const e=shiro();if(e)e.classList.add('flick');}},
-    {who:SHIRO,t:'その穴を、きみは全部ふさいだ。だから、ぼくはもう、ここにいられない'},
-    {who:YOU,t:'待って。穴をひとつ空けておけば、いてくれるのか？'},
-    {who:SHIRO,t:'だめだよ。それだけは、やっちゃいけない'},
-    {who:SHIRO,t:'だいじょうぶ。気づいて、確かめて、直す。きみはもう、ひとりでできる'},
-    {who:SHIRO,t:'次に穴が生まれたとき、最初に見つけるのが、きみでありますように'},
+    {who:SHIRO,t:'お店が危ないあいだだけ、ぼくはこうして姿を持てた'},
+    {who:YOU,t:'もう、危なくないから……？'},
+    {who:SHIRO,t:'ううん。危ないことは、これからも起きる。でも、気づいて、確かめて、直せる店長がいる。だからもう、ぼくが出てこなくても大丈夫なんだ'},
+    {who:YOU,t:'いやだよ。まだ教わりたいことが、たくさんあるのに'},
+    {who:SHIRO,t:'見えなくなるだけだよ。棚のどこかで、ちゃんと見てる。……鈴は、ときどき磨いてね'},
+    {who:SHIRO,t:'これからは、きみが、このお店の守り神だ'},
     {fn:()=>{const e=shiro();if(e){e.classList.remove('flick');e.classList.add('gone');}}},
     {who:YOU,t:'……ありがとう、シロ'},
     {who:'',t:'次の朝も、よろず屋ピクセル堂は、いつもどおりに店を開けた'}
@@ -2174,7 +2186,7 @@ function rollHTML(){
   const sect=t=>`<div class="rsect">${t}</div>`;
   let h=`<div class="rtitle">Getting Secure It</div>`;
   h+=sect('主演')+rollLine('tencho','店長','あなた');
-  h+=sect('案内役')+rollLine('shiro','お店の「穴」から生まれた妖精','シロ');
+  h+=sect('案内役')+rollLine('shiro','古い銀の鈴に宿る守り神','シロ');
   h+=sect('お客さん')+['tanaka','suzuki','yamada','houjin','tomo','kenkyu'].map(id=>rollLine(id,CAST[id].role,CAST[id].name)).join('');
   // ゲスト出演：設定をまちがえたときに、困らせてしまったお客さん
   const guests=[];S.traps.forEach(x=>{if(x.guest&&!guests.some(g=>g.t===x.guest.t))guests.push(x.guest);});

@@ -86,6 +86,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   await page.click(`.dayrow[data-day="${FROM}"]`);
   const steps = {
     12: async () => {
+      check('伏線：お店の棚に、売りものでない「古い銀の鈴」がある', await (async () => { await tab('shop'); const t = await page.locator('#p-shop .viewport').innerText(); return /古い銀の鈴/.test(t) && /非売品/.test(t) && (await page.locator('#p-shop .item').count()) === 6 && (await page.locator('#p-shop .item [data-act="cart"]').count()) === 5; })());
       await tab('shop'); await click('[data-act="botRun"]'); check('12日目：未対策は、自動登録が通る', (await notes()).some(n => /^danger/.test(n))); await clearWin();
       await tab('console');
       check('12日目：ピクセルハブに、今日のプルリクエストはない', await (async () => { await svc('hub'); const t = await page.locator('#p-console .viewport').innerText(); return /未対応のプルリクエストはありません/.test(t) && (await page.locator('[data-act="applyFix"]').count()) === 0; })());
@@ -247,7 +248,8 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   const talk = [], shiro = []; for (let i = 0; i < 60 && (await winUp()); i++) { talk.push(await page.locator('#winText').innerText()); shiro.push(await page.evaluate(() => document.querySelector('#ending .ch[data-cast="shiro"]').className)); await winNext(); await page.waitForTimeout(50); }
   check('エンディング：会話が流れる（' + talk.length + 'こと）', talk.length >= 14 && /今日の営業を終えた/.test(talk[0]) && !talk.some(t => /店じまい/.test(t)) && talk.some(t => /まちがえた設定も、\d+回あった/.test(t)));
   check('エンディング：「セキュリティ対策に終わりはない」と伝える', talk.some(t => /セキュリティ対策に終わりはない/.test(t)));
-  check('エンディング：シロが正体を明かし、薄れて、消える', talk.some(t => /「穴」から生まれた妖精/.test(t)) && shiro.some(c => /flick/.test(c)) && /gone/.test(shiro[shiro.length - 1]) && !/flick|gone/.test(shiro[0]) && /いつもどおりに店を開けた/.test(talk[talk.length - 1]));
+  check('エンディング：シロが正体（古い銀の鈴に宿る守り神）を明かし、薄れて、消える', talk.some(t => /古い銀の鈴/.test(t)) && talk.some(t => /きみが、このお店の守り神だ/.test(t)) && !talk.some(t => /「穴」から生まれた/.test(t)) && shiro.some(c => /flick/.test(c)) && /gone/.test(shiro[shiro.length - 1]) && !/flick|gone/.test(shiro[0]) && /いつもどおりに店を開けた/.test(talk[talk.length - 1]));
+  check('エンディング：もとは祟るほうで、迎えられて守るほうになった（雇われて守る側に回るのと同じ）と明かす', talk.some(t => /昔のぼくは、祟るほうだった/.test(t)) && talk.some(t => /雇われて守る側に回る/.test(t)) && talk.some(t => /鈴は、ときどき磨いてね/.test(t)));
   check('エンドロール：会話のあとに始まる', (await page.locator('#roll').isVisible()) && !(await page.locator('#ending').isVisible()));
   const roll = await page.locator('#roll').innerText();
   const s = await state();
@@ -255,7 +257,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   check('エンドロール：攻撃者の役名が、登場順に明かされる', ['カフェの盗聴者', 'ダウングレード職人', 'クーポン連打部隊', 'WAFすり抜け師', '深夜のデータ持ち出し屋'].every(t => roll.includes(t)) && roll.indexOf('カフェの盗聴者') < roll.indexOf('深夜のデータ持ち出し屋') && (await page.locator('#roll .rsp').count()) >= 20);
   check('エンドロール：ゲスト出演（困らせてしまったお客さん）が出る', FROM > 12 || (roll.includes('ゲスト出演') && roll.includes('会員になれなかった やまだ')));
   check('エンドロール：引っかかったトラップの一覧（' + s.traps.length + '件）', (await page.locator('#roll .rtraps li').count()) === s.traps.length && (FROM > 12 || s.traps.length >= 5));
-  check('エンドロール：「そして、お店は今日も営業中」と、終わりのボタンがある', roll.includes('そして、お店は今日も営業中') && roll.includes('お店の「穴」から生まれた妖精') && (await page.locator('#roll [data-act="rollTitle"]').count()) === 1);
+  check('エンドロール：「そして、お店は今日も営業中」と、終わりのボタンがある', roll.includes('そして、お店は今日も営業中') && roll.includes('古い銀の鈴に宿る守り神') && (await page.locator('#roll [data-act="rollTitle"]').count()) === 1);
   check('最後の場面：見える位置に来るまでは始まらない', (await page.locator('#stingCh.in').count()) === 0);
   const mu = () => page.evaluate(() => window.GSI_DEBUG.music.info());
   check('曲：エンドロールで鳴り始める（' + JSON.stringify(await mu()) + '）', (await mu()).playing && (await mu()).state === 'running' && (await page.locator('#roll .rsound').isVisible()));

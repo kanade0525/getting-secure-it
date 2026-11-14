@@ -119,6 +119,20 @@ sprite("item_cat", { w: 12, h: 12 }, `
   ..KyRyK...
   ..KyyyK...
   ..KKKKK...`)
+// 古い銀の鈴（非売品）：シロが宿っている。結び目はシロの翼の色、舌（ぜつ）はシロの芯の色
+sprite("item_bell", { w: 10, h: 12 }, `
+  ...CKKC...
+  ..CCKKCC..
+  ...KLLK...
+  ..KLWWLK..
+  ..KLWLLK..
+  .KLWLLLLK.
+  .KLLLLLLK.
+  .KLLLLLnK.
+  KLLLLLLnnK
+  KKKKKKKKKK
+  ....yy....
+  ....yy....`)
 sheet("items", ["item_*"], { pad: 1 })
 
 // ブラウザの再読み込みアイコン（8×8、円形の矢印）

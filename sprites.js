@@ -511,6 +511,8 @@ icons: {
   item_sign: ["KKKKKKKKKK","KRRRRRRRRK","KRWWWWWWRK","KRWRRRRWRK","KRWRYYRWRK","KRWRYYRWRK","KRWRRRRWRK","KRWWWWWWRK","KRRRRRRRRK","KKKKKKKKKK","...KKKK...","...KKKK..."],
   item_bottle: ["....KK....","....Kt K..","...KttK...","...KbbK...","..KbbbbK..","..KbWbbK..","..KbbbbK..","..KbbbbK..","..KbbbbK..","..KbbbbK..","..KKKKKK..",".........."],
   item_cat: [".K.....K..","KyK...KyK.","KyyKKKyyK.","KyWWWWWyK.","KyWKWKWyK.","KyWWWWWyK.","KyWWRWWyK.",".KyWWWyK..","..KyyyK...","..KyRyK...","..KyyyK...","..KKKKK..."],
+  // 古い銀の鈴（非売品）。シロが宿っている。結び目はシロの翼の色、舌（ぜつ）はシロの芯の色
+  item_bell: ["...CKKC...","..CCKKCC..","...KLLK...","..KLWWLK..","..KLWLLK..",".KLWLLLLK.",".KLLLLLLK.",".KLLLLLnK.","KLLLLLLnnK","KKKKKKKKKK","....yy....","....yy...."],
   reload: ["..NNN.N.",".N...NNN","N....N.N","N.......","N.......","N......N",".N...N.N","..NNN.N."],
   logo_hub: [".KK..KK.","KppK.Kp.",".KKK.KK.","..Kp.pK.","..KpKK..","..KppK..",".KppppK.","..KKKK.."],
   logo_ca: ["..KKKK..",".KggggK.","KgGGGGgK","KgGWWGgK","KgGGGGgK",".KggggK.",".KGKKGK.","KGK..KGK"],
