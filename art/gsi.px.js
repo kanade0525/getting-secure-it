@@ -7,35 +7,35 @@ pal({ K: "#1a1426", W: "#f4f0e6", S: "#f2c09a", s: "#c98a68", H: "#3b2416", h: "
 // ネームヤ（ドメイン会社）：住所札。金色の札に黒い穴と紐
 sprite("logo_registrar", { w: 8, h: 8 }, `
   ..KKKK..
-  .KYYYYK.
-  KYyKKyYK
-  KYyyyyYK
-  KYYYYYYK
-  KYYYYYYK
-  .KYYYYK.
+  .KBBBBK.
+  KBbKKbBK
+  KBbbbbBK
+  KBBBBBBK
+  KBBBBBBK
+  .KBBBBK.
   ..KKKK..`)
 
 // ピクセルクラウド（サーバー）：雲
 sprite("logo_cloud", { w: 8, h: 8 }, `
   ...KK...
-  ..KbbK..
-  .KbWbbK.
-  KbbbbbbK
-  KbbbbbbK
-  KBBBBBBK
+  ..KYYK..
+  .KYWYYK.
+  KYYYYYYK
+  KYYYYYYK
+  KOOOOOOK
   .KKKKKK.
   ........`)
 
 // 認証局：印章（リボンつき）
 sprite("logo_ca", { w: 8, h: 8 }, `
   ..KKKK..
-  .KggggK.
-  KgGGGGgK
-  KgGWWGgK
-  KgGGGGgK
-  .KggggK.
-  .KGKKGK.
-  KGK..KGK`)
+  .KYYYYK.
+  KYBBBBYK
+  KYBWWBYK
+  KYBBBBYK
+  .KYYYYK.
+  .KBKKBK.
+  KBK..KBK`)
 
 sheet("logos", ["logo_*"], { pad: 1 })
 
@@ -44,12 +44,12 @@ sheet("logos", ["logo_*"], { pad: 1 })
 // ピクセルハブ（コード共有）：分岐のアイコン
 sprite("logo_hub", { w: 8, h: 8 }, `
   .KK..KK.
-  KppK.Kp.
+  KWWK.KW.
   .KKK.KK.
-  ..Kp.pK.
-  ..KpKK..
-  ..KppK..
-  .KppppK.
+  ..KW.WK.
+  ..KWKK..
+  ..KWWK..
+  .KWWWWK.
   ..KKKK..`)
 
 
