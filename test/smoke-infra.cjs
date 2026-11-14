@@ -99,15 +99,20 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       await verify(12, false, null);   // 入口を作っただけ：まだ誰も通らない
       await tab('console'); await click('[data-act="copyEdge"]'); await shot('12-edge-made');
       await svc('registrar');
-      await page.selectOption('#nrType', 'A'); await page.fill('#nrName', '@'); await click('[data-act="paste"]');
-      check('12日目：コピーした入口のIPアドレスを貼り付けられる', (await page.inputValue('#nrVal')) === '198.51.100.10');
+      // ドメインそのもの（@）に CNAME は置けない。ALIAS で、入口の名前へ向ける
+      await page.selectOption('#nrType', 'CNAME'); await page.fill('#nrName', '@'); await click('[data-act="paste"]');
+      check('12日目：コピーした入口のアドレス（名前）を貼り付けられる', (await page.inputValue('#nrVal')) === 'pixeldo-edge.pixelcdn.example');
       await click('[data-act="dnsAdd"]');
+      check('12日目：@ に CNAME を登録しようとすると、ALIAS を使うよう言われる', /CNAME を登録できません/.test(await page.locator('#p-console .viewport').innerText()) && !(await state()).dns.some(r => r.type === 'CNAME'));
+      await page.selectOption('#nrType', 'ALIAS'); await page.fill('#nrName', '@'); await click('[data-act="paste"]');
+      await click('[data-act="dnsAdd"]');
+      check('12日目：ALIAS レコードが登録される', (await state()).dns.some(r => r.type === 'ALIAS' && r.name === '@' && r.value === 'pixeldo-edge.pixelcdn.example'));
       const i = (await state()).dns.findIndex(r => r.type === 'A' && r.value === '203.0.113.24');
       await shot('12-dns');
       await click(`[data-act="dnsDel"][data-i="${i}"]`);
       check('12日目：向き先を変え終えると、シロがWAFへ案内する', (await winUp()) && /入口を通るようになった/.test(await page.locator('#winText').innerText()));
       await clearWin();
-      check('12日目：入口へ向けたAレコードは、もう消せない', (await page.locator('[data-act="dnsDel"]').count()) === (await state()).dns.length - 1);
+      check('12日目：入口へ向けたレコードは、もう消せない', (await page.locator('[data-act="dnsDel"]').count()) === (await state()).dns.length - 1);
       check('12日目：矢印はピクセルクラウドへ戻る', (await arrow()) === 'svc-cloud');
       await svc('cloud'); check('12日目：矢印は小メニューの「WAF」', (await arrow()) === 'sub-waf');
       await sub('waf'); await shot('12-waf');
@@ -123,9 +128,10 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
     13: async () => {
       await tab('console'); check('13日目：WAFの画面が開いていて、ログインの回数を選べる', (await page.locator('#inf-wafLogin').count()) === 1);
       await set('wafLogin', '10000'); await verify(13, false, 'ログインの制限を「5分で10,000回」にした');
-      await tab('console'); await set('wafLogin', '2'); await verify(13, false, 'ログインの制限を「5分で2回」にした');
-      await tab('console'); await set('wafLogin', '20');
-      await tab('shop'); await click('[data-act="bruteTry"]'); check('13日目：対策後は、20回で止まる', /20回で止まった/.test(await page.locator('#p-shop').innerText()));
+      await tab('console'); await set('wafLogin', '10'); await verify(13, false, 'ログインの制限を「5分で10回」にした');
+      check('13日目：きつすぎると、同じ接続元を共有する法人のお客さまから苦情が届く', (await state()).voices.some(v => v.day === 13 && v.who === '法人のお客さま'));
+      await tab('console'); await set('wafLogin', '100');
+      await tab('shop'); await click('[data-act="bruteTry"]'); check('13日目：対策後は、100回で止まる', /100回で止まった/.test(await page.locator('#p-shop').innerText()));
       await verify(13, true);
     },
     14: async () => {
@@ -133,7 +139,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       check('14日目：矢印は小メニューの「WAF」', (await arrow()) === 'sub-waf');
       await set('size', 'l'); await verify(14, false, 'サーバーを大きくして耐えようとした');
       await tab('console'); await set('size', 's'); await sub('waf'); await shot('14-waf');
-      await set('wafRate', '20'); const lead = await verify(14, false, 'レート制限を「5分で20回」にした');
+      await set('wafRate', '100'); const lead = await verify(14, false, 'レート制限を「5分で100回」にした');
       check('14日目：きつすぎると「お客さんが困ってる」と言われる', /お客さんが困ってる/.test(lead || ''));
       await tab('console'); await set('wafRate', '2000');   // 同じ画面で、ゆるめる
       await sub('edge'); await sw('cache');
@@ -176,7 +182,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       await sw('autoPatch'); await verify(19, false, null);   // 自動適用だけでは、いまの穴は残る
       await tab('console'); await click('[data-act="vulnScan"]'); await clearWin(); check('19日目：調べると、既知の穴が並ぶ', (await notes()).some(n => /^danger/.test(n))); await shot('19-server');
       await click('[data-act="patchNow"]'); await clearWin();
-      check('19日目：適用すると、OSが新しくなる', /Ubuntu 24\.04/.test(await page.locator('#p-console .viewport').innerText()));
+      check('19日目：適用しても、OSは同じまま。更新だけが当たる', /Ubuntu 22\.04/.test(await page.locator('#p-console .viewport').innerText()) && /更新をすべて適用/.test(await page.locator('#p-console .viewport').innerText()));
       await verify(19, true);
     },
     20: async () => {
@@ -238,19 +244,26 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   await page.click('#sheet [data-act="nextDay"]'); await page.waitForTimeout(150);
   check('エンディング：夜の街角の場面が出て、会話が始まる', (await page.locator('#ending').isVisible()) && (await winUp()) && (await page.locator('#ending .ch').count()) >= 6);
   await shot('ending');
-  const talk = []; for (let i = 0; i < 40 && (await winUp()); i++) { talk.push(await page.locator('#winText').innerText()); await winNext(); await page.waitForTimeout(50); }
-  check('エンディング：会話が流れる（' + talk.length + 'こと）', talk.length >= 6 && /店じまい/.test(talk[0]) && talk.some(t => /まちがえた設定も、\d+回あった/.test(t)));
+  const talk = [], shiro = []; for (let i = 0; i < 60 && (await winUp()); i++) { talk.push(await page.locator('#winText').innerText()); shiro.push(await page.evaluate(() => document.querySelector('#ending .ch[data-cast="shiro"]').className)); await winNext(); await page.waitForTimeout(50); }
+  check('エンディング：会話が流れる（' + talk.length + 'こと）', talk.length >= 14 && /今日の営業を終えた/.test(talk[0]) && !talk.some(t => /店じまい/.test(t)) && talk.some(t => /まちがえた設定も、\d+回あった/.test(t)));
+  check('エンディング：「セキュリティ対策に終わりはない」と伝える', talk.some(t => /セキュリティ対策に終わりはない/.test(t)));
+  check('エンディング：シロが正体を明かし、薄れて、消える', talk.some(t => /「穴」から生まれた妖精/.test(t)) && shiro.some(c => /flick/.test(c)) && /gone/.test(shiro[shiro.length - 1]) && !/flick|gone/.test(shiro[0]) && /いつもどおりに店を開けた/.test(talk[talk.length - 1]));
   check('エンドロール：会話のあとに始まる', (await page.locator('#roll').isVisible()) && !(await page.locator('#ending').isVisible()));
   const roll = await page.locator('#roll').innerText();
   const s = await state();
-  check('エンドロール：主演・案内役・お客さん・協力・スペシャルサンクス', ['主演', '案内役', 'お客さん', '協力', 'スペシャルサンクス', 'ピクセルクラウド', '毎日苦情をくれたお客さんたち'].every(t => roll.includes(t)));
+  check('エンドロール：主演・案内役・お客さん・協力・スペシャルサンクス・制作', ['主演', '案内役', 'お客さん', '協力', 'スペシャルサンクス', 'ピクセルクラウド', '毎日苦情をくれたお客さんたち', '制作', 'kanade0525'].every(t => roll.includes(t)));
   check('エンドロール：攻撃者の役名が、登場順に明かされる', ['カフェの盗聴者', 'ダウングレード職人', 'クーポン連打部隊', 'WAFすり抜け師', '深夜のデータ持ち出し屋'].every(t => roll.includes(t)) && roll.indexOf('カフェの盗聴者') < roll.indexOf('深夜のデータ持ち出し屋') && (await page.locator('#roll .rsp').count()) >= 20);
   check('エンドロール：ゲスト出演（困らせてしまったお客さん）が出る', FROM > 12 || (roll.includes('ゲスト出演') && roll.includes('会員になれなかった やまだ')));
-  check('エンドロール：引っかかったトラップの一覧（' + s.traps.length + '件）', (await page.locator('#roll .rtraps li').count()) === s.traps.length && s.traps.length >= 5);
-  check('エンドロール：「そして、お店は今日も営業中」で終わる', roll.includes('そして、お店は今日も営業中') && (await page.locator('#roll [data-act="rollTitle"]').isVisible()));
+  check('エンドロール：引っかかったトラップの一覧（' + s.traps.length + '件）', (await page.locator('#roll .rtraps li').count()) === s.traps.length && (FROM > 12 || s.traps.length >= 5));
+  check('エンドロール：「そして、お店は今日も営業中」と、終わりのボタンがある', roll.includes('そして、お店は今日も営業中') && roll.includes('お店の「穴」から生まれた妖精') && (await page.locator('#roll [data-act="rollTitle"]').count()) === 1);
+  check('最後の場面：見える位置に来るまでは始まらない', (await page.locator('#stingCh.in').count()) === 0);
   check('クリアの記録が残る', s.phase === 'end' && s.cleared === 24);
   await shot('roll-top');
-  await page.evaluate(() => { const r = document.getElementById('roll'); r.scrollTop = r.scrollHeight; }); await shot('roll-end');
+  await page.evaluate(() => { const r = document.getElementById('roll'); r.scrollTop = r.scrollHeight; });
+  // 最後の場面（動きを減らす設定では、姿の切り替えだけ）：シロ → 黒い姿 → いなくなる
+  const seen = []; for (let i = 0; i < 60; i++) { const c = await page.evaluate(() => { const e = document.getElementById('stingCh'); return e.dataset.cast + '|' + e.className; }); if (seen[seen.length - 1] !== c) seen.push(c); if (/kuro/.test(c) && /dark/.test(c) && !/out/.test(c) && !seen.shot) { seen.shot = 1; await shot('roll-kuro'); } if (/out/.test(c)) break; await page.waitForTimeout(100); }
+  check('最後の場面：シロが現れ、黒い姿に変わり、いなくなる（' + seen.join(' → ') + '）', seen.some(c => /^shiro\|.*\bin\b/.test(c)) && seen.some(c => /^kuro\|.*dark/.test(c)) && /out/.test(seen[seen.length - 1]));
+  await shot('roll-end');
   await page.click('#roll [data-act="rollTitle"]'); await page.waitForTimeout(100);
   check('エンドロールのあと、タイトルへ戻る', (await page.locator('#title').isVisible()) && /全24日クリア/.test(await page.locator('#title').innerText()));
   // つづきから：まとめ → エンディングをもう一度
@@ -270,9 +283,23 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   const mv = await p2.evaluate(() => { const t = document.getElementById('rollTrack'); return { go: t.classList.contains('go'), y: t.getBoundingClientRect().top, h: innerHeight, dur: getComputedStyle(t).animationDuration }; });
   check('エンドロール：下から上へ流れる（' + JSON.stringify(mv) + '）', mv.go && mv.y < mv.h);
   await p2.screenshot({ path: path.join(OUT, 'infra-roll-pc.png') });
+  // スキップ：名前の流れを飛ばす →「営業中」→ 最後の場面（シロが震えて、黒い姿に変わり、飛び去る）→ おわり
   await p2.click('#roll .rskip'); await p2.waitForTimeout(1200);
-  check('エンドロール：スキップで最後の画面へ', (await p2.locator('#rollEnd').isVisible()) && !(await p2.locator('#rollTrack').isVisible()));
+  check('エンドロール：スキップで「そして、お店は今日も営業中」へ', (await p2.locator('#rollFin').isVisible()) && !(await p2.locator('#rollTrack').isVisible()) && !(await p2.locator('#rollEnd').isVisible()));
   await p2.screenshot({ path: path.join(OUT, 'infra-roll-fin.png') });
+  const st = []; let t0 = Date.now();
+  for (let i = 0; i < 140 && !(await p2.locator('#rollEnd').isVisible()); i++) {
+    const c = await p2.evaluate(() => { const b = document.getElementById('rollSting'), e = document.getElementById('stingCh'); return b.hidden ? 'wait' : e.dataset.cast + '|' + e.className.replace('sting-ch', '').trim(); });
+    if (st[st.length - 1] !== c) { st.push(c); if (/^shiro\|in$/.test(c)) { await p2.waitForTimeout(900); await p2.screenshot({ path: path.join(OUT, 'infra-sting-1shiro.png') }); } if (/shake/.test(c)) { await p2.waitForTimeout(1200); await p2.screenshot({ path: path.join(OUT, 'infra-sting-2shake.png') }); } if (/^kuro\|in dark$/.test(c)) { await p2.waitForTimeout(700); await p2.screenshot({ path: path.join(OUT, 'infra-sting-3kuro.png') }); } if (/fly/.test(c)) { await p2.waitForTimeout(250); await p2.screenshot({ path: path.join(OUT, 'infra-sting-4fly.png') }); } }
+    await p2.waitForTimeout(100);
+  }
+  check('最後の場面：シロ → 震える → 黒い姿 → 飛び去る → おわり（' + st.join(' → ') + '、' + Math.round((Date.now() - t0) / 100) / 10 + '秒）', st.some(c => /^shiro\|in$/.test(c)) && st.some(c => /shake/.test(c)) && st.some(c => /^kuro\|.*dark/.test(c)) && st.some(c => /fly/.test(c)) && (await p2.locator('#rollEnd').isVisible()));
+  check('おわり：ボタンだけが残る', (await p2.locator('#roll [data-act="rollTitle"]').isVisible()) && !(await p2.locator('#rollSting').isVisible()) && !(await p2.locator('#roll .rskip').isVisible()));
+  await p2.screenshot({ path: path.join(OUT, 'infra-roll-end-pc.png') });
+  // もう一度見る → スキップを3回押すと、すぐ終わりまで行ける
+  await p2.click('#roll [data-act="rollAgain"]'); await p2.waitForTimeout(300);
+  for (let i = 0; i < 3; i++) { await p2.click('#roll .rskip'); await p2.waitForTimeout(150); }
+  check('もう一度見る：スキップを3回で、おわりまで飛ばせる', (await p2.locator('#rollEnd').isVisible()) && !(await p2.locator('#rollSting').isVisible()));
   check('デバッグで見返しただけでは、クリアの記録は変わらない', (await p2.evaluate(() => JSON.parse(localStorage.getItem('gsi-demo-v2') || 'null'))) === null || (await p2.evaluate(() => JSON.parse(localStorage.getItem('gsi-demo-v2')).phase)) !== 'end');
   await p2.close();
 

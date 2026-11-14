@@ -440,8 +440,9 @@ input[type="text"]:disabled{opacity:.6}
 .msg-err{color:var(--danger)}
 .msg-ok{color:var(--safe)}
 /* ---------- タイトル：夜空に浮かぶ、よろず屋ピクセル堂のジオラマ（アイソメ）。昼夜のテーマによらず、夜の1種類 ---------- */
-.title-screen{--stars-a:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 130' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M85 124h1v1h-1zM15 12h1v1h-1zM96 77h1v1h-1zM132 30h1v1h-1zM20 33h1v1h-1zM111 10h1v1h-1zM152 124h1v1h-1z'/%3E%3Cpath fill='%23c3c7d6' d='M41 53h1v1h-1zM17 119h1v1h-1zM26 73h1v1h-1zM152 53h1v1h-1z'/%3E%3Cpath fill='%237a8099' d='M140 15h1v1h-1zM114 56h1v1h-1zM60 83h1v1h-1z'/%3E%3C/svg%3E");--stars-b:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 190' shape-rendering='crispEdges'%3E%3Cpath fill='%235c86d6' d='M118 146h1v1h-1zM51 50h1v1h-1zM160 50h1v1h-1zM26 140h1v1h-1zM155 104h1v1h-1z'/%3E%3Cpath fill='%238f6ac9' d='M222 122h1v1h-1zM208 134h1v1h-1zM27 117h1v1h-1zM210 180h1v1h-1z'/%3E%3Cpath fill='%237a8099' d='M221 153h1v1h-1zM124 164h1v1h-1zM80 39h1v1h-1zM165 13h1v1h-1z'/%3E%3C/svg%3E");--stars-c:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 310 270' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M151 44h1v1h1v1h-1v1h-1v-1h-1v-1h1zM219 196h1v1h1v1h-1v1h-1v-1h-1v-1h1zM274 185h1v1h1v1h-1v1h-1v-1h-1v-1h1zM139 230h1v1h-1zM10 116h1v1h-1z'/%3E%3Cpath fill='%23ffe08a' d='M11 159h1v1h1v1h-1v1h-1v-1h-1v-1h1zM69 101h1v1h-1z'/%3E%3C/svg%3E");
-  --cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1z'/%3E%3C/svg%3E");
+.title-screen,.rsting{--stars-a:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 130' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M85 124h1v1h-1zM15 12h1v1h-1zM96 77h1v1h-1zM132 30h1v1h-1zM20 33h1v1h-1zM111 10h1v1h-1zM152 124h1v1h-1z'/%3E%3Cpath fill='%23c3c7d6' d='M41 53h1v1h-1zM17 119h1v1h-1zM26 73h1v1h-1zM152 53h1v1h-1z'/%3E%3Cpath fill='%237a8099' d='M140 15h1v1h-1zM114 56h1v1h-1zM60 83h1v1h-1z'/%3E%3C/svg%3E");--stars-b:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 190' shape-rendering='crispEdges'%3E%3Cpath fill='%235c86d6' d='M118 146h1v1h-1zM51 50h1v1h-1zM160 50h1v1h-1zM26 140h1v1h-1zM155 104h1v1h-1z'/%3E%3Cpath fill='%238f6ac9' d='M222 122h1v1h-1zM208 134h1v1h-1zM27 117h1v1h-1zM210 180h1v1h-1z'/%3E%3Cpath fill='%237a8099' d='M221 153h1v1h-1zM124 164h1v1h-1zM80 39h1v1h-1zM165 13h1v1h-1z'/%3E%3C/svg%3E");--stars-c:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 310 270' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M151 44h1v1h1v1h-1v1h-1v-1h-1v-1h1zM219 196h1v1h1v1h-1v1h-1v-1h-1v-1h1zM274 185h1v1h1v1h-1v1h-1v-1h-1v-1h1zM139 230h1v1h-1zM10 116h1v1h-1z'/%3E%3Cpath fill='%23ffe08a' d='M11 159h1v1h1v1h-1v1h-1v-1h-1v-1h1zM69 101h1v1h-1z'/%3E%3C/svg%3E");
+  --cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1z'/%3E%3C/svg%3E");}
+.title-screen{
   position:fixed;inset:0;z-index:30;color:#fff;color-scheme:dark;display:flex;overflow:auto;
   padding:calc(18px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   background:radial-gradient(90% 56% at 50% 56%,#1b2256 0,rgba(27,34,86,0) 72%),var(--stars-a) 0 0/320px 260px,var(--stars-b) 70px 120px/460px 380px,#070916}
@@ -467,6 +468,14 @@ input[type="text"]:disabled{opacity:.6}
 .ebox{margin:auto;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 .ekick{margin:0;font-size:15px;letter-spacing:.3em;margin-right:-.3em;color:#c3c7d6;text-shadow:2px 2px 0 #1a1426}
 body.ending-on .dim{background:transparent}
+.ending .ch.flick{opacity:.55}
+.ending .ch.gone{opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  .ending .ch.flick{animation:chFlick .7s steps(2,end) infinite}
+  .ending .ch.gone{animation:chGone 1.6s steps(8,end) forwards}
+}
+@keyframes chFlick{from{opacity:1}to{opacity:.35}}
+@keyframes chGone{from{opacity:.6;transform:none}to{opacity:0;transform:translateY(-10px)}}
 .roll{position:fixed;inset:0;z-index:31;background:#000;color:#fff;color-scheme:dark;overflow:hidden}
 .roll[hidden]{display:none}
 .rtrack{position:absolute;left:0;right:0;top:100%;display:flex;flex-direction:column;align-items:center;gap:26px;padding:0 20px 40px;text-align:center}
@@ -483,8 +492,23 @@ body.ending-on .dim{background:transparent}
 .rtraps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-width:420px;text-align:left;font-size:15px;line-height:1.6}
 .rtraps li{display:grid;grid-template-columns:4.2em minmax(0,1fr);gap:8px}
 .rtraps li span{color:#a6abd4}
-.rend{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:20px;text-align:center}
-.rend[hidden]{display:none}
+.rend,.rcard{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:20px;text-align:center}
+.rend[hidden],.rcard[hidden],.rsting[hidden]{display:none}
+/* 最後の場面：夜空にシロがひとりで現れ、震えて、黒い姿に変わり、飛び去る。--o＝ドット1つぶんの大きさ */
+.rsting{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(90% 56% at 50% 56%,#1b2256 0,rgba(27,34,86,0) 72%),var(--stars-a) 0 0/320px 260px,var(--stars-b) 70px 120px/460px 380px,#070916}
+.sting-ch{display:block;line-height:0;opacity:0}
+.sting-ch.in{opacity:1}
+.sting-ch.dark{--g:calc(var(--o)*.5);filter:drop-shadow(var(--g) 0 0 #c2373f) drop-shadow(calc(var(--g)*-1) 0 0 #c2373f) drop-shadow(0 var(--g) 0 #c2373f) drop-shadow(0 calc(var(--g)*-1) 0 #c2373f)}
+.sting-ch.out{opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  .rcard,.rsting{animation:rendIn .9s steps(6,end)}
+  .sting-ch{transition:opacity .9s steps(6,end)}
+  .sting-ch.shake{animation:stShake 1.9s linear}
+  .sting-ch.fly{transition:transform .6s cubic-bezier(.7,0,1,.4),opacity .2s linear .42s;transform:translate(70vw,-80vh);opacity:0}
+  .rsting.flash::after{content:"";position:absolute;inset:0;background:#fff;pointer-events:none;animation:stFlash .45s steps(4,end) forwards}
+}
+@keyframes stShake{0%,100%{transform:none}6%{transform:translate(calc(var(--o)*-.25),0)}12%{transform:translate(calc(var(--o)*.25),0)}18%{transform:translate(calc(var(--o)*-.25),0)}24%{transform:translate(calc(var(--o)*.5),0)}30%{transform:translate(calc(var(--o)*-.5),0)}36%{transform:translate(calc(var(--o)*.5),calc(var(--o)*-.25))}42%{transform:translate(calc(var(--o)*-.75),0)}48%{transform:translate(calc(var(--o)*.75),calc(var(--o)*.25))}54%{transform:translate(calc(var(--o)*-.75),0)}60%{transform:translate(var(--o),calc(var(--o)*-.25))}66%{transform:translate(calc(var(--o)*-1),0)}72%{transform:translate(var(--o),calc(var(--o)*.5))}78%{transform:translate(calc(var(--o)*-1.25),0)}84%{transform:translate(calc(var(--o)*1.25),calc(var(--o)*-.5))}90%{transform:translate(calc(var(--o)*-1.5),0)}96%{transform:translate(calc(var(--o)*1.5),calc(var(--o)*.5))}}
+@keyframes stFlash{from{opacity:.85}to{opacity:0}}
 .rfin{margin:0;font-size:clamp(20px,5.5vw,26px);line-height:1.6}
 .rend .acts{justify-content:center}
 .rskip{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:2;font:inherit;font-size:13px;color:#fff;background:#000;border:2px solid #fff;padding:4px 12px;min-height:44px;cursor:pointer}
@@ -494,7 +518,9 @@ body.ending-on .dim{background:transparent}
 /* 動きを減らす設定：流さずに、上から順にスクロールで読む */
 .roll.static{overflow:auto}
 .roll.static .rtrack{position:static;padding-top:calc(60px + env(safe-area-inset-top,0px))}
-.roll.static .rend{position:static;padding:50px 20px calc(60px + env(safe-area-inset-bottom,0px))}
+.roll.static .rcard{position:static;padding:50px 20px 0}
+.roll.static .rsting{position:relative;inset:auto;height:260px;margin:40px 0 0}
+.roll.static .rend{position:static;padding:40px 20px calc(60px + env(safe-area-inset-bottom,0px))}
 .menu{border:4px solid #fff;outline:4px solid #070916;background:rgba(7,9,22,.86);padding:10px 8px;text-align:left;display:flex;flex-direction:column;gap:2px}
 .menu button{font:inherit;font-size:18px;line-height:1.5;color:#fff;background:none;border:0;text-align:left;padding:8px 10px 8px 34px;position:relative;cursor:pointer;min-height:44px}
 .menu button::before{content:"";position:absolute;left:12px;top:15px;width:8px;height:14px;background:currentColor;opacity:0;-webkit-mask:var(--cursor) center/contain no-repeat;mask:var(--cursor) center/contain no-repeat}
@@ -626,12 +652,12 @@ const chapterOf=d=>(GD.chapters.find(c=>d>=c.from&&d<=c.to)||GD.chapters[0]).n;
 
 /* ---------- 状態 ---------- */
 const KEY='gsi-demo-v2';
-const SERVER_IP='203.0.113.24',EDGE_IP='198.51.100.10';   // お店のサーバー／12日目に作る入口（CDN）
+const SERVER_IP='203.0.113.24',EDGE_HOST='pixeldo-edge.pixelcdn.example';   // お店のサーバー／12日目に作る入口（CDN）のアドレス（IPアドレスではなく名前）
 // ピクセルクラウド・ネームヤの設定（12日目〜）。どれも管理画面で、あとから何度でも変えられる
 const freshInf=()=>({edge:false,cache:false,wafSignup:'allow',wafLogin:'0',wafRate:'0',wafDecode:false,bot:'off',crawler:'allow',size:'s',fwWeb:'any',fwSsh:'any',fwOut:'any',patched:false,autoPatch:false,csp:'none',keyRotated:false,regLock:false,reg2fa:false,dnsFreeze:false,alarmOut:false});
 const TAKEN=['shop','pixel','store','zakka','retro','example','google','amazon','rakuten','yahoo'];
 const TLDS={'.com':'¥1,480／年','.jp':'¥3,980／年','.shop':'¥980／年'};
-const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,scrapeRes:null,seenScrape:false,fwRes:null,seenFw:false,step:null,traps:[],saidEdge:false,rev:3,cleared:-1,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
+const fresh=()=>({day:0,phase:'intro',tab:'shop',voices:[],badge:{},cart:0,last:null,chatLog:[],shopQ:'',shopRes:null,seenLeak:false,orderPrice:null,orderQty:null,buyQty:1,orderRes:null,seenTamper:false,reviewQ:'',reviewRes:null,seenXss:false,storeRes:null,seenStore:false,csrfRes:null,seenCsrf:false,idorRes:null,idorId:null,seenIdor:false,couponRes:null,seenCoupon:false,sessionRes:null,seenSession:false,botRes:null,seenBot:false,bruteN:0,bruteRes:null,seenBrute:false,dosRes:null,seenDos:false,wafRes:null,wafEnc:false,seenWaf:false,vulnShown:false,seenVuln:false,skimRes:null,seenSkim:false,keyRes:null,seenKey:false,domRes:null,seenDom:false,exfilRes:null,seenExfil:false,scrapeRes:null,seenScrape:false,fwRes:null,seenFw:false,step:null,traps:[],trapsFrom:0,saidEdge:false,rev:3,cleared:-1,domain:null,ds:null,whois:false,dnsOk:false,dnsVal:'',dnsMsg:'',
   dns:[],svc:'registrar',sub:'server',relMsg:'',dcvMsg:'',instMsg:'',dnsAddMsg:'',
   cfg:{ca:null,keyMade:false,token:null,issued:false,installed:null,autoRenew:false,cert:false,https:false,redirect:false,tlsMin:'1.0',ciph:{aes:true,chacha:true,des3:true,rc4:true},hsts:false,hstsAge:'300',code:{},app:{},tasks:{},inf:freshInf()}});
 let S=fresh();
@@ -645,6 +671,7 @@ if(!S.sub)S.sub='server';
 if(!S.cfg.code)S.cfg.code={};if(!S.cfg.tasks)S.cfg.tasks={};
 S.cfg.inf=Object.assign(freshInf(),S.cfg.inf||{});if(!Array.isArray(S.traps))S.traps=[];
 if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
+(S.dns||[]).forEach(r=>{if(r.type==='A'&&r.value==='198.51.100.10'){r.type='ALIAS';r.value=EDGE_HOST;}});   // 入口をIPアドレスで向けていた版の記録は、名前（ALIAS）に直す
 if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 let busy=false,certBusy=false,dnsBusy=false;
@@ -1095,7 +1122,7 @@ function loginDemo(){
     ${stopped?'<p class="pg-err"><b>429 Too Many Requests</b>　アクセスが多すぎます。しばらくしてからお試しください。</p>':n0?'<p class="pg-err">メールアドレスかパスワードが違います。</p>':''}</div></div>`;
   const how=note('再現：tanaka さんのアカウントを狙う',`<p>パスワードを次々に試します。試した回数：<b>${n0.toLocaleString()}</b></p><div class="acts"><button class="btn primary" data-act="bruteTry">パスワードを100回試す</button></div>`);
   let n='';
-  if(r)n=stopped?(r.at<=2?note('結果',`<p><b>${r.at}回で止まった</b></p><p>ただし、2回打ち間違えただけのお客さんも、同じように止められる</p>`)
+  if(r)n=stopped?(r.at<=10?note('結果',`<p><b>${r.at}回で止まった</b></p><p>ただし、会社やカフェのように同じ接続元を共有するお客さんたちも、何人かがログインしただけで止められる</p>`)
       :note('結果',`<p><b>${r.at}回で止まった</b></p><p>入口のWAFが、回数を超えた相手を止めた。総当たりが成り立たない</p>`,'ok'))
     :note('結果',`<p><b>${n0.toLocaleString()}回試しても止まらない</b></p><p>${lim?'5分で'+lim.toLocaleString()+'回までは、そのまま試せる。':''}このまま続ければ、いつか当てられてしまう</p>`,'danger');
   return {page,notes:n+how};
@@ -1209,9 +1236,9 @@ function patchHTML(){
   if(!i.patched){
     h+=`<div class="row"><div class="desc">未適用のセキュリティ更新<span class="note">${shown?'12件':'まだ調べていません'}</span></div><button class="btn${shown?'':' primary'}" data-act="vulnScan">${shown?'もう一度調べる':'更新を調べる'}</button></div>`;
     if(shown){h+=`<div class="pg-b">${vrows(o.items,'bad')}</div><div class="row"><div class="desc">更新を適用する<span class="note">適用のあと、サーバーを再起動します（1分ほど）</span></div><button class="btn primary" data-act="patchNow">適用して再起動</button></div>`;
-      if(today)cNotes.push(note('結果','<p><b>既知の脆弱性あり</b></p><p>バージョンを調べれば、誰でも狙える状態</p>','danger'));}
+      if(today)cNotes.push(note('結果','<p><b>既知の脆弱性あり</b></p><p>直した版が出ているのに、当てていない。穴の中身は公開されているので、誰でも狙える状態</p>','danger'));}
   }else{
-    h+=`<div class="row"><div class="desc">未適用のセキュリティ更新<span class="note">0件</span></div><span class="small msg-ok">最新</span></div>`;
+    h+=`<div class="row"><div class="desc">未適用のセキュリティ更新<span class="note">0件</span></div><span class="small msg-ok">適用済み</span></div>`;
     if(today){h+=`<div class="pg-b">${vrows(o.after,'ok')}</div>`;cNotes.push(note('結果','<p><b>既知の穴なし</b></p><p>更新で、公開済みの脆弱性はふさがった</p>','ok'));}
   }
   return h+`<div class="row"><div class="desc">セキュリティ更新を自動で適用<span class="note">新しい更新が出たら、深夜に適用して再起動します</span></div>${infSw('autoPatch')}</div></div>`;
@@ -1232,7 +1259,7 @@ function domainDemoHTML(){
     :note('結果',`<p><b>拒否された</b></p><p>移管ロックが、なりすましの申請を止めた${i.reg2fa?'。アカウントも、2段階認証で守られている':''}</p>`,'ok'));
   cNotes.push(note('再現：なりすましの移管申請','<p>攻撃者が持ち主のふりをして、ドメインの移管を申請します。</p><div class="acts"><button class="btn primary" data-act="domTry">なりすましの移管申請が来た場合を再現する</button></div>'));
   return `<div class="sec" data-focus><h3>登録者変更・移管の申請</h3>
-    <div class="dbdump" style="padding:8px 12px"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：${esc(DOM())} を別の管理者へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認メールの返信待ち（返信がなければ、7日後に自動で承認）'}</div></div></div>`;
+    <div class="dbdump" style="padding:8px 12px"><div>申請者：${S.whois?'（公開代行ごしの情報で照合）':'山田 太郎（WHOISの公開情報と一致）'}</div><div>内容　：${esc(DOM())} を別の管理者へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認の返信待ち（期限までに断らなければ、自動で承認）'}</div></div></div>`;
 }
 // 24日目：ピクセルクラウド「監視」の、夜間の通信ログ
 function exfilDemoHTML(){
@@ -1579,7 +1606,7 @@ function netHopEnd(hop){
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
 let tick=0;
 if(!RM)setInterval(()=>{tick^=1;
-  if(!$('title').hidden||!$('ending').hidden||!$('roll').hidden)document.querySelectorAll('.ch[data-cast],.rsp[data-cast]').forEach(el=>{el.innerHTML=spr(frameRows(CAST[el.dataset.cast].rows,tick),+el.dataset.s,'');});},520);
+  if(!$('title').hidden||!$('ending').hidden||!$('roll').hidden)document.querySelectorAll('.ch[data-cast],.rsp[data-cast],.sting-ch[data-cast]').forEach(el=>{el.innerHTML=spr(frameRows(CAST[el.dataset.cast].rows,tick),+el.dataset.s,'');});},520);
 
 let caBusy=false,relBusy=false,clip='';
 const nr={type:'A',name:'',val:''};
@@ -1588,7 +1615,12 @@ function normName(n){n=String(n||'').trim().toLowerCase().replace(/\.$/,'');cons
 function aRec(){return (S.dns||[]).filter(r=>r.type==='A'&&r.name==='@');}
 const isLive=()=>S.phase!=='intro'&&S.phase!=='setup';
 // ドメイン（Aレコード）の向き先：server＝サーバーに直接／edge＝入口（CDN）／both＝両方／none＝登録なし／other＝どちらでもないアドレス
-function dnsTo(){const a=aRec().map(r=>String(r.value).trim());if(!a.length)return 'none';const sv=a.includes(SERVER_IP),ed=a.includes(EDGE_IP);return a.some(v=>v!==SERVER_IP&&v!==EDGE_IP)?'other':sv&&ed?'both':ed?'edge':'server';}
+// ドメインそのもの（名前 @）の向き先のレコード：A＝IPアドレスへ／ALIAS＝別の名前へ（@ には CNAME を置けないので、その代わり）
+const apex=()=>(S.dns||[]).filter(r=>r.name==='@'&&(r.type==='A'||r.type==='ALIAS'));
+const normHost=v=>String(v||'').trim().toLowerCase().replace(/\.$/,'');
+const toServer=r=>r.type==='A'&&String(r.value).trim()===SERVER_IP,toEdge=r=>r.type==='ALIAS'&&normHost(r.value)===EDGE_HOST;
+// ドメインの向き先：server＝サーバーに直接／edge＝入口（CDN）／both＝両方／none＝登録なし／other＝どちらでもない宛先がまじっている
+function dnsTo(){const a=apex();if(!a.length)return 'none';const sv=a.some(toServer),ed=a.some(toEdge);return a.some(r=>!toServer(r)&&!toEdge(r))?'other':sv&&ed?'both':ed?'edge':'server';}
 // 判定（days*.js の check・where）に渡す設定。ドメインの向き先は S.dns にあるので、ここで写しておく
 const CFG=()=>{S.cfg.dnsTo=isLive()?dnsTo():'server';return S.cfg;};
 // 入口（CDN）が効いているか：作ってあって、ドメインが入口を向いている
@@ -1631,15 +1663,15 @@ function registrarHTML(){
     <div class="drow dhead" style="margin-top:8px"><span>タイプ</span><span>名前</span><span>値</span><span></span></div>
     ${recs.length?recs.map((r,n)=>{
       // お店の住所（A @）は、公開中は消せない。入口（CDN）を作ったあとは、入口へ向け終わるまで書き換えられる
-      const lock=live&&r.type==='A'&&r.name==='@'&&(i.edge?to==='edge':r.value===SERVER_IP);
+      const lock=live&&r.name==='@'&&(i.edge?to==='edge'&&toEdge(r):toServer(r));
       return `<div class="drow"><span>${esc(r.type)}</span><span>${esc(r.name)}</span><span>${esc(r.value)}</span>${frozen?'<span class="small muted">凍結中</span>':lock?'<span class="small muted">公開中</span>':`<button class="link" data-act="dnsDel" data-i="${n}">削除</button>`}</div>`;}).join(''):'<p class="small muted" style="padding:8px 12px;margin:0">レコードはまだありません</p>'}
-    ${frozen?'<p class="res small muted" style="padding-top:10px">DNSの変更を凍結中です。レコードの追加・削除はできません。</p>':`<div class="domrow"><select id="nrType" aria-label="タイプ">${['A','TXT','CNAME'].map(t=>`<option ${nr.type===t?'selected':''}>${t}</option>`).join('')}</select>
+    ${frozen?'<p class="res small muted" style="padding-top:10px">DNSの変更を凍結中です。レコードの追加・削除はできません。</p>':`<div class="domrow"><select id="nrType" aria-label="タイプ">${['A','ALIAS','CNAME','TXT'].map(t=>`<option ${nr.type===t?'selected':''}>${t}</option>`).join('')}</select>
       <input type="text" id="nrName" placeholder="名前（ドメインそのものは @）" aria-label="名前" value="${esc(nr.name)}" autocomplete="off" autocapitalize="off" spellcheck="false">
       <input type="text" id="nrVal" placeholder="値" aria-label="値" value="${esc(nr.val)}" autocomplete="off" autocapitalize="off" spellcheck="false">
       <button class="btn" data-act="dnsAdd">追加</button></div>
     ${clip?'<p class="res"><button class="link" data-act="paste">コピーした値を「値」に貼り付け</button></p>':''}
     ${S.dnsAddMsg?`<p class="res small msg-err">${S.dnsAddMsg}</p>`:''}`}</div>`;
-  if(live&&i.edge&&to!=='edge'&&!frozen)cNotes.push(note('解説：ドメインの向き先を、入口に変える',`<p>DNS設定の <b>Aレコード（名前 @）</b> が、お店の住所です。いまの値はサーバー（${SERVER_IP}）で、お客さんはサーバーに直接来ています。</p><p>値が入口のIPアドレス（${EDGE_IP}）の Aレコードを追加して、古いレコードを削除しましょう。</p>`));
+  if(live&&i.edge&&to!=='edge'&&!frozen)cNotes.push(note('解説：ドメインの向き先を、入口に変える',`<p>DNS設定の <b>A レコード（名前 @）</b> が、お店の住所です。いまはサーバーのIPアドレス（${SERVER_IP}）を指していて、お客さんはサーバーに直接来ています。</p><p>タイプ <b>ALIAS</b>・名前 <b>@</b>・値が入口のアドレス（${EDGE_HOST}）のレコードを追加して、古い A レコードを削除しましょう。</p><p class="muted">ドメインそのもの（@）は、CNAME では別の名前へ向けられない決まりです。その代わりに使うのが ALIAS です。</p>`));
   if(DAYS[S.day]&&DAYS[S.day].demo&&DAYS[S.day].demo.kind==='domain')h+=domainDemoHTML();
   if(live&&S.day>=23)h+=`<div class="sec"><h3>ドメインの保護</h3>
     <div class="row"><div class="desc">移管ロック<span class="note">ほかの会社や、ほかの持ち主へ移す申請を、受け付けません</span></div>${infSw('regLock')}</div>
@@ -1666,11 +1698,10 @@ function caHTML(){
 
 /* --- ピクセルクラウド：サーバーや、その周りの設備を借りるサービス。使い始めたサービスが、小メニューに並ぶ ---
    サーバー／証明書／通信設定（1日目〜）／入口（CDN）・WAF（12日目〜）／ファイアウォール（17日目〜）／シークレット（22日目〜）／監視（24日目〜） */
+// 長期サポート版のOSは、バージョンの数字はそのままで、修正だけが配られる。19日目の「更新を適用」で変わるのは、更新を当てたかどうか
 function osInfo(){
   const upd=!!S.cfg.inf.patched;
-  return {name:upd?'Ubuntu 24.04 LTS':'Ubuntu 14.04 LTS',
-    pkg:upd?'OpenSSL 3.0.13 ／ OpenSSH 9.6 ／ nginx 1.26':'OpenSSL 1.0.1f ／ OpenSSH 6.6 ／ nginx 1.10',
-    upd};
+  return {name:'Ubuntu 22.04 LTS',pkg:'OpenSSL 3.0.2 ／ OpenSSH 8.9 ／ nginx 1.18'+(upd?'（更新をすべて適用）':''),upd};
 }
 function cloudSubs(){
   const live=isLive(),d=S.day,subs=[['server','サーバー']];
@@ -1684,7 +1715,7 @@ function cloudSubs(){
 function cloudServerHTML(){
   const live=isLive(),os=osInfo(),d=S.day,dd=DAYS[d],k=live&&dd&&dd.demo?dd.demo.kind:'';
   let h=`<div class="sec"><h3>サーバー</h3><div class="row"><div class="desc">shop-server-01<span class="note">IPアドレス ${SERVER_IP}</span></div><span class="small ${live?'msg-ok':'muted'}">${live?'公開中':'準備中'}</span></div>
-    <div class="row"><div class="desc">OS<span class="note">${os.name}</span></div><span class="small ${os.upd?'msg-ok':'muted'}">${os.upd?'最新':'稼働中'}</span></div>
+    <div class="row"><div class="desc">OS<span class="note">${os.name}</span></div><span class="small ${os.upd?'msg-ok':'muted'}">${os.upd?'更新済み':'稼働中'}</span></div>
     <div class="row"><div class="desc">主なソフトウェア<span class="note">${os.pkg}</span></div></div>`;
   if(live&&d>=14)h+=`<div class="row"><label class="desc" for="inf-size">サーバーの大きさ<span class="note">大きいほど、同時にさばける量が増えます</span></label>${infSel('size',[['s','小（1コア・1GB）'],['l','大（8コア・32GB）']])}</div>`;
   if(!live)h+=`<div class="row"><div class="desc">サイトを公開する<span class="note">${S.domain?'ドメインがこのサーバーを指していれば公開できます':'先にドメインを取得してください'}</span></div><button class="btn primary" data-act="publish" ${S.domain&&!relBusy?'':'disabled'}>リリースする</button></div>
@@ -1704,10 +1735,10 @@ function cloudEdgeHTML(){
   if(!i.edge)return h+intro('お店のサーバーの手前に置く、通信の入口です。お客さんの通信はまず入口に届き、入口がサーバーへ取り次ぎます。')
     +`<div class="row"><div class="desc">入口を作る<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><button class="btn primary" data-act="edgeMake">作成する</button></div></div>`;
   h+=`<div class="row"><div class="desc">pixeldo-edge<span class="note">取り次ぎ先：shop-server-01（${SERVER_IP}）</span></div><span class="small msg-ok">稼働中</span></div>
-    <div class="row"><div class="desc">入口のIPアドレス<span class="note">${EDGE_IP}</span></div><button class="btn" data-act="copyEdge">${clip===EDGE_IP?'コピーしました':'コピー'}</button></div>
-    <div class="row"><div class="desc">${esc(S.domain)} の向き先<span class="note">${to==='edge'?'入口（'+EDGE_IP+'）':to==='server'?'サーバー（'+SERVER_IP+'）に直接':to==='both'?'入口とサーバーの両方':to==='none'?'登録がありません':'入口でもサーバーでもないアドレス'}</span></div>${to==='edge'?'<span class="small msg-ok">入口を通っています</span>':'<button class="btn" data-act="svc" data-s="registrar">ネームヤを開く</button>'}</div>`;
+    <div class="row"><div class="desc">入口のアドレス<span class="note">${EDGE_HOST}</span></div><button class="btn" data-act="copyEdge">${clip===EDGE_HOST?'コピーしました':'コピー'}</button></div>
+    <div class="row"><div class="desc">${esc(S.domain)} の向き先<span class="note">${to==='edge'?'入口（'+EDGE_HOST+'）':to==='server'?'サーバー（'+SERVER_IP+'）に直接':to==='both'?'入口とサーバーの両方':to==='none'?'登録がありません':'入口でもサーバーでもない宛先'}</span></div>${to==='edge'?'<span class="small msg-ok">入口を通っています</span>':'<button class="btn" data-act="svc" data-s="registrar">ネームヤを開く</button>'}</div>`;
   if(S.day>=14)h+=`<div class="row"><div class="desc">キャッシュ<span class="note">商品ページや画像など、誰が見ても同じ内容は、入口が覚えておいて代わりに返します</span></div>${infSw('cache')}</div>`;
-  if(to!=='edge')cNotes.push(note('解説：入口は、作っただけでは通らない',`<p>お客さんはいまも、サーバー（${SERVER_IP}）に直接来ています。ドメインの向き先（DNSの Aレコード）を入口のIPアドレスに書き換えると、通信が入口を通るようになります。</p><p>DNSは、ドメインを取った「ネームヤ」で設定します。入口のIPアドレスをコピーしてから、ネームヤを開きましょう。</p>`));
+  if(to!=='edge')cNotes.push(note('解説：入口は、作っただけでは通らない',`<p>お客さんはいまも、サーバー（${SERVER_IP}）に直接来ています。ドメインの向き先（DNS）を入口のアドレスに変えると、通信が入口を通るようになります。</p><p>入口は世界中に置かれていて、IPアドレスは場所や時間で変わります。だから、IPアドレスではなく<b>名前</b>で向けます。DNSは、ドメインを取った「ネームヤ」で設定します。アドレスをコピーしてから、ネームヤを開きましょう。</p>`));
   return h+'</div>';
 }
 // WAF：入口に届いた通信を検査して、通す・止めるを決める。ルールは日が進むごとに増える
@@ -1720,8 +1751,8 @@ function cloudWafHTML(){
     <div class="row"><label class="desc" for="inf-crawler">確認済みの検索エンジン<span class="note">検索サービスが、お店のページを集めに来るボット</span></label>${infSel('crawler',[['allow','通す'],['block','止める']])}</div></div>`;
   h+=`<div class="sec"><h3>WAF のルール</h3>${intro('取り付け先：pixeldo-edge。入口に届いた通信を、ここのルールで検査します。')}
     <div class="row"><label class="desc" for="inf-wafSignup">会員登録（/signup）への送信<span class="note">登録フォームに届いた送信の扱い</span></label>${infSel('wafSignup',[['allow','そのまま通す'],['count','数えるだけ'],['captcha','人間か確かめる（CAPTCHA）'],['block','すべてブロック']])}</div>`;
-  if(d>=13)h+=`<div class="row"><label class="desc" for="inf-wafLogin">ログイン（/login）の回数<span class="note">同じ相手から、5分あたり。超えた分はブロック</span></label>${infSel('wafLogin',[['0','制限なし'],['10000','10,000回まで'],['20','20回まで'],['2','2回まで']])}</div>`;
-  if(d>=14)h+=`<div class="row"><label class="desc" for="inf-wafRate">サイト全体の回数<span class="note">同じ相手から、5分あたり。超えた分はブロック</span></label>${infSel('wafRate',[['0','制限なし'],['200000','200,000回まで'],['2000','2,000回まで'],['20','20回まで']])}</div>`;
+  if(d>=13)h+=`<div class="row"><label class="desc" for="inf-wafLogin">ログイン（/login）の回数<span class="note">同じ接続元（IPアドレス）から、5分あたり。超えた分はブロック</span></label>${infSel('wafLogin',[['0','制限なし'],['10000','10,000回まで'],['100','100回まで'],['10','10回まで']])}</div>`;
+  if(d>=14)h+=`<div class="row"><label class="desc" for="inf-wafRate">サイト全体の回数<span class="note">同じ接続元（IPアドレス）から、5分あたり。超えた分はブロック</span></label>${infSel('wafRate',[['0','制限なし'],['200000','200,000回まで'],['2000','2,000回まで'],['100','100回まで']])}</div>`;
   if(d>=15)h+=`<div class="row"><div class="desc">よくある攻撃の型<span class="note">SQLインジェクションなど、既知の型に合う入力をブロック</span></div><span class="small msg-ok">有効</span></div>
     <div class="row"><div class="desc">検査の前に、入力をデコードする<span class="note">%27 のように書き換えた文字を、元に戻してから検査します</span></div>${infSw('wafDecode')}</div>`;
   h+='</div>';
@@ -1983,8 +2014,8 @@ function cfgForDay(n){
   return c;
 }
 // n日目の朝の、ドメインの向き先：入口（CDN）を作った日（dnsEdge）を過ぎていれば、入口を向いている
-function dnsForDay(n){let e=false;for(let i=1;i<n&&i<=LAST_DAY;i++)if(DAYS[i].dnsEdge)e=true;return e?EDGE_IP:SERVER_IP;}
-const setDnsForDay=n=>{S.dns=[{type:'A',name:'@',value:dnsForDay(n)}].concat((S.dns||[]).filter(r=>!(r.type==='A'&&r.name==='@')));};
+function dnsForDay(n){let e=false;for(let i=1;i<n&&i<=LAST_DAY;i++)if(DAYS[i].dnsEdge)e=true;return e?{type:'ALIAS',name:'@',value:EDGE_HOST}:{type:'A',name:'@',value:SERVER_IP};}
+const setDnsForDay=n=>{S.dns=[dnsForDay(n)].concat((S.dns||[]).filter(r=>!(r.name==='@'&&(r.type==='A'||r.type==='ALIAS'))));};
 function daySheet(){
   const name=n=>n===0?'0日目　オープン準備':DAYS[n].title;
   let h=`<div class="loghd"><h2 id="mTitle" style="margin:0">日を選ぶ</h2><button class="btn" data-act="${daysFromTitle?'toTitle':'close'}">${daysFromTitle?'タイトルへ戻る':'閉じる'}</button></div>
@@ -2091,7 +2122,9 @@ function showEnd(){
 }
 /* ---------- エンディングとエンドロール ----------
    エンディング：夜の街角（タイトルと同じジオラマ）で、店長とシロが話す。物陰にいた攻撃者は、もういない。
-   エンドロール：主演 → 案内役 → お客さん →（ゲスト出演）→ 攻撃者のみなさん（登場順。役名はここで初めて明かす）→ 協力 → スペシャルサンクス → 引っかかったトラップ →「そして、お店は今日も営業中」 */
+     シロは正体（お店の「穴」から生まれた妖精）を明かし、穴がなくなったので消える。「セキュリティ対策に終わりはない」もここで伝える。
+   エンドロール：主演 → 案内役 → お客さん →（ゲスト出演）→ 攻撃者のみなさん（登場順。役名はここで初めて明かす）→ 協力 → スペシャルサンクス → 制作 → 引っかかったトラップ
+     →「そして、お店は今日も営業中」→ 最後の場面（シロがひとりで現れ、震えて、黒い姿に変わって飛び去る。言葉はない）→ おわり */
 const END_CAST=[['houjin',43,19],['yamada',33.5,24.5],['tencho',17.5,24.5],['shiro',26,25,4],['suzuki',30,27.5],['tanaka',12.5,27.5],['tomo',21.5,29]];
 function castAt(list,sc){
   return list.map(([id,gx,gy,z,cls])=>{
@@ -2102,30 +2135,44 @@ function castAt(list,sc){
 // done＝24日目をクリアして、はじめて見るとき（記録に「全部クリア」を残す）。見返すときは記録を変えない
 function startEnding(done){
   if(busy)return;
-  hideModal();hideToast();netStop();title.hidden=true;rollEl.hidden=true;
+  hideModal();hideToast();netStop();title.hidden=true;rollStop();rollEl.hidden=true;
   if(done){S.phase='end';S.cleared=Math.max(S.cleared,LAST_DAY);save();render();}
   const vw=window.innerWidth,vh=window.innerHeight,st=(window.devicePixelRatio||1)>=2?2:1;
   const sc=Math.max(1,Math.min(4,Math.floor(Math.min((vw-32)/TS.w,(vh-250)/TS.h)*st)/st));
   $('ending').innerHTML=`<div class="ebox"><p class="ekick">${LAST_DAY}日目の夜</p>
     <div class="scene" style="width:${TS.w*sc}px;height:${TS.h*sc}px" role="img" aria-label="夜の街角。よろず屋ピクセル堂の前に、店長とシロ、お客さんたちが並んでいる"><img src="title.png" alt="" width="${TS.w*sc}" height="${TS.h*sc}">${castAt(END_CAST,sc)}</div></div>`;
   $('ending').hidden=false;document.body.classList.add('ending-on');
-  const n=S.traps.length;
+  const n=S.traps.length,known=(S.trapsFrom||0)<=1;   // known＝最初からトラップを数えている記録
+  const shiro=()=>$('ending').querySelector('.ch[data-cast="shiro"]');
+  // シロの正体：お店の「穴」から生まれた妖精。穴を全部ふさいだので、もういられない。途中の {fn} は、場面のシロを薄れさせ、消す
   say([
-    {who:'',t:LAST_DAY+'日目の夜。よろず屋ピクセル堂は、今日も無事に店じまいをした'},
+    {who:'',t:LAST_DAY+'日目の夜。よろず屋ピクセル堂は、今日の営業を終えた'},
     {who:YOU,t:'お店を公開したら、それで完成だと思ってたよ'},
-    {who:SHIRO,t:'公開は、はじまりだったね。通信、アプリ、防壁、運用。ぜんぶ、きみが自分の手で直した'},
-    {who:SHIRO,t:n?'まちがえた設定も、'+n+'回あった。でも、お知らせを読んで、気づいて、直した。それでいいんだ':'設定をまちがえて、お客さんを困らせることもなかった。たいしたものだよ'},
-    {who:SHIRO,t:'攻撃は、これからも来る。でも、気づいて、確かめて、直す。そのやり方を、きみはもう知ってる'},
-    {who:YOU,t:'うん。……シロ、明日も来てくれる？'},
-    {who:SHIRO,t:'もちろん。今度は、お客さんとしてね'}
-  ],startRoll);
+    {who:SHIRO,t:'公開は、はじまりだったね。通信、アプリ、防壁、運用。ぜんぶ、きみが自分の手で直した'}
+  ].concat(n?[{who:SHIRO,t:'まちがえた設定も、'+n+'回あった。でも、お知らせを読んで、気づいて、直した。それでいいんだ'}]:known?[{who:SHIRO,t:'設定をまちがえて、お客さんを困らせることもなかった。たいしたものだよ'}]:[]).concat([
+    {who:SHIRO,t:'でもね、セキュリティ対策に終わりはないんだ。新しい部品、新しいページ、まだ誰も知らない手口。穴は、明日もどこかで生まれる'},
+    {who:YOU,t:'そのときは、また教えてよ。いつもみたいに'},
+    {who:SHIRO,t:'……それが、もうできないんだ'},
+    {who:SHIRO,t:'黙っててごめん。ぼくは、人間じゃない。このお店の「穴」から生まれた妖精なんだ'},
+    {who:SHIRO,t:'筒抜けの通信、文字をつなげただけの検索、開けっぱなしの裏口。お店に穴があるあいだだけ、ぼくはここにいられた'},
+    {who:YOU,t:'だから、どこに穴があるのか、いつも知ってたのか……'},
+    {fn:()=>{const e=shiro();if(e)e.classList.add('flick');}},
+    {who:SHIRO,t:'その穴を、きみは全部ふさいだ。だから、ぼくはもう、ここにいられない'},
+    {who:YOU,t:'待って。穴をひとつ空けておけば、いてくれるのか？'},
+    {who:SHIRO,t:'だめだよ。それだけは、やっちゃいけない'},
+    {who:SHIRO,t:'だいじょうぶ。気づいて、確かめて、直す。きみはもう、ひとりでできる'},
+    {who:SHIRO,t:'次に穴が生まれたとき、最初に見つけるのが、きみでありますように'},
+    {fn:()=>{const e=shiro();if(e){e.classList.remove('flick');e.classList.add('gone');}}},
+    {who:YOU,t:'……ありがとう、シロ'},
+    {who:'',t:'次の朝も、よろず屋ピクセル堂は、いつもどおりに店を開けた'}
+  ]),startRoll);
 }
 const rollLine=(id,role,who)=>`<div class="cr">${id?`<span class="rsp" data-cast="${id}" data-s="4">${spr(frameRows(CAST[id].rows,tick),4,'')}</span>`:''}${role?`<div class="rrole">${esc(role)}</div>`:''}<div class="rwho">${esc(who)}</div></div>`;
 function rollHTML(){
   const sect=t=>`<div class="rsect">${t}</div>`;
   let h=`<div class="rtitle">Getting Secure It</div>`;
   h+=sect('主演')+rollLine('tencho','店長','あなた');
-  h+=sect('案内役')+rollLine('shiro','ホワイトハッカー','シロ');
+  h+=sect('案内役')+rollLine('shiro','お店の「穴」から生まれた妖精','シロ');
   h+=sect('お客さん')+['tanaka','suzuki','yamada','houjin','tomo','kenkyu'].map(id=>rollLine(id,CAST[id].role,CAST[id].name)).join('');
   // ゲスト出演：設定をまちがえたときに、困らせてしまったお客さん
   const guests=[];S.traps.forEach(x=>{if(x.guest&&!guests.some(g=>g.t===x.guest.t))guests.push(x.guest);});
@@ -2136,30 +2183,64 @@ function rollHTML(){
   h+=sect('攻撃者のみなさん（登場順）')+seen.map(e=>rollLine(e.id,e.days.join('・')+'日目',CAST[e.id].name)).join('');
   h+=sect('協力')+[['registrar','ネームヤ'],['cloud','ピクセルクラウド'],['ca',CAS.free.n],['hub','ピクセルハブ']].map(([k,n])=>`<div class="cr"><span class="rlogo">${spr(IC['logo_'+k],4,'')}</span><div class="rwho">${esc(n)}</div></div>`).join('');
   h+=sect('スペシャルサンクス')+`<div class="cr"><div class="rwho">毎日苦情をくれたお客さんたち</div></div>`;
-  h+=sect('引っかかったトラップ')+(S.traps.length?`<ul class="rtraps">${S.traps.slice().sort((a,b)=>a.day-b.day).map(x=>`<li><span>${x.day}日目</span>${esc(x.t)}</li>`).join('')}</ul>`:`<div class="cr"><div class="rwho">ひとつもなし</div><div class="rrole">おみごと</div></div>`);
+  h+=sect('制作')+`<div class="cr"><div class="rwho">${esc(ROLL_MAKER)}</div></div>`;
+  // 引っかかったトラップ。trapsFrom＝数え始めた日（トラップを数える前の版で遊んだ記録は、途中から、または全部が「記録なし」）
+  const from=S.trapsFrom||0,since=from>1&&from<=LAST_DAY?`<div class="rrole">${from}日目から数えています</div>`:'';
+  h+=sect('引っかかったトラップ')+(S.traps.length?`<ul class="rtraps">${S.traps.slice().sort((a,b)=>a.day-b.day).map(x=>`<li><span>${x.day}日目</span>${esc(x.t)}</li>`).join('')}</ul>${since}`
+    :from>LAST_DAY?`<div class="cr"><div class="rwho">記録なし</div><div class="rrole">前の版で遊んだ記録です</div></div>`
+    :`<div class="cr"><div class="rwho">ひとつもなし</div><div class="rrole">おみごと</div></div>${since}`);
   return h;
 }
-const ROLL_FIN='そして、お店は今日も営業中';
+const ROLL_FIN='そして、お店は今日も営業中',ROLL_MAKER='kanade0525';   // 制作者の表記
+// エンドロールの進み具合：roll＝名前が流れている／fin＝「営業中」／sting＝最後の場面／end＝おわり（static＝動きを減らす設定。流さずに読む）
+let rollStage='',rollT=[],rollIO=null;
+const rollLater=(ms,fn)=>{rollT.push(setTimeout(fn,ms));};
+function rollStop(){rollT.forEach(clearTimeout);rollT=[];if(rollIO){rollIO.disconnect();rollIO=null;}}
 function startRoll(){
+  rollStop();
   $('ending').hidden=true;document.body.classList.remove('ending-on');
+  const sc=Math.max(4,Math.min(8,Math.floor(Math.min(window.innerWidth,window.innerHeight)/90)));
   rollEl.innerHTML=`<button class="rskip" data-act="rollSkip">スキップ</button><div class="rtrack" id="rollTrack">${rollHTML()}</div>
-    <div class="rend" id="rollEnd" hidden><p class="rfin">${ROLL_FIN}</p><div class="acts"><button class="btn primary" data-act="rollTitle">タイトルへ戻る</button><button class="btn" data-act="rollAgain">もう一度見る</button></div></div>`;
-  rollEl.hidden=false;rollEl.scrollTop=0;
-  const tr=$('rollTrack');
-  rollEl.classList.toggle('static',RM);
-  if(RM){$('rollEnd').hidden=false;rollEl.querySelector('.rskip').hidden=true;return;}   // 動きを減らす設定：流さずに、スクロールで読む
+    <div class="rcard" id="rollFin" hidden><p class="rfin">${ROLL_FIN}</p></div>
+    <div class="rsting" id="rollSting" aria-hidden="true" hidden><span class="sting-ch" id="stingCh" data-s="${sc}" style="--o:${sc}px"></span></div>
+    <div class="rend" id="rollEnd" hidden><div class="acts"><button class="btn primary" data-act="rollTitle">タイトルへ戻る</button><button class="btn" data-act="rollAgain">もう一度見る</button></div></div>`;
+  rollEl.hidden=false;rollEl.scrollTop=0;rollEl.classList.toggle('static',RM);
+  if(RM){   // 動きを減らす設定：流さずに、上から順に読む。最後の場面は、見える位置まで来たら始める
+    rollStage='static';['rollFin','rollSting','rollEnd'].forEach(id=>{$(id).hidden=false;});rollEl.querySelector('.rskip').hidden=true;
+    if(window.IntersectionObserver){rollIO=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){rollIO.disconnect();rollIO=null;stingPlay(true);}},{root:rollEl,threshold:.6});rollIO.observe($('rollSting'));}
+    else stingPlay(true);
+    return;
+  }
+  rollStage='roll';
   rollEl.querySelector('.rskip').focus({preventScroll:true});
+  const tr=$('rollTrack');
   requestAnimationFrame(()=>{tr.style.setProperty('--dur',Math.max(24,(tr.scrollHeight+window.innerHeight)/56)+'s');tr.classList.add('go');});
-  tr.addEventListener('animationend',rollDone,{once:true});
+  tr.addEventListener('animationend',()=>{if(rollStage==='roll'&&$('rollTrack')===tr)rollNext();},{once:true});
 }
-function rollDone(){
-  const tr=$('rollTrack'),en=$('rollEnd');if(!tr||!en||!en.hidden)return;
-  tr.hidden=true;en.hidden=false;rollEl.querySelector('.rskip').hidden=true;
-  const b=en.querySelector('button');if(b)b.focus({preventScroll:true});
+// 次の場面へ（名前が流れ終わったとき、場面が終わったとき、スキップを押したとき）
+function rollNext(){
+  if(rollEl.hidden||!$('rollEnd'))return;
+  rollStop();
+  const tr=$('rollTrack'),fin=$('rollFin'),st=$('rollSting'),en=$('rollEnd');
+  if(rollStage==='roll'){rollStage='fin';tr.hidden=true;fin.hidden=false;rollLater(3600,rollNext);}
+  else if(rollStage==='fin'){rollStage='sting';fin.hidden=true;st.hidden=false;stingPlay(false,rollNext);}
+  else if(rollStage==='sting'){rollStage='end';st.hidden=true;en.hidden=false;rollEl.querySelector('.rskip').hidden=true;const b=en.querySelector('button');if(b)b.focus({preventScroll:true});}
+}
+// 最後の場面：シロがひとりで現れる → 体が震える → 黒い姿に変わる → 飛び去る。still＝動きを減らす設定（震えと飛ぶ動きは出さず、姿の切り替えだけ）
+function stingPlay(still,done){
+  const ch=$('stingCh'),box=$('rollSting');if(!ch)return;
+  const draw=id=>{ch.dataset.cast=id;ch.innerHTML=spr(frameRows(CAST[id].rows,tick),+ch.dataset.s,'');};
+  ch.className='sting-ch';box.classList.remove('flash');draw('shiro');
+  let t=0;const at=(ms,fn)=>{t+=ms;rollLater(t,fn);};
+  at(still?100:600,()=>ch.classList.add('in'));
+  at(still?1500:2600,()=>{if(!still)ch.classList.add('shake');});
+  at(still?0:1900,()=>{ch.classList.remove('shake');draw('kuro');ch.classList.add('dark');if(!still)box.classList.add('flash');});
+  at(still?1800:1800,()=>ch.classList.add(still?'out':'fly'));
+  at(still?300:1500,()=>{if(done)done();});
 }
 function reset(){
   try{localStorage.removeItem(KEY);}catch(e){}
-  $('ending').hidden=true;rollEl.hidden=true;document.body.classList.remove('ending-on');
+  $('ending').hidden=true;rollStop();rollEl.hidden=true;document.body.classList.remove('ending-on');
   netStop();S=fresh();pcScroll={};Q=[];showing=false;setTalking(false);busy=false;certBusy=false;dnsBusy=false;caBusy=false;relBusy=false;clip='';nr.name='';nr.val='';
   hideToast();hideModal();render();startIntro();
 }
@@ -2180,9 +2261,9 @@ document.addEventListener('click',e=>{
   else if(a==='verify'){verify();}
   else if(a==='nextDay'){hideModal();if(S.day<LAST_DAY)startDay(S.day+1);else startEnding(true);}
   else if(a==='ending'){startEnding(false);}
-  else if(a==='rollSkip'){rollDone();}
+  else if(a==='rollSkip'){rollNext();}
   else if(a==='rollAgain'){startRoll();}
-  else if(a==='rollTitle'){rollEl.hidden=true;showTitle(false);}
+  else if(a==='rollTitle'){rollStop();rollEl.hidden=true;showTitle(false);}
   else if(a==='ca'){c.ca=b.dataset.ca;save();render();if(c.ca!=='self')say([{who:SHIRO,t:CAS[c.ca].n+'のタブが、ブラウザに増えたよ。まずはこのサーバーで秘密鍵とCSRを作ろう'}]);}
   else if(a==='certRedo'||a==='reinstall'){
     if(a==='certRedo')Object.assign(c,{ca:null,keyMade:false,token:null,issued:false});
@@ -2196,6 +2277,7 @@ document.addEventListener('click',e=>{
     if(c.inf.dnsFreeze&&isLive())return;
     const name=normName(nr.name),val=nr.val.trim();
     if(!nr.name.trim()||!val){S.dnsAddMsg='名前と値を入力してください（ドメインそのものは「@」）';render();return;}
+    if(nr.type==='CNAME'&&name==='@'){S.dnsAddMsg='ドメインそのもの（@）には、CNAME を登録できません。別の名前へ向けるときは、ALIAS を使ってください';render();return;}
     S.dns=S.dns||[];S.dns.push({type:nr.type,name,value:val});nr.name='';nr.val='';S.dnsAddMsg='';resetDemoRes();save();render();edgeSaid();}
   else if(a==='dnsDel'){const i=+b.dataset.i;if(c.inf.dnsFreeze&&isLive())return;if(i>=0&&S.dns&&S.dns[i]){S.dns.splice(i,1);resetDemoRes();save();render();edgeSaid();}}
   else if(a==='dcv'){
@@ -2275,10 +2357,10 @@ document.addEventListener('click',e=>{
     S.botRes={mode,made:pass?100:0,list};save();render();
     if(pass&&!S.seenBot){S.seenBot=true;save();say([{who:SHIRO,t:'人間かどうかを確かめないから、プログラムで何件でも作れちゃう'},{who:SHIRO,t:'「管理」タブのピクセルクラウドで、入口（CDN）とWAFを用意して止めよう'}]);}}
   else if(a==='bruteTry'){const lim=edgeOn()?Number(c.inf.wafLogin||0):0,next=(S.bruteN||0)+100;
-    if(lim&&next>lim){S.bruteN=lim;S.bruteRes={stopped:true,at:lim};}else{S.bruteN=next;S.bruteRes={stopped:false};}save();render();
+    if(lim&&next>=lim){S.bruteN=lim;S.bruteRes={stopped:true,at:lim};}else{S.bruteN=next;S.bruteRes={stopped:false};}save();render();
     if(!S.bruteRes.stopped&&!S.seenBrute){S.seenBrute=true;save();say([{who:SHIRO,t:'何回失敗しても止まらないから、試し放題だ'},{who:SHIRO,t:'ピクセルクラウドの「WAF」で、ログインの回数を制限しよう'}]);}}
-  else if(a==='dosFire'){const i=c.inf,n=edgeOn()?i.wafRate:'0',held=n==='2000'||n==='20';
-    S.dosRes=held?{load:n==='20'?12:i.cache?30:55,down:false,strict:n==='20'}:{load:100,down:true,big:i.size==='l'};save();render();pcFocus($('p-console'));
+  else if(a==='dosFire'){const i=c.inf,n=edgeOn()?i.wafRate:'0',held=n==='2000'||n==='100';
+    S.dosRes=held?{load:n==='100'?12:i.cache?30:55,down:false,strict:n==='100'}:{load:100,down:true,big:i.size==='l'};save();render();pcFocus($('p-console'));
     if(!held&&!S.seenDos){S.seenDos=true;save();say([{who:SHIRO,t:'一気に送られると、サーバーが落ちちゃう'},{who:SHIRO,t:'ピクセルクラウドの「WAF」で、サイト全体の回数を決めよう'}]);}}
   else if(a==='wafEnc'){S.wafEnc=!S.wafEnc;S.wafRes=null;save();render();}
   else if(a==='wafSend'){const enc=!!S.wafEnc,pass=enc&&!c.inf.wafDecode,fixed=c.code.defense==='layered';S.wafRes={pass,enc};save();render();pcFocus($('p-console'));
@@ -2288,8 +2370,8 @@ document.addEventListener('click',e=>{
   else if(a==='fwTry'){const fixed=c.inf.fwSsh==='admin';S.fwRes={open:!fixed};save();render();pcFocus($('p-console'));
     if(!fixed&&!S.seenFw){S.seenFw=true;save();say([{who:SHIRO,t:'サーバーに直接つなげるから、入口の対策がぜんぶ素通りだ'},{who:SHIRO,t:'ピクセルクラウドの「ファイアウォール」で、受け付ける相手を絞ろう'}]);}}
   else if(a==='vulnScan'){S.vulnShown=true;save();render();pcFocus($('p-console'));
-    if(!c.inf.patched&&!S.seenVuln){S.seenVuln=true;save();say([{who:SHIRO,t:'使ってるソフトのバージョンが、そのまま公開済みの穴になってる'},{who:SHIRO,t:'同じ画面の「適用して再起動」で、更新を当てよう'}]);}}
-  else if(a==='patchNow'){c.inf.patched=true;S.vulnShown=true;save();render();pcFocus($('p-console'));say([{who:SHIRO,t:'更新が当たって、サーバーが再起動した。古いバージョンは、もう残ってない'}]);}
+    if(!c.inf.patched&&!S.seenVuln){S.seenVuln=true;save();say([{who:SHIRO,t:'直した版はもう配られてるのに、12件も当てないままになってる'},{who:SHIRO,t:'同じ画面の「適用して再起動」で、更新を当てよう'}]);}}
+  else if(a==='patchNow'){c.inf.patched=true;S.vulnShown=true;save();render();pcFocus($('p-console'));say([{who:SHIRO,t:'更新が当たって、サーバーが再起動した。溜まっていた穴は、これでふさがった'}]);}
   else if(a==='skimPay'){const pol=c.inf.csp||'none';S.skimRes={stolen:pol==='none',dead:pol==='strict'};save();render();
     if(pol==='none'&&!S.seenSkim){S.seenSkim=true;save();say([{who:SHIRO,t:'差し替えられた外部スクリプトが、入力を外へ送っちゃった'},{who:SHIRO,t:'ピクセルクラウドの「通信設定」でCSPを付けて、読み込み元と送り先を絞ろう'}]);}}
   else if(a==='keyView'){const safe=c.code.apikey==='server';S.keyRes={abused:!safe};save();render();
@@ -2301,8 +2383,8 @@ document.addEventListener('click',e=>{
     if(out==='any'&&!S.seenExfil){S.seenExfil=true;save();say([{who:SHIRO,t:'外向きが自由だと、少量ずつこっそり持ち出せちゃう'},{who:SHIRO,t:'ピクセルクラウドの「ファイアウォール」で、出ていく通信の宛先を絞ろう'}]);}}
   /* --- ピクセルクラウド・ネームヤの設定 --- */
   else if(a==='infSw'){const k=b.dataset.k,v=S.vulnShown;c.inf[k]=!c.inf[k];resetDemoRes();S.vulnShown=v;save();render();}
-  else if(a==='edgeMake'){c.inf.edge=true;resetDemoRes();save();render();say([{who:SHIRO,t:'入口ができた。でもまだ、誰も入口を通ってない'},{who:SHIRO,t:'ドメインの向き先を、入口のIPアドレスに変えよう。IPアドレスをコピーして、ネームヤのDNSで、Aレコードを書き換えるんだ'}]);}
-  else if(a==='copyEdge'){clip=EDGE_IP;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
+  else if(a==='edgeMake'){c.inf.edge=true;resetDemoRes();save();render();say([{who:SHIRO,t:'入口ができた。でもまだ、誰も入口を通ってない'},{who:SHIRO,t:'ドメインの向き先を、入口のアドレスに変えよう。アドレスをコピーして、ネームヤのDNSに「ALIAS」のレコードを足す。古い「A」レコードは消すんだ'}]);}
+  else if(a==='copyEdge'){clip=EDGE_HOST;try{navigator.clipboard.writeText(clip).catch(()=>{});}catch(err){}render();}
   else if(a==='goCert'){S.svc='cloud';S.sub='cert';setTab('console');}
   /* --- ピクセルハブ：プルリクエストの中身（コードの差分）を見て、マージする --- */
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;
@@ -2437,6 +2519,7 @@ if(S.rev<3){
     S.cfg=cfgForDay(n);if(keep)S.cfg.token=keep;setDnsForDay(n);
     if(!end){S.phase='incident';S.step=null;S.last=null;S.voices=(S.voices||[]).filter(v=>v.day<S.day);}
   }
+  S.trapsFrom=S.phase==='end'?LAST_DAY+1:Math.max(1,S.day);   // この版より前は、引っかかったトラップを数えていなかった
   S.rev=3;save();
 }
 render();

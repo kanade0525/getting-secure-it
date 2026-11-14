@@ -53,10 +53,10 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   await p.screenshot({ path: OUT + '/days-debug.png' });
   await p.check('#dbgFix'); await p.click('.dayrow[data-day="17"]'); await p.waitForTimeout(100);
   s = await state(p);
-  ok('デバッグ：17日目の対策の場面から始まる（会話なし・16日目までの対策あり）', s.day === 17 && s.phase === 'fix' && s.cfg.inf.bot === 'challenge' && s.cfg.inf.wafRate === '2000' && s.cfg.inf.fwSsh === 'any' && s.dns.some(x => x.type === 'A' && x.value === '198.51.100.10') && !(await p.locator('#win').isVisible()) && s.domain === 'pixeldo.shop');
+  ok('デバッグ：17日目の対策の場面から始まる（会話なし・16日目までの対策あり）', s.day === 17 && s.phase === 'fix' && s.cfg.inf.bot === 'challenge' && s.cfg.inf.wafRate === '2000' && s.cfg.inf.fwSsh === 'any' && s.dns.some(x => x.type === 'ALIAS' && x.value === 'pixeldo-edge.pixelcdn.example') && !s.dns.some(x => x.type === 'A' && x.name === '@') && !(await p.locator('#win').isVisible()) && s.domain === 'pixeldo.shop');
   // どの日も、その日の朝の設定では防げず、次の日の朝の設定では防げる
-  const plan = await p.evaluate(() => { const G = window.GSI_DEBUG, D = window.GSI_DAYS.days, EDGE = '198.51.100.10', out = [];
-    const cfg = n => Object.assign(G.cfgForDay(n), { dnsTo: G.dnsForDay(n) === EDGE ? 'edge' : 'server' });
+  const plan = await p.evaluate(() => { const G = window.GSI_DEBUG, D = window.GSI_DAYS.days, out = [];
+    const cfg = n => Object.assign(G.cfgForDay(n), { dnsTo: G.dnsForDay(n).type === 'ALIAS' ? 'edge' : 'server' });
     for (let n = 1; n <= G.lastDay; n++) { const a = D[n].check(cfg(n)), b = D[n].check(cfg(n + 1)); if (a.ok || !b.ok || !a.why || !b.lines.length) out.push(n + ':' + a.ok + '/' + b.ok); }
     return out; });
   ok('全24日：朝の設定では防げず、正解を入れると防げる' + (plan.length ? '（' + plan.join(' ') + '）' : ''), plan.length === 0);
@@ -71,13 +71,24 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   const old14 = Object.assign({}, save6, { day: 14, phase: 'fix', step: undefined, cfg: Object.assign({}, SAFE, { code: { search: 'param', signup: 'verify', login: 'throttle', dos: 'shield' } }), voices: [{ who: '監視', sys: true, t: 'x', day: 13, unread: false }, { who: '監視', sys: true, t: 'y', day: 14, unread: false }] });
   p = await open('', old14); s = await state(p);
   ok('古い記録（14日目の途中）：14日目の朝からやり直しになる', s.rev === 3 && s.day === 14 && s.phase === 'incident' && !s.step && s.voices.every(v => v.day < 14));
-  ok('古い記録：13日目までの対策は、新しい設定の形で入っている', s.cfg.inf.edge && s.cfg.inf.wafSignup === 'captcha' && s.cfg.inf.wafLogin === '20' && s.cfg.inf.wafRate === '0' && !s.cfg.code.dos && !s.cfg.code.signup && s.cfg.code.search === 'param' && s.dns.some(x => x.type === 'A' && x.value === '198.51.100.10') && !s.dns.some(x => x.type === 'A' && x.value === '203.0.113.24'));
+  ok('古い記録：13日目までの対策は、新しい設定の形で入っている', s.cfg.inf.edge && s.cfg.inf.wafSignup === 'captcha' && s.cfg.inf.wafLogin === '100' && s.cfg.inf.wafRate === '0' && !s.cfg.code.dos && !s.cfg.code.signup && s.cfg.code.search === 'param' && s.dns.some(x => x.type === 'ALIAS' && x.value === 'pixeldo-edge.pixelcdn.example') && !s.dns.some(x => x.type === 'A' && x.value === '203.0.113.24') && s.trapsFrom === 14);
   await p.click('.menu button[data-t="cont"]'); await p.waitForTimeout(100);
   ok('古い記録：つづきからで、14日目の朝の会話が始まる', (await p.locator('#win').isVisible()) && /落ちてる/.test(await p.locator('#winText').innerText()));
   await p.close();
+  // 入口をIPアドレスで向けていた版（版3の最初）の記録は、名前（ALIAS）に直る
+  const ipEdge = Object.assign({}, save6, { rev: 3, day: 15, phase: 'fix', traps: [], dns: [{ type: 'A', name: '@', value: '198.51.100.10' }, { type: 'TXT', name: '_acme-challenge', value: 'ABCD-EFGH' }], cfg: Object.assign({}, SAFE, { inf: { edge: true, wafSignup: 'captcha' } }) });
+  p = await open('', ipEdge); s = await state(p); await p.click('.menu button[data-t="cont"]'); await clear(p); await p.click('.tabs button[data-tab="console"]'); await p.click('#svc-cloud'); await p.click('.sub[data-sub="edge"]');
+  ok('入口をIPアドレスで向けていた記録：ALIAS に直り、入口を通っている扱いになる', /入口を通っています/.test(await p.locator('#p-console .viewport').innerText()) && (await state(p)).dns.some(x => x.type === 'ALIAS' && x.value === 'pixeldo-edge.pixelcdn.example'));
+  await p.close();
   const oldEnd = Object.assign({}, save6, { day: 24, phase: 'end', cfg: Object.assign({}, SAFE, { autoRenew: true, code: { search: 'param', egress: 'monitor', registrar: 'lock' } }) });
   p = await open('', oldEnd); s = await state(p);
-  ok('古い記録（全部クリア）：クリアのまま、全部の対策が入った設定になる', s.phase === 'end' && s.cleared === 24 && s.cfg.inf.alarmOut && s.cfg.inf.regLock && s.cfg.code.apikey === 'server' && !s.cfg.code.egress);
+  ok('古い記録（全部クリア）：クリアのまま、全部の対策が入った設定になる', s.phase === 'end' && s.cleared === 24 && s.cfg.inf.alarmOut && s.cfg.inf.regLock && s.cfg.code.apikey === 'server' && !s.cfg.code.egress && s.trapsFrom === 25);
+  // トラップを数える前の記録：エンドロールは「ひとつもなし／おみごと」ではなく「記録なし」
+  await p.click('.menu button[data-t="cont"]'); await p.click('#sheet [data-act="ending"]'); await p.waitForTimeout(150);
+  const talk = []; for (let i = 0; i < 40 && !(await p.locator('#roll').isVisible()); i++) { talk.push(await p.locator('#winText').innerText()); await p.click('#win', { position: { x: 24, y: 16 } }); await p.waitForTimeout(50); }
+  const rollText = await p.locator('#roll').innerText();
+  ok('古い記録（全部クリア）：エンドロールのトラップは「記録なし」。シロも「まちがえなかった」とは言わない', /記録なし/.test(rollText) && !/おみごと/.test(rollText) && !talk.some(t => /たいしたものだよ|まちがえた設定も/.test(t)));
+  await p.click('#roll [data-act="rollTitle"]'); await p.waitForTimeout(100);
   await p.click('.menu [data-t="days"]');
   ok('全部クリアしたあとは、一般でも「エンディング」を選べる', await p.locator('.dayrow[data-act="ending"]').count() === 1);
   await p.close();

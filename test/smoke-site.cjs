@@ -17,7 +17,7 @@ const getPlan = async browser => {
   const r = await p.evaluate(() => { const o = {}, G = window.GSI_DEBUG; for (let n = 1; n <= G.lastDay; n++) o[n] = { bad: G.cfgForDay(n), good: G.cfgForDay(n + 1), dnsBad: G.dnsForDay(n), dnsGood: G.dnsForDay(n + 1) }; return o; });
   await p.close(); return r;
 };
-const seed = (day, c, ip, D) => ({ rev: 3, day, phase: 'fix', tab: D.tab || 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [{ type: 'A', name: '@', value: ip }], svc: D.svc || 'hub', sub: D.sub || 'server', cfg: c });
+const seed = (day, c, rec, D) => ({ rev: 3, day, phase: 'fix', tab: D.tab || 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [rec], svc: D.svc || 'hub', sub: D.sub || 'server', cfg: c });
 // 日ごとのデモの操作。tab/svc/sub は、開いておく画面。guide は、未対策のときに案内の矢印が立つ場所
 //   （ブラウザのタブ＝svc-◯◯／ピクセルクラウドの小メニュー＝sub-◯◯／対策を入れる画面をもう開いているなら ''）
 const DAYS = {
