@@ -101,7 +101,7 @@ const log = (...a) => console.log('[smoke]', ...a);
   await tab('console'); await select('#hstsAge', '31536000');
   for (let i = 0; i < 60; i++) { const s = await state(); if (s.phase === 'clear') break; if (await winUp()) { await winNext(); } else { const vb = page.locator('#verifyBtn'); if (await vb.isVisible()) await vb.click(); } await page.waitForTimeout(150); }
   await settle('clear'); await shot('08-day3-clear');
-  // デモは11日目まで続く。3日目クリア後は4日目へ進むことだけ確認（4日目以降は smoke-ch2 で検証）
+  // 3日目クリア後は、4日目へ進むことだけ確かめる（4日目以降は smoke-net・smoke-site・smoke-infra で確かめる）
   await toNext(); await settle('incident');
   log('after day3 → day', (await state()).day);
   log('errors:', errors.length ? errors : 'none');
