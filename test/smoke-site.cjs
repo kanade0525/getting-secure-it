@@ -17,7 +17,7 @@ const getPlan = async browser => {
   const r = await p.evaluate(() => { const o = {}, G = window.GSI_DEBUG; for (let n = 1; n <= G.lastDay; n++) o[n] = { bad: G.cfgForDay(n), good: G.cfgForDay(n + 1), dnsBad: G.dnsForDay(n), dnsGood: G.dnsForDay(n + 1) }; return o; });
   await p.close(); return r;
 };
-const seed = (day, c, rec, D) => ({ rev: 3, day, phase: 'fix', tab: D.tab || 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [rec], svc: D.svc || 'hub', sub: D.sub || 'server', cfg: c });
+const seed = (day, c, rec, D) => ({ rev: 4, day, phase: 'fix', tab: D.tab || 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [rec], svc: D.svc || 'hub', sub: D.sub || 'server', cfg: c });
 // 日ごとのデモの操作。tab/svc/sub は、開いておく画面。guide は、未対策のときに案内の矢印が立つ場所
 //   （ブラウザのタブ＝svc-◯◯／良えWSの小メニュー＝sub-◯◯／対策を入れる画面をもう開いているなら ''）
 const DAYS = {
@@ -31,19 +31,20 @@ const DAYS = {
   11: { steps: [async p => { for (let i = 0; i < 6; i++) await p.click('[data-act="couponApply"]'); await p.waitForTimeout(2400); }] },
   12: { steps: [async p => { await p.click('[data-act="botRun"]'); }] },
   13: { steps: [async p => { await p.click('[data-act="bruteTry"]'); }] },
-  18: { steps: [] },
-  21: { steps: [async p => { await p.click('[data-act="skimPay"]'); }] },
-  22: { steps: [async p => { await p.click('[data-act="keyView"]'); }] },
+  19: { steps: [] },
+  22: { steps: [async p => { await p.click('[data-act="skimPay"]'); }] },
+  23: { steps: [async p => { await p.click('[data-act="keyView"]'); }] },
   // 管理タブに出るデモ（良えWS・Cithub・おなまえや.comの画面）
   5: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'svc-hub', steps: [async p => { await p.click('[data-act="storeRead"]'); }] },
   14: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'sub-waf', steps: [async p => { await p.click('[data-act="dosFire"]'); }] },
   15: { tab: 'console', svc: 'cloud', sub: 'waf', guide: 'svc-hub', steps: [async p => { await p.click('[data-act="wafEnc"]'); }, async p => { await p.click('[data-act="wafSend"]'); }] },
   16: { tab: 'console', svc: 'cloud', sub: 'waf', guide: '', steps: [async p => { await p.click('[data-act="scrapeRun"]'); }] },
   17: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'sub-fw', steps: [async p => { await p.click('[data-act="fwTry"]'); }] },
-  19: { tab: 'console', svc: 'cloud', sub: 'server', guide: '', steps: [async p => { const b = p.locator('[data-act="vulnScan"]'); if (await b.count()) await b.click(); }] },
-  20: { tab: 'console', svc: 'hub', guide: '', steps: [] },
-  23: { tab: 'console', svc: 'registrar', guide: '', steps: [async p => { await p.click('[data-act="domTry"]'); }] },
-  24: { tab: 'console', svc: 'cloud', sub: 'mon', guide: 'sub-fw', steps: [async p => { await p.click('[data-act="exfilRun"]'); }] },
+  18: { tab: 'console', svc: 'cloud', sub: 'server', guide: 'sub-vpc', steps: [async p => { await p.click('[data-act="dbTry"]'); }] },
+  20: { tab: 'console', svc: 'cloud', sub: 'server', guide: '', steps: [async p => { const b = p.locator('[data-act="vulnScan"]'); if (await b.count()) await b.click(); }] },
+  21: { tab: 'console', svc: 'hub', guide: '', steps: [] },
+  24: { tab: 'console', svc: 'registrar', guide: '', steps: [async p => { await p.click('[data-act="domTry"]'); }] },
+  25: { tab: 'console', svc: 'cloud', sub: 'mon', guide: 'sub-fw', steps: [async p => { await p.click('[data-act="exfilRun"]'); }] },
 };
 
 (async () => {

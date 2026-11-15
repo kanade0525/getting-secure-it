@@ -441,6 +441,24 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
+  portscan: {name:"開けっぱなしの扉探し", role:"18日目", group:"attacker", rows:[
+    "..K.........K...",
+    "..KK.......KK...",
+    "...KKDDDDDDKK...",
+    "...KDDDDDDDDK...",
+    "..KDDDDDDDDDDK..",
+    "..KDDRRDDRRDDK..",
+    "..KDDrRDDRrDDK..",
+    "..KDDDDDDDDDDK..",
+    "...KDDDDDDDDK...",
+    "..KDPDDDDDDPDK..",
+    ".KDDPDDDDDDPDDK.",
+    ".KDDDDDPPDDDDDK.",
+    ".KDDDDDDDDDDDDK.",
+    "..KDDDDDDDDDDK..",
+    "....KDK..KDK....",
+    "....KK....KK...."
+  ]},
   skimmer: {name:"カード情報スキマー", role:"19日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",

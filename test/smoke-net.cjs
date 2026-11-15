@@ -1,4 +1,4 @@
-// 通信タブの通し確認（全24日）：攻撃の再生 → 対策 → 「防げたか確かめる」→ クリア。
+// 通信タブの通し確認（全25日）：攻撃の再生 → 対策 → 「防げたか確かめる」→ クリア。
 // 各日の対策画面は通らず、設定（cfg）を直接そろえて、通信タブの表示と進行だけを確かめる（対策画面の操作は smoke.cjs・smoke-infra.cjs）。
 //   node test/smoke-net.cjs <index.html のあるフォルダ または URL> <スクショの出力先> [日,日,...]
 const { chromium } = require('playwright');
@@ -15,7 +15,7 @@ const getPlan = async browser => {
   await p.close(); return r;
 };
 // step:'net'＝お知らせはもう読んだ（通信タブを開くと再生が始まる）
-const seed = (day, phase, c, rec, last) => ({ rev: 3, day, phase, step: 'net', tab: 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: last || null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [rec], svc: 'hub', sub: 'server', cfg: c });
+const seed = (day, phase, c, rec, last) => ({ rev: 4, day, phase, step: 'net', tab: 'shop', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: last || null, domain: 'pixeldo.shop', ds: null, whois: true, dnsOk: true, dnsVal: '', dnsMsg: '', dns: [rec], svc: 'hub', sub: 'server', cfg: c });
 
 (async () => {
   const browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });

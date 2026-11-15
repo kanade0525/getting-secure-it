@@ -1,7 +1,7 @@
 // 管理画面の現実味：ディスプレイの中（各社のサイト）に、その会社が知り得ないことが出ていないかを調べる。
 //   ・ほかの会社の名前（良えWSの画面に「レッツ暗号を開く」など）が出ない
 //   ・ゲームの言葉（〜日目・攻撃者・トラップ）や、シロの話し言葉が出ない（説明はディスプレイの外のメモに書く）
-//   0〜24日目の朝（未対策）と対策後、1日目の証明書の途中の状態を、会社ごと・小メニューごとにすべて開く。
+//   0〜25日目の朝（未対策）と対策後、1日目の証明書の途中の状態を、会社ごと・小メニューごとにすべて開く。
 //   node test/smoke-console.cjs <index.html のあるフォルダ または URL>
 const { chromium } = require('playwright');
 const path = require('path');
@@ -24,7 +24,7 @@ const GAME = /\d+日目|攻撃者|トラップ|シロ|だよ|しよう|してね
   const PLAN = await p0.evaluate(() => { const G = window.GSI_DEBUG, o = {}; for (let n = 0; n <= G.lastDay; n++) o[n] = { bad: G.cfgForDay(n), good: G.cfgForDay(n + 1), dnsBad: G.dnsForDay(n), dnsGood: G.dnsForDay(n + 1) }; return o; });
   await p0.close();
   const cases = [];
-  for (let n = 0; n <= 24; n++) for (const fixed of [false, true]) cases.push({ tag: n + '日目' + (fixed ? '（対策後）' : '（朝）'), day: n, cfg: fixed ? PLAN[n].good : PLAN[n].bad, dns: fixed ? PLAN[n].dnsGood : PLAN[n].dnsBad, whois: fixed });
+  for (let n = 0; n <= 25; n++) for (const fixed of [false, true]) cases.push({ tag: n + '日目' + (fixed ? '（対策後）' : '（朝）'), day: n, cfg: fixed ? PLAN[n].good : PLAN[n].bad, dns: fixed ? PLAN[n].dnsGood : PLAN[n].dnsBad, whois: fixed });
   // 1日目の証明書：鍵だけ／CSRをダウンロード／申請済み／発行済み・未設置／自己署名
   const c1 = PLAN[1].bad;
   [['鍵だけ', { keyMade: true }], ['CSRをダウンロード', { keyMade: true, ca: 'free' }], ['申請済み', { keyMade: true, ca: 'free', token: 'ABCD-EFGH' }],
@@ -35,7 +35,7 @@ const GAME = /\d+日目|攻撃者|トラップ|シロ|だよ|しよう|してね
   page.on('pageerror', e => errors.push(String(e)));
   let opened = 0;
   for (const C of cases) {
-    const seed = { rev: 3, day: C.day, phase: 'fix', tab: 'console', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: C.whois, dnsOk: true, dns: [].concat(C.dns), svc: 'cloud', sub: 'server', cfg: C.cfg };
+    const seed = { rev: 4, day: C.day, phase: 'fix', tab: 'console', voices: [], badge: {}, traps: [], cart: 0, chatLog: [], last: null, domain: 'pixeldo.shop', ds: null, whois: C.whois, dnsOk: true, dns: [].concat(C.dns), svc: 'cloud', sub: 'server', cfg: C.cfg };
     await page.goto(URL); await page.evaluate(x => localStorage.setItem('gsi-demo-v2', x), JSON.stringify(seed)); await page.reload();
     await page.click('.menu button[data-t="cont"]');
     for (let i = 0; i < 40 && await page.locator('#win').isVisible(); i++) { await page.click('#win', { position: { x: 24, y: 16 } }); await page.waitForTimeout(30); }

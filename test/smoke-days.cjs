@@ -29,7 +29,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   await p.screenshot({ path: OUT + '/title-390.png' });
   await p.click('.menu [data-t="days"]');
   let r = await rows(p);
-  ok('一般：0〜5日目はクリア、6日目はいまここ、7日目から先は選べない', r.length === 25 && r.slice(0, 6).every(x => !x.dis && x.s === 'クリア') && !r[6].dis && r[6].s === 'いまここ' && r.slice(7).every(x => x.dis && x.s === 'lock' && /^\d+日目$/.test(x.t)));
+  ok('一般：0〜5日目はクリア、6日目はいまここ、7日目から先は選べない', r.length === 26 && r.slice(0, 6).every(x => !x.dis && x.s === 'クリア') && !r[6].dis && r[6].s === 'いまここ' && r.slice(7).every(x => x.dis && x.s === 'lock' && /^\d+日目$/.test(x.t)));
   await p.screenshot({ path: OUT + '/days-normal.png' });
   await p.click('.dayrow[data-day="3"]'); await clear(p);
   let s = await state(p);
@@ -48,7 +48,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   ok('デバッグ：タイトルに「日を選ぶ」と「デバッグ中」が出る', await p.locator('.menu [data-t="days"]').count() === 1 && /デバッグ中/.test(await p.locator('.tver').textContent()));
   await p.click('.menu [data-t="days"]');
   r = await rows(p);
-  ok('デバッグ：全25日が選べる', r.length === 25 && r.every(x => !x.dis));
+  ok('デバッグ：0〜25日目がすべて選べる', r.length === 26 && r.every(x => !x.dis));
   ok('デバッグ：一覧の最後に「エンディングとエンドロール」がある', await p.locator('.dayrow[data-act="ending"]').count() === 1);
   await p.screenshot({ path: OUT + '/days-debug.png' });
   await p.check('#dbgFix'); await p.click('.dayrow[data-day="17"]'); await p.waitForTimeout(100);
@@ -70,7 +70,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   // 3c) 古い保存データ（版2：12日目以降の対策を、Cithubのコードで入れていた）
   const old14 = Object.assign({}, save6, { day: 14, phase: 'fix', step: undefined, cfg: Object.assign({}, SAFE, { code: { search: 'param', signup: 'verify', login: 'throttle', dos: 'shield' } }), voices: [{ who: '監視', sys: true, t: 'x', day: 13, unread: false }, { who: '監視', sys: true, t: 'y', day: 14, unread: false }] });
   p = await open('', old14); s = await state(p);
-  ok('古い記録（14日目の途中）：14日目の朝からやり直しになる', s.rev === 3 && s.day === 14 && s.phase === 'incident' && !s.step && s.voices.every(v => v.day < 14));
+  ok('古い記録（14日目の途中）：14日目の朝からやり直しになる', s.rev === 4 && s.day === 14 && s.phase === 'incident' && !s.step && s.voices.every(v => v.day < 14));
   ok('古い記録：13日目までの対策は、新しい設定の形で入っている', s.cfg.inf.edge && s.cfg.inf.wafSignup === 'captcha' && s.cfg.inf.wafLogin === '100' && s.cfg.inf.wafRate === '0' && !s.cfg.code.dos && !s.cfg.code.signup && s.cfg.code.search === 'param' && s.dns.some(x => x.type === 'ALIAS' && x.value === 'pixeldo-edge.eews-cdn.example') && !s.dns.some(x => x.type === 'A' && x.value === '203.0.113.24') && s.trapsFrom === 14);
   await p.click('.menu button[data-t="cont"]'); await p.waitForTimeout(100);
   ok('古い記録：つづきからで、14日目の朝の会話が始まる', (await p.locator('#win').isVisible()) && /落ちてる/.test(await p.locator('#winText').innerText()));
@@ -82,7 +82,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   await p.close();
   const oldEnd = Object.assign({}, save6, { day: 24, phase: 'end', cfg: Object.assign({}, SAFE, { autoRenew: true, code: { search: 'param', egress: 'monitor', registrar: 'lock' } }) });
   p = await open('', oldEnd); s = await state(p);
-  ok('古い記録（全部クリア）：クリアのまま、全部の対策が入った設定になる', s.phase === 'end' && s.cleared === 24 && s.cfg.inf.alarmOut && s.cfg.inf.regLock && s.cfg.code.apikey === 'server' && !s.cfg.code.egress && s.trapsFrom === 25);
+  ok('古い記録（全部クリア）：クリアのまま、全部の対策が入った設定になる', s.phase === 'end' && s.cleared === 25 && s.cfg.inf.dbNet === 'private' && s.cfg.inf.alarmOut && s.cfg.inf.regLock && s.cfg.code.apikey === 'server' && !s.cfg.code.egress && s.trapsFrom === 26);
   // トラップを数える前の記録：エンドロールは「ひとつもなし／おみごと」ではなく「記録なし」
   await p.click('.menu button[data-t="cont"]'); await p.click('#sheet [data-act="ending"]'); await p.waitForTimeout(150);
   const talk = []; for (let i = 0; i < 40 && !(await p.locator('#roll').isVisible()); i++) { talk.push(await p.locator('#winText').innerText()); await p.click('#win', { position: { x: 24, y: 16 } }); await p.waitForTimeout(50); }
@@ -129,7 +129,7 @@ const fails = []; const ok = (what, cond) => { console.log(cond ? 'ok  ' : 'NG  
   p = await open('', endSave); await p.click('.menu [data-t="days"]');
   ok('日を選ぶ：説明に「クリアの印と会話ログは残る／すべて消すにはタイトルのはじめから」とある', /クリアの印と会話ログは残ります/.test(await p.locator('#sheet').innerText()) && /タイトルの「はじめから」/.test(await p.locator('#sheet').innerText()));
   await p.click('.dayrow[data-day="0"]'); await p.waitForTimeout(150); await clear(p); s = await state(p);
-  ok('日を選ぶ → 0日目：0日目から遊び直せて、クリアの印・会話ログ・トラップは残り、ドメインや設定は最初に戻る', s.day === 0 && s.cleared === 24 && s.traps.length === 1 && s.chatLog.some(m => m.t === 'まえのきろく') && !s.domain && !s.dns.length && !s.cfg.https && !s.voices.length);
+  ok('日を選ぶ → 0日目：0日目から遊び直せて、クリアの印・会話ログ・トラップは残り、ドメインや設定は最初に戻る', s.day === 0 && s.cleared === 25 && s.traps.length === 1 && s.chatLog.some(m => m.t === 'まえのきろく') && !s.domain && !s.dns.length && !s.cfg.https && !s.voices.length);
   await p.close();
 
   // 4) タイトルの「全4章…」を5回押すと、デバッグの入・切

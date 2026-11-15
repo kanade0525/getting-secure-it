@@ -1,9 +1,9 @@
-// 12〜24日目とエンディングの通し確認：朝の会話 →「お知らせ」→「通信」→ 管理画面で設定 →「防げたか確かめる」→ クリア、を画面の操作だけで進める。
+// 12〜25日目とエンディングの通し確認：朝の会話 →「お知らせ」→「通信」→ 管理画面で設定 →「防げたか確かめる」→ クリア、を画面の操作だけで進める。
 // 確かめること：
 //   ・シロの案内どおり「お知らせ」を読んでからでないと、「通信」で再生が始まらない
 //   ・対策は、それがある場所で入れる（良えWSの入口・WAF・ファイアウォールなど／おなまえや.com／Cithub）。案内の矢印が次の場所に立つ
 //   ・まちがえた設定（ゆるすぎ・きつすぎ）ではクリアにならず、トラップとして記録される
-//   ・24日目のあとにエンディングが流れ、エンドロール（攻撃者の役名・ゲスト出演・引っかかったトラップ）が出る
+//   ・25日目のあとにエンディングが流れ、エンドロール（攻撃者の役名・ゲスト出演・引っかかったトラップ）が出る
 //   node test/smoke-infra.cjs <index.html のあるフォルダ または URL> <スクショの出力先> [開始日（既定12）]
 const { chromium } = require('playwright');
 const path = require('path');
@@ -173,75 +173,91 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
       await verify(17, true);
     },
     18: async () => {
-      await tab('shop'); await click('[data-act="goCert"]');
-      check('18日目：メモのボタンは、良えWSの「証明書」を開くだけ', (await state()).tab === 'console' && (await state()).sub === 'cert' && !(await state()).cfg.autoRenew);
-      await click('#autorenew'); await clearWin();
+      await tab('console'); check('18日目：サーバーの画面に shop-db-01 が出る', /shop-db-01/.test(await page.locator('#p-console .viewport').innerText()));
+      await click('[data-act="dbTry"]'); check('18日目：未対策は、インターネットからDBにつながる', (await notes()).some(n => /^danger/.test(n))); await clearWin();
+      check('18日目：矢印は小メニューの「VPC」', (await arrow()) === 'sub-vpc');
+      await sub('vpc'); await shot('18-vpc-a');
+      check('18日目：リソースマップに、IGW・2つのサブネット・サーバー・DBが描かれる', await page.evaluate(() => { const t = document.querySelector('.vmap svg').textContent; return ['インターネットゲートウェイ', 'public-a', 'private-a', 'shop-server-01', 'shop-db-01'].every(x => t.includes(x)); }));
+      check('18日目：横にはみ出さない', !(await wide()));
+      await set('dbNet', 'private'); await verify(18, false, 'DBを移しただけで、外へ出る道を作らなかった');
+      await tab('console'); await set('privRoute', 'igw'); await verify(18, false, 'プライベートサブネットの外への道を、インターネットゲートウェイにした');
+      await tab('console'); check('18日目：NATゲートウェイを作る前は、ルート表で選べない', (await page.locator('#inf-privRoute option[value="nat"]').count()) === 0);
+      await click('[data-act="natMake"]'); await clearWin(); await set('privRoute', 'nat'); await shot('18-vpc-b');
+      check('18日目：DBを移してNATを通したら、矢印は「ファイアウォール」', (await arrow()) === 'sub-fw');
+      await sub('fw'); await set('dbSg', 'vpc'); await verify(18, false, 'DBが受け付ける相手を「VPCの中すべて」にした');
+      await tab('console'); await set('dbSg', 'web'); await shot('18-fw');
       await verify(18, true);
     },
     19: async () => {
-      await tab('console'); check('19日目：サーバーの画面に「ソフトウェアの更新」がある', /ソフトウェアの更新/.test(await page.locator('#p-console .viewport').innerText()));
-      await sw('autoPatch'); await verify(19, false, null);   // 自動適用だけでは、いまの穴は残る
-      await tab('console'); await click('[data-act="vulnScan"]'); await clearWin(); check('19日目：調べると、既知の穴が並ぶ', (await notes()).some(n => /^danger/.test(n))); await shot('19-server');
-      await click('[data-act="patchNow"]'); await clearWin();
-      check('19日目：適用しても、OSは同じまま。更新だけが当たる', /Ubuntu 22\.04/.test(await page.locator('#p-console .viewport').innerText()) && /更新をすべて適用/.test(await page.locator('#p-console .viewport').innerText()));
+      await tab('shop'); await click('[data-act="goCert"]');
+      check('19日目：メモのボタンは、良えWSの「証明書」を開くだけ', (await state()).tab === 'console' && (await state()).sub === 'cert' && !(await state()).cfg.autoRenew);
+      await click('#autorenew'); await clearWin();
       await verify(19, true);
     },
     20: async () => {
-      await tab('console'); check('20日目：Cithubにセキュリティ警告が出ている', (await state()).svc === 'hub' && /セキュリティ警告/.test(await page.locator('#p-console .viewport').innerText()) && (await notes()).some(n => /^danger/.test(n)));
-      await shot('20-hub'); await click('[data-act="applyFix"]'); await clearWin();
+      await tab('console'); check('20日目：サーバーの画面に「ソフトウェアの更新」がある', /ソフトウェアの更新/.test(await page.locator('#p-console .viewport').innerText()));
+      await sw('autoPatch'); await verify(20, false, null);   // 自動適用だけでは、いまの穴は残る
+      await tab('console'); await click('[data-act="vulnScan"]'); await clearWin(); check('20日目：調べると、既知の穴が並ぶ', (await notes()).some(n => /^danger/.test(n))); await shot('20-server');
+      await click('[data-act="patchNow"]'); await clearWin();
+      check('20日目：適用しても、OSは同じまま。更新だけが当たる', /Ubuntu 22\.04/.test(await page.locator('#p-console .viewport').innerText()) && /更新をすべて適用/.test(await page.locator('#p-console .viewport').innerText()));
       await verify(20, true);
     },
     21: async () => {
-      await tab('shop'); await click('[data-act="skimPay"]'); check('21日目：未対策は、カード情報が外へ送られる', (await notes()).some(n => /^danger/.test(n))); await clearWin();
-      await tab('console'); check('21日目：通信設定に CSP がある', (await page.locator('#inf-csp').count()) === 1 && (await page.locator('[data-act="applyFix"]').count()) === 0);
-      await set('csp', 'strict'); await verify(21, false, 'CSPを「お店だけ許可」にして、決済を止めた');
-      await tab('console'); await set('csp', 'allow'); await shot('21-net');
+      await tab('console'); check('21日目：Cithubにセキュリティ警告が出ている', (await state()).svc === 'hub' && /セキュリティ警告/.test(await page.locator('#p-console .viewport').innerText()) && (await notes()).some(n => /^danger/.test(n)));
+      await shot('21-hub'); await click('[data-act="applyFix"]'); await clearWin();
       await verify(21, true);
     },
     22: async () => {
-      await tab('console'); check('22日目：矢印はCithub（今いる場所なので立たない）', (await state()).svc === 'hub' && (await arrow()) === '');
-      await click('[data-act="applyFix"]'); await clearWin();
-      check('22日目：マージしたあと、シロがシークレットへ案内する', /シークレット/.test((await state()).chatLog.slice(-1)[0].t));
-      check('22日目：矢印は良えWSへ', (await arrow()) === 'svc-cloud');
-      await verify(22, false, '漏れたキーを、使えるまま残した');
-      await tab('console'); await svc('cloud'); check('22日目：矢印は小メニューの「シークレット」', (await arrow()) === 'sub-secret');
-      await sub('secret'); await shot('22-secret');
-      await click('[data-act="keyRotate"]'); await clearWin();
+      await tab('shop'); await click('[data-act="skimPay"]'); check('22日目：未対策は、カード情報が外へ送られる', (await notes()).some(n => /^danger/.test(n))); await clearWin();
+      await tab('console'); check('22日目：通信設定に CSP がある', (await page.locator('#inf-csp').count()) === 1 && (await page.locator('[data-act="applyFix"]').count()) === 0);
+      await set('csp', 'strict'); await verify(22, false, 'CSPを「お店だけ許可」にして、決済を止めた');
+      await tab('console'); await set('csp', 'allow'); await shot('22-net');
       await verify(22, true);
     },
     23: async () => {
-      await tab('console'); await click('[data-act="domTry"]'); check('23日目：未対策は、なりすましの申請が通りかける', (await notes()).some(n => /^danger/.test(n))); await clearWin();
-      await sw('regLock'); await verify(23, false, null);   // 2段階認証がまだ
-      await tab('console'); await sw('reg2fa'); await sw('dnsFreeze'); await shot('23-registrar');
-      const lead = await verify(23, false, 'DNSの変更をすべて凍結した');
-      check('23日目：止めすぎは「別のものまで止めた」と言われる', /別のものまで/.test(lead || ''));
-      await tab('console'); check('23日目：凍結中は、DNSを変えられない', (await page.locator('[data-act="dnsAdd"]').count()) === 0);
-      await sw('dnsFreeze');
+      await tab('console'); check('23日目：矢印はCithub（今いる場所なので立たない）', (await state()).svc === 'hub' && (await arrow()) === '');
+      await click('[data-act="applyFix"]'); await clearWin();
+      check('23日目：マージしたあと、シロがシークレットへ案内する', /シークレット/.test((await state()).chatLog.slice(-1)[0].t));
+      check('23日目：矢印は良えWSへ', (await arrow()) === 'svc-cloud');
+      await verify(23, false, '漏れたキーを、使えるまま残した');
+      await tab('console'); await svc('cloud'); check('23日目：矢印は小メニューの「シークレット」', (await arrow()) === 'sub-secret');
+      await sub('secret'); await shot('23-secret');
+      await click('[data-act="keyRotate"]'); await clearWin();
       await verify(23, true);
     },
     24: async () => {
-      await tab('console'); check('24日目：「監視」の画面が開いている', (await state()).sub === 'mon');
-      await click('[data-act="exfilRun"]'); check('24日目：未対策は、外へ送れてしまう', (await notes()).some(n => /^danger/.test(n))); await clearWin();
-      check('24日目：矢印は小メニューの「ファイアウォール」', (await arrow()) === 'sub-fw');
-      await sub('fw'); await set('fwOut', 'none'); await shot('24-fw'); await verify(24, false, '出ていく通信をすべて止めた');
-      await tab('console'); await set('fwOut', 'allow');
-      check('24日目：宛先を絞ったら、矢印は小メニューの「監視」', (await arrow()) === 'sub-mon');
-      const lead = await verify(24, false, null);
-      check('24日目：止めただけでは足りない、と言われる', /送信は止められた/.test(lead || ''));
-      await tab('console'); await sub('mon'); await sw('alarmOut'); await shot('24-mon');
+      await tab('console'); await click('[data-act="domTry"]'); check('24日目：未対策は、なりすましの申請が通りかける', (await notes()).some(n => /^danger/.test(n))); await clearWin();
+      await sw('regLock'); await verify(24, false, null);   // 2段階認証がまだ
+      await tab('console'); await sw('reg2fa'); await sw('dnsFreeze'); await shot('24-registrar');
+      const lead = await verify(24, false, 'DNSの変更をすべて凍結した');
+      check('24日目：止めすぎは「別のものまで止めた」と言われる', /別のものまで/.test(lead || ''));
+      await tab('console'); check('24日目：凍結中は、DNSを変えられない', (await page.locator('[data-act="dnsAdd"]').count()) === 0);
+      await sw('dnsFreeze');
       await verify(24, true);
+    },
+    25: async () => {
+      await tab('console'); check('25日目：「監視」の画面が開いている', (await state()).sub === 'mon');
+      await click('[data-act="exfilRun"]'); check('25日目：未対策は、外へ送れてしまう', (await notes()).some(n => /^danger/.test(n))); await clearWin();
+      check('25日目：矢印は小メニューの「ファイアウォール」', (await arrow()) === 'sub-fw');
+      await sub('fw'); await set('fwOut', 'none'); await shot('25-fw'); await verify(25, false, '出ていく通信をすべて止めた');
+      await tab('console'); await set('fwOut', 'allow');
+      check('25日目：宛先を絞ったら、矢印は小メニューの「監視」', (await arrow()) === 'sub-mon');
+      const lead = await verify(25, false, null);
+      check('25日目：止めただけでは足りない、と言われる', /送信は止められた/.test(lead || ''));
+      await tab('console'); await sub('mon'); await sw('alarmOut'); await shot('25-mon');
+      await verify(25, true);
     }
   };
-  for (let day = FROM; day <= 24; day++) {
+  for (let day = FROM; day <= 25; day++) {
     await morning(day);
     await steps[day]();
     log(day + '日目 OK');
-    if (day < 24) await next(day);
+    if (day < 25) await next(day);
   }
 
   // エンディング：解説の「エンディングへ」→ 夜の街角で会話 → エンドロール
   for (let i = 0; i < 80; i++) { if (await page.locator('#sheet [data-act="nextDay"]').isVisible()) break; if (await winUp()) await winNext(); await page.waitForTimeout(50); }
-  check('24日目：解説のボタンが「エンディングへ」', /エンディングへ/.test(await page.locator('#sheet [data-act="nextDay"]').innerText()));
+  check('25日目：解説のボタンが「エンディングへ」', /エンディングへ/.test(await page.locator('#sheet [data-act="nextDay"]').innerText()));
   await page.click('#sheet [data-act="nextDay"]'); await page.waitForTimeout(150);
   check('エンディング：夜の街角の場面が出て、会話が始まる', (await page.locator('#ending').isVisible()) && (await winUp()) && (await page.locator('#ending .ch').count()) >= 6);
   await shot('ending');
@@ -261,7 +277,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   check('最後の場面：見える位置に来るまでは始まらない', (await page.locator('#stingCh.in').count()) === 0);
   const mu = () => page.evaluate(() => window.GSI_DEBUG.music.info());
   check('曲：エンドロールで鳴り始める（' + JSON.stringify(await mu()) + '）', (await mu()).playing && (await mu()).state === 'running' && (await page.locator('#roll .rsound').isVisible()));
-  check('クリアの記録が残る', s.phase === 'end' && s.cleared === 24);
+  check('クリアの記録が残る', s.phase === 'end' && s.cleared === 25);
   await shot('roll-top');
   await page.evaluate(() => { const r = document.getElementById('roll'); r.scrollTop = r.scrollHeight; });
   // 最後の場面（動きを減らす設定では、姿の切り替えだけ）：シロ → 黒い姿 → いなくなる
@@ -270,7 +286,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   check('曲：最後の場面が始まると止まる', !(await mu()).playing);
   await shot('roll-end');
   await page.click('#roll [data-act="rollTitle"]'); await page.waitForTimeout(100);
-  check('エンドロールのあと、タイトルへ戻る', (await page.locator('#title').isVisible()) && /全24日クリア/.test(await page.locator('#title').innerText()));
+  check('エンドロールのあと、タイトルへ戻る', (await page.locator('#title').isVisible()) && /全25日クリア/.test(await page.locator('#title').innerText()));
   // つづきから：まとめ → エンディングをもう一度
   await page.click('.menu button[data-t="cont"]'); await page.waitForTimeout(100);
   check('クリア後の「つづきから」で、まとめが出る', /守りきった/.test(await page.locator('#sheet').innerText()) && (await page.locator('#sheet [data-act="ending"]').isVisible()));
