@@ -171,9 +171,16 @@ body.fab-on:not(.talking) #p-net:not([hidden]){height:calc(var(--net-h) - 64px)}
 .row:last-child{border-bottom:0}
 .row .desc{flex:1 1 180px}
 .row .note{display:block;font-size:12px;color:var(--muted)}
-.sw{font:inherit;min-width:72px;min-height:40px;border:3px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
-.sw[aria-pressed="true"]{background:var(--safe);color:var(--surface)}
+/* トグルスイッチ（オン／オフ）。つまみが左右に動く。押せる範囲は見た目より広く（高さ44px） */
+.sw{position:relative;flex:none;width:56px;height:44px;padding:0;margin:0;border:0;background:none;cursor:pointer;font:inherit;color:inherit}
+.sw .swt{position:absolute;left:0;right:0;top:50%;height:30px;transform:translateY(-50%);border-radius:999px;background:#9aa0b8;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12)}
+.sw .swt::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.sw[aria-checked="true"] .swt{background:var(--sw-on,#2e9e5b)}
+.sw[aria-checked="true"] .swt::after{transform:translateX(26px)}
+.sw:focus-visible{outline:none}
+.sw:focus-visible .swt{outline:3px solid var(--mark);outline-offset:2px}
 .sw:disabled{opacity:.45;cursor:not-allowed}
+@media (prefers-reduced-motion:no-preference){.sw .swt,.sw .swt::after{transition:background .15s,transform .15s}}
 select{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:4px 8px;min-height:44px}
 select:disabled{opacity:.45}
 .row select{max-width:100%;min-width:0}
@@ -516,7 +523,9 @@ body.ending-on .dim{background:transparent}
 .rskip{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:2;font:inherit;font-size:13px;color:#fff;background:#000;border:2px solid #fff;padding:4px 12px;min-height:44px;cursor:pointer}
 .rskip[hidden],.rsound[hidden]{display:none}
 .rsound{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:2;font:inherit;font-size:13px;color:#fff;background:#000;border:2px solid #fff;padding:4px 12px;min-height:44px;cursor:pointer}
-.rsound[aria-pressed="false"]{color:#a6abd4;border-color:#a6abd4}
+.rsound{display:flex;align-items:center;gap:8px}
+.rsound .sw{display:inline-block;pointer-events:none;height:30px;--sw-on:#2e9e5b}
+.rsound[aria-checked="false"]{color:#a6abd4;border-color:#a6abd4}
 @media (prefers-reduced-motion:no-preference){.rend{animation:rendIn .9s steps(6,end)}}
 @keyframes rendIn{from{opacity:0}to{opacity:1}}
 /* 動きを減らす設定：流さずに、上から順にスクロールで読む */
@@ -1640,9 +1649,11 @@ const CFG=()=>{S.cfg.dnsTo=isLive()?dnsTo():'server';return S.cfg;};
 // 入口（CDN）が効いているか：作ってあって、ドメインが入口を向いている
 const edgeOn=()=>!!S.cfg.inf.edge&&dnsTo()==='edge';
 // 管理画面の部品：設定のスイッチと選択肢（c.inf の項目を、その場で切り替える）
-const infSw=(k,dis)=>`<button class="sw" id="inf-${k}" data-act="infSw" data-k="${k}" aria-pressed="${!!S.cfg.inf[k]}" ${dis?'disabled':''}>${S.cfg.inf[k]?'オン':'オフ'}</button>`;
+const swIn=on=>`<span class="swt" aria-hidden="true"></span><span class="sr">${on?'オン':'オフ'}</span>`;
+const infSw=(k,dis)=>`<button class="sw" id="inf-${k}" data-act="infSw" data-k="${k}" role="switch" aria-checked="${!!S.cfg.inf[k]}" ${dis?'disabled':''}>${swIn(S.cfg.inf[k])}</button>`;
 const infSel=(k,opts)=>`<select id="inf-${k}" data-inf="${k}">${opts.map(([v,n])=>`<option value="${v}" ${S.cfg.inf[k]===v?'selected':''}>${n}</option>`).join('')}</select>`;
-function sw(id,on,dis){return `<button class="sw" id="${id}" data-act="${id}" aria-pressed="${on}" ${dis?'disabled':''}>${on?'オン':'オフ'}</button>`;}
+const rsoundIn=on=>`<span>音楽</span><span class="sw" aria-checked="${!!on}" aria-hidden="true"><span class="swt"></span></span><span class="sr">${on?'オン':'オフ'}</span>`;
+function sw(id,on,dis){return `<button class="sw" id="${id}" data-act="${id}" role="switch" aria-checked="${!!on}" ${dis?'disabled':''}>${swIn(on)}</button>`;}
 const intro=t=>`<p class="small" style="padding:10px 12px 0;margin:0">${t}</p>`;
 
 /* --- WHOIS：公開代行なしなら、いま公開されている持ち主情報をそのまま見せる（危ない理由はシロのメモで） --- */
@@ -2311,7 +2322,7 @@ function startRoll(){
   rollStop();
   $('ending').hidden=true;document.body.classList.remove('ending-on');
   const sc=Math.max(4,Math.min(8,Math.floor(Math.min(window.innerWidth,window.innerHeight)/90)));
-  rollEl.innerHTML=`<button class="rsound" data-act="rollSound" aria-pressed="${Music.isOn()}">${Music.isOn()?'音楽：オン':'音楽：オフ'}</button><button class="rskip" data-act="rollSkip">スキップ</button><div class="rtrack" id="rollTrack">${rollHTML()}</div>
+  rollEl.innerHTML=`<button class="rsound" data-act="rollSound" role="switch" aria-checked="${Music.isOn()}">${rsoundIn(Music.isOn())}</button><button class="rskip" data-act="rollSkip">スキップ</button><div class="rtrack" id="rollTrack">${rollHTML()}</div>
     <div class="rcard" id="rollFin" hidden><p class="rfin">${ROLL_FIN}</p></div>
     <div class="rsting" id="rollSting" aria-hidden="true" hidden><span class="sting-ch" id="stingCh" data-s="${sc}" style="--o:${sc}px"></span></div>
     <div class="rend" id="rollEnd" hidden><div class="acts"><button class="btn primary" data-act="rollTitle">タイトルへ戻る</button><button class="btn" data-act="rollAgain">もう一度見る</button></div></div>`;
@@ -2376,7 +2387,7 @@ document.addEventListener('click',e=>{
   else if(a==='rollSkip'){rollNext();}
   else if(a==='rollAgain'){startRoll();}
   else if(a==='rollTitle'){rollQuit();showTitle(false);}
-  else if(a==='rollSound'){const v=!Music.isOn();Music.setOn(v);b.setAttribute('aria-pressed',v);b.textContent=v?'音楽：オン':'音楽：オフ';if(v&&(rollStage==='roll'||rollStage==='static'))Music.start();}
+  else if(a==='rollSound'){const v=!Music.isOn();Music.setOn(v);b.setAttribute('aria-checked',v);b.innerHTML=rsoundIn(v);if(v&&(rollStage==='roll'||rollStage==='static'))Music.start();}
   else if(a==='ca'){c.ca=b.dataset.ca;if(c.ca==='self')c.issued=true;
     if(c.ca!=='self'){S.svc='ca';save();render();say([{who:SHIRO,t:'CSRをダウンロードできた。無料で証明書を出してくれる認証局「'+CAS[c.ca].n+'」のサイトを、新しいタブで開いたよ'},{who:SHIRO,t:'ここにCSRを提出しよう'}]);}
     else{save();render();}}
