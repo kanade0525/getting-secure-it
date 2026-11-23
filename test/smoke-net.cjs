@@ -35,7 +35,7 @@ const seed = (day, phase, c, rec, last) => ({ rev: 4, day, phase, step: 'net', t
     const boot = async s => { await page.goto(URL); await page.evaluate(x => localStorage.setItem('gsi-demo-v2', x), JSON.stringify(s)); await page.reload(); await page.click('.menu button[data-t="cont"]'); await page.waitForTimeout(60); };
     const view = () => page.evaluate(() => {
       const vis = id => { const e = document.getElementById(id); return !!e && !e.classList.contains('off'); };
-      return { fits: document.documentElement.scrollHeight <= innerHeight, atk: vis('nAtk'), shield: vis('nShield'), warn: vis('nWarn'),
+      return { fits: document.documentElement.scrollHeight <= innerHeight, atk: vis('nAtk'), shield: vis('nShield'), def: !!document.querySelector('#nAtk.def'), warn: vis('nWarn'),
         lines: document.querySelectorAll('#netLog .ln.b').length, steps: document.querySelectorAll('#netLog .ln:not(.b)').length,
         head: (document.querySelector('#netLog .lh.atk') || {}).innerText || '', sub: (document.querySelector('#p-net>p') || {}).innerText || '',
         bad: document.querySelectorAll('#netLog .ln.b.bad').length, ok: document.querySelectorAll('#netLog .ln.b.ok').length };
@@ -50,8 +50,9 @@ const seed = (day, phase, c, rec, last) => ({ rev: 4, day, phase, step: 'net', t
     const a = await view();
     check(day, '一画面に収まる（攻撃後）', a.fits);
     check(day, '攻撃者が図に出ている', a.atk);
-    check(day, '「攻撃者の画面」の見出しと行がある', /攻撃者の画面/.test(a.head) && a.lines >= 2);
-    check(day, '未対策なので被害の行がある', a.bad >= 1 && !a.shield);
+    check(day, '攻撃者の見出し（「攻撃者の画面」か「もし攻撃者が来たら」）と行がある', /攻撃者の画面|もし攻撃者が来たら/.test(a.head) && a.lines >= 2);
+    // 一部だけ防げた行（盾）は出てよい。攻撃者が「負けた」姿になっていないこと
+    check(day, '未対策なので被害の行がある', a.bad >= 1 && !a.def);
     await page.screenshot({ path: path.join(OUT, 'net-' + String(day).padStart(2, '0') + '-a.png') });
 
     // 2) 対策してから「防げたか確かめる」→ クリア
@@ -59,14 +60,14 @@ const seed = (day, phase, c, rec, last) => ({ rev: 4, day, phase, step: 'net', t
     await boot(Object.assign(seed(day, 'fix', good, D.dnsGood, s.last), { tab: 'console' }));
     await clearWin();
     const before = await (async () => { await page.click('.tabs button[data-tab="net"]'); await page.waitForTimeout(60); return view(); })();
-    check(day, '確かめる前は、前回の結果のまま（先に答えを見せない）', before.bad >= 1 && !before.shield);
+    check(day, '確かめる前は、前回の結果のまま（先に答えを見せない）', before.bad >= 1 && !before.def);
     await page.click('#verifyBtn');
     check(day, '確かめるとクリアになる', await settle('clear'));
     await page.waitForTimeout(80);
     if (await page.locator('#modal').isVisible()) await page.evaluate(() => { document.getElementById('modal').hidden = true; });
     await clearWin();
     const b = await view();
-    check(day, '防いだ印（盾）が出て、被害の行がない', b.shield && b.bad === 0 && b.ok >= 1);
+    check(day, '防いだ印（盾）が出て、被害の行がない', b.shield && b.def && b.bad === 0 && b.ok >= 1);
     check(day, '一画面に収まる（対策後）', b.fits);
     await page.screenshot({ path: path.join(OUT, 'net-' + String(day).padStart(2, '0') + '-b.png') });
     log(`${day}日目 OK  攻撃:${a.steps}+${a.lines}行  対策後:${b.steps}+${b.lines}行  「${a.sub}」`);

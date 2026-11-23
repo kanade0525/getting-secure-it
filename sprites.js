@@ -297,7 +297,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  csrf: {name:"なりすまし注文の仕掛け人", role:"9日目", group:"attacker", rows:[
+  csrf: {name:"お届け先すり替えの仕掛け人", role:"9日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKPPPPPPKK...",
@@ -524,6 +524,7 @@ icons: {
   logo_registrar: ["..KKKK..",".KBBBBK.","KBbKKbBK","KBbbbbBK","KBBBBBBK","KBBBBBBK",".KBBBBK.","..KKKK.."],
   router: ["................","................","...n........n...","...n........n...","...n........n...","...n........n...",".KKKKKKKKKKKKKK.",".KLLLLLLLLLLLLK.",".KLLLLLLLLLLLLK.",".KnnnnnnnnnnnnK.",".KngnynnnnNNNnK.",".KnnnnnnnnnnnnK.",".KKKKKKKKKKKKKK.","..KK........KK..","................","................"],
   cloud: ["................","................","................","......KKKK......",".....KbbbbK.....","..KKKbbbbbbK....",".KbbbKbbbbbbKK..",".KbWWbbbbbbbbbK.","KbbWbbbbbbbbbbbK","KbbbbbbbbbbbbbbK","KbbbbbbbbbbbbbbK",".KBBBBBBBBBBBBK.","..KKKKKKKKKKKK..","................","................","................"],
+  edge: ["................","................",".KKKKKKKKKKKKKK.","KCCCCCCCCCCCCCCK","KCCCCCCCCCCCCCCK",".KKKKKKKKKKKKKK.","..KtK......KtK..","..KtKKKKKKKKtK..","..KtTTTTTTTTtK..","..KtKKKKKKKKtK..","..KtK......KtK..","..KtK......KtK..","..KtK......KtK..","..KtK......KtK..",".KKKKK....KKKKK.","................"],
   logo_cloud: ["...KK...","..KYYK..",".KYWYYK.","KYYYYYYK","KYYYYYYK","KOOOOOOK",".KKKKKK.","........"],
   item_robot: ["...KKKK...","..KnnnnK..","..KnKKnK..","..KnnnnK..",".KKKKKKKK.","KnLLLLLLnK","KnLrLLrLnK","KnLLLLLLnK","KnLLLLLLnK",".KnnnnnnK.","..KK..KK..","..KK..KK.."],
   item_mug: ["..........","..LLLLLL..",".LWWWWWWL.",".LWbbbbWLK",".LWbbbbWKK",".LWbbbbWKK",".LWbbbbWLK",".LWWWWWWL.",".LLLLLLLL.","..LLLLLL..","..........",".........."],

@@ -62,6 +62,25 @@ sprite("n_server", { w: 16, h: 16 }, `
   ...KK......KK...
   ................`)
 
+// 入口（CDN）：お店の手前の門。通信は門をくぐってショップへ
+sprite("n_edge", { w: 16, h: 16 }, `
+  ................
+  ................
+  .KKKKKKKKKKKKKK.
+  KCCCCCCCCCCCCCCK
+  KCCCCCCCCCCCCCCK
+  .KKKKKKKKKKKKKK.
+  ..KtK......KtK..
+  ..KtKKKKKKKKtK..
+  ..KtTTTTTTTTtK..
+  ..KtKKKKKKKKtK..
+  ..KtK......KtK..
+  ..KtK......KtK..
+  ..KtK......KtK..
+  ..KtK......KtK..
+  .KKKKK....KKKKK.
+  ................`)
+
 // パケット（ふつう）：中身が読める手紙
 sprite("pk_open", { w: 10, h: 8 }, `
   KKKKKKKKKK
