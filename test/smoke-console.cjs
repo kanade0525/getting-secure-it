@@ -15,7 +15,7 @@ const OTHERS = {
   ca: /良えWS|おなまえや|Cithub|入口/,
   hub: /良えWS|おなまえや|レッツ暗号/,
 };
-const GAME = /\d+日目|攻撃者|トラップ|シロ|だよ|しよう|してね|ゲーム/;
+const GAME = /\d+日目|攻撃者|トラップ|シロ|だよ|しよう|してね|ゲーム|『/;   // 『』は、ゲームの文（セリフやメモ）で固有名称をくくる書き方。ディスプレイの中には出ない
 
 (async () => {
   const browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });
