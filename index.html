@@ -171,6 +171,7 @@ body.talking #p-net:not([hidden]){height:calc(var(--net-h) - 164px)}
 .netlog .af{display:block;line-height:0;background:#ff7a6b;border:2px solid #c2373f}
 .netlog .ln{display:grid;grid-template-columns:44px 1fr;gap:0 8px;align-items:baseline;padding:1px 0}
 .netlog .ln.b{grid-template-columns:10px 1fr;gap:0 6px}
+.netlog .bul::before{content:"";display:inline-block;width:4px;height:4px;background:currentColor;vertical-align:middle}
 .netlog .tg{font-size:10px;line-height:1.5;text-align:center;color:#9aa0cc;border:1px solid #565c88}
 .netlog .tg.ok{color:#7ee59a;border-color:#3f8f58}
 .netlog .tg.bad{color:#ff8a94;border-color:#a84a58}
@@ -191,12 +192,12 @@ body.fab-on:not(.talking) #p-net:not([hidden]){height:calc(var(--net-h) - 64px)}
 .row .note{display:block;font-size:12px;color:var(--muted)}
 /* トグルスイッチ（オン／オフ）。つまみが左右に動く。押せる範囲は見た目より広く（高さ44px） */
 .sw{position:relative;flex:none;width:56px;height:44px;padding:0;margin:0;border:0;background:none;cursor:pointer;font:inherit;color:inherit}
-.sw .swt{position:absolute;left:0;right:0;top:50%;height:30px;transform:translateY(-50%);border-radius:999px;background:#9aa0b8;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12)}
-.sw .swt::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
-.sw[aria-checked="true"] .swt{background:var(--sw-on,#2e9e5b)}
+.sw .swt{position:absolute;left:0;right:0;top:50%;height:30px;transform:translateY(-50%);background:#9aa0b8;box-shadow:inset 0 0 0 3px var(--line)}
+.sw .swt::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;background:#fff;box-shadow:inset 0 0 0 3px var(--line)}
+.sw[aria-checked="true"] .swt{background:var(--accent)}
 .sw[aria-checked="true"] .swt::after{transform:translateX(26px)}
 .sw:focus-visible{outline:none}
-.sw:focus-visible .swt{outline:3px solid var(--mark);outline-offset:2px}
+.sw:focus-visible .swt{outline:3px dashed var(--accent);outline-offset:3px}
 .sw:disabled{opacity:.45;cursor:not-allowed}
 @media (prefers-reduced-motion:no-preference){.sw .swt,.sw .swt::after{transition:background .15s,transform .15s}}
 select{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:4px 8px;min-height:44px}
@@ -423,11 +424,11 @@ button.nav:hover{background:var(--br-strip)}
 .hj-meta p:last-child{margin-bottom:0}
 .note-hd{display:flex;align-items:center;gap:7px;margin:0 0 6px}
 .note-hd .spr{flex:none}
-.hj-meta-h{display:inline-block;font-size:11px;font-weight:bold;line-height:1.5;color:var(--on-accent);background:var(--accent);padding:1px 8px}
+.hj-meta-h{display:inline-block;font-size:11px;font-weight:bold;line-height:1.5;color:var(--ink);background:transparent;border:1px solid var(--muted);padding:0 7px}
 .hj-meta.danger{border-left-color:var(--danger)}
-.hj-meta.danger .hj-meta-h{background:var(--danger);color:#fff}
+.hj-meta.danger .hj-meta-h{background:var(--danger);border-color:var(--danger);color:#fff}
 .hj-meta.ok{border-left-color:var(--safe)}
-.hj-meta.ok .hj-meta-h{background:var(--safe);color:var(--surface)}
+.hj-meta.ok .hj-meta-h{background:var(--safe);border-color:var(--safe);color:var(--surface)}
 .hj-meta .acts{margin:8px 0 0}
 .hj-meta .dbdump{padding:0;margin:6px 0 0;font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
 .hj-meta .pc{margin:8px 0}
@@ -568,7 +569,7 @@ body.ending-on .dim{background:transparent}
 .rskip[hidden],.rsound[hidden]{display:none}
 .rsound{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:2;font:inherit;font-size:13px;color:#fff;background:#000;border:2px solid #fff;padding:4px 12px;min-height:44px;cursor:pointer}
 .rsound{display:flex;align-items:center;gap:8px}
-.rsound .sw{display:inline-block;pointer-events:none;height:30px;--sw-on:#2e9e5b}
+.rsound .sw{display:inline-block;pointer-events:none;height:30px;--line:#fff}
 .rsound[aria-checked="false"]{color:#a6abd4;border-color:#a6abd4}
 @media (prefers-reduced-motion:no-preference){.rend{animation:rendIn .9s steps(6,end)}}
 @keyframes rendIn{from{opacity:0}to{opacity:1}}
@@ -1011,7 +1012,7 @@ function reviewDemo(){
     // 命令入りのレビューは、文字としては何も出ない（開いた人のブラウザが、命令として実行するから）
     list+=rv('店長',5,r.xss?'':esc(r.text||''));
     if(r.plain)n=note('ヒント','<p>ふつうの文字として表示された。シロの言うとおり、画面を動かす記号を書いて試してみよう。</p>');
-    else if(r.xss)n=note('解説：いま起きたこと',`<p><b>このレビューを開いた人の画面で、勝手に処理が走った。</b>レビューの文字は表示されず、仕込まれた命令として動きました。</p><p>・知らないサイトへ飛ばされた<br>・ログイン状態（クッキー）が盗まれた</p>
+    else if(r.xss)n=note('解説：いま起きたこと',`<p><b>このレビューを開いた人の画面で、勝手に処理が走った。</b>レビューの文字は表示されず、仕込まれた命令として動きました。</p><p>・知らないサイトへ飛ばされた<br>・ログイン状態（Cookie）が盗まれた</p>
       <div class="acts"><button class="btn" data-act="xssPlay">開いた人の画面で何が起きるか見る</button></div>`,'danger');
     else n=note('結果','<p>記号もそのまま、ただの文字として表示されました。画面は動きません。</p>','ok');
   }
@@ -1189,7 +1190,7 @@ function signupDemo(){
     :`<div class="pg" data-focus><div class="co-head">会員登録</div><div class="pg-b">
     <div class="signup-form"><input disabled placeholder="メールアドレス"><input disabled placeholder="パスワード">${mode==='captcha'?'<div class="captcha"><i class="cbox"></i>私はロボットではありません</div>':''}</div>
     <button class="btn" disabled style="margin-top:8px">登録</button></div></div>`;
-  const how=note('再現：自動登録',`<p>この会員登録フォームに、プログラムで連続して登録を送ります。</p><div class="acts"><button class="btn primary" data-act="botRun">自動で100件登録してみる</button></div>`);
+  const how=note('再現：自動登録',`<p>この会員登録フォームに、プログラムで連続して登録を送ります。</p><div class="acts"><button class="btn primary" data-act="botRun">ボットに100件登録されたらどうなるか見る</button></div>`);
   let n='';
   if(r)n=r.made?note('結果',`<p><b>${r.made}件 登録成功</b></p><p>${r.mode==='count'?'WAFは数えただけで、1件も止めていない':'人間かどうかを確かめないので、いくらでも作れてしまった'}</p><div class="dbdump">${r.list.map(m=>'<div>'+esc(m)+'</div>').join('')}<div>…ほか約${r.made-r.list.length}件</div></div>`,'danger')
     :r.mode==='block'?note('結果','<p><b>0件</b>　WAFが、登録フォームへの送信をすべて止めた</p><p>ただし、本物のお客さんも会員登録できない</p>')
@@ -1202,7 +1203,7 @@ function loginDemo(){
     <div class="signup-form"><input disabled value="tanaka@example.com"><input disabled placeholder="パスワード"></div>
     <button class="btn" disabled style="margin-top:8px">ログイン</button>
     ${stopped?'<p class="pg-err"><b>429 Too Many Requests</b>　アクセスが多すぎます。しばらくしてからお試しください。</p>':n0?'<p class="pg-err">メールアドレスかパスワードが違います。</p>':''}</div></div>`;
-  const how=note('再現：tanaka さんのアカウントを狙う',`<p>パスワードを次々に試します。試した回数：<b>${n0.toLocaleString()}</b></p><div class="acts"><button class="btn primary" data-act="bruteTry">パスワードを100回試す</button></div>`);
+  const how=note('再現：tanaka さんのアカウントを狙う',`<p>パスワードを次々に試します。試した回数：<b>${n0.toLocaleString()}</b></p><div class="acts"><button class="btn primary" data-act="bruteTry">パスワードを100回試されたらどうなるか見る</button></div>`);
   let n='';
   if(r)n=stopped?(r.at<=10?note('結果',`<p><b>${r.at}回で止まった</b></p><p>ただし、会社やカフェのように同じ接続元を共有するお客さんたちも、何人かがログインしただけで止められる</p>`)
       :note('結果',`<p><b>${r.at}回で止まった</b></p><p>入口のWAFが、回数を超えた相手を止めた。総当たりが成り立たない</p>`,'ok'))
@@ -1216,7 +1217,7 @@ function dosDemoHTML(){
   if(r)cNotes.push(r.down?note('結果',`<p><b>サーバーダウン</b></p><p>${r.big?'大きくしたサーバーも、量で押し切られた':'来た分をそのまま受けたので、量で押し切られた'}。本物のお客さんも開けない</p>`,'danger')
     :r.strict?note('結果',`<p><b>耐えた（負荷 ${load}%）</b></p><p>ただし、ふつうに買い物するお客さんも「アクセスが多すぎます」と止められる</p>`)
     :note('結果',`<p><b>耐えた（負荷 ${load}%）</b></p><p>入口のWAFが、決めた回数を超えた相手を止めた</p>`,'ok'));
-  cNotes.push(note('再現：大量アクセス','<p>お店に、大量のアクセスを一気に送ります。</p><div class="acts"><button class="btn primary" data-act="dosFire">大量アクセスを送る</button></div>'));
+  cNotes.push(note('再現：大量アクセス','<p>お店に、大量のアクセスを一気に送ります。</p><div class="acts"><button class="btn primary" data-act="dosFire">大量アクセスが来たらどうなるか見る</button></div>'));
   return `<div class="sec" data-focus><h3>サーバーの負荷</h3><div class="pg-b"><div class="mon-h">アクセス状況</div>
     <div class="meter"><div class="meter-bar" style="width:${Math.min(100,load)}%;background:${col}"></div></div>
     <div class="small muted" style="margin:6px 0 0">負荷 ${load}%${r&&r.down?' — ダウン':''}</div></div></div>`;
@@ -1227,11 +1228,11 @@ function wafDemoHTML(){
   const fixed=S.cfg.code.defense==='layered',enc=!!S.wafEnc,r=S.wafRes;
   const PLAIN="' OR 1=1 --",ENC='%27%20OR%201%3D1%20--';
   if(r)cNotes.push(r.pass
-    ?(fixed?note('結果','<p><b>WAFを通過 → でもコードで止まった</b></p><p>お問い合わせフォームが入力を値として扱うので、届いても実行されない</p>','ok')
+    ?(fixed?note('結果','<p><b>WAFは通過したが、コードで止まった</b></p><p>お問い合わせフォームが入力を値として扱うので、届いても実行されない</p>','ok')
            :note('結果','<p><b>WAFを通過して届いた</b></p><p>WAF頼みだと、書き方を変えられると素通りする</p>','danger'))
     :note('結果',r.enc?'<p><b>WAFがブロック</b></p><p>デコードして元の形に戻してから検査したので、書き換えても見抜けた</p>':'<p><b>WAFがブロック</b></p><p>既知の型は止められた（でも書き方を変えると……？）</p>','ok'));
   cNotes.push(note('再現：お問い合わせフォームへ攻撃を送る',`<div class="dbdump"><div>「${enc?ENC:esc(PLAIN)}」${enc?'（エンコードした書き方）':'（そのまま）'}</div></div>
-    <div class="acts"><button class="btn" data-act="wafEnc" aria-pressed="${enc}">${enc?'そのままの書き方に戻す':'エンコードした書き方に変える'}</button><button class="btn primary" data-act="wafSend">送信する</button></div>`));
+    <div class="acts"><button class="btn" data-act="wafEnc" aria-pressed="${enc}">${enc?'そのままの書き方に戻す':'エンコードした書き方に変える'}</button><button class="btn primary" data-act="wafSend">この文字列を送られたらどうなるか見る</button></div>`));
   // 管理画面に出るのは、WAF の記録（通した／止めた）だけ
   return `<div class="sec" data-focus><h3>WAF の記録</h3>
     ${r?`<div class="wafrow ${r.pass?'pass':'block'}"><b>${r.pass?'通過':'ブロック'}</b><code>POST /contact　name=${r.enc?ENC:esc(PLAIN)}</code></div>`:'<p class="small muted" style="padding:8px 12px;margin:0">記録はまだありません</p>'}</div>`;
@@ -1242,7 +1243,7 @@ function scrapeDemoHTML(){
   const fixed=edgeOn()&&S.cfg.inf.bot==='challenge',r=S.scrapeRes;
   if(r)cNotes.push(r.all?note('結果',`<p><b>全1,240商品を取得できた</b></p><p>${r.ua?'ふつうのブラウザの名前を名乗っただけで、すべて通った。':''}写真・説明・値段を丸ごと集められる。そっくりの偽サイトも作れてしまう</p>`,'danger')
     :note('結果',`<p><b>${r.got}件で止まった</b></p><p>入口がボットと判定して、ブラウザかどうかの確認を出した</p>`,'ok'));
-  cNotes.push(note('再現：商品ページを集める','<p>プログラムで、商品ページを番号順に全部取りに行きます。</p><div class="acts"><button class="btn primary" data-act="scrapeRun">全商品のページを自動で集める</button></div>'));
+  cNotes.push(note('再現：商品ページを集める','<p>プログラムで、商品ページを番号順に全部取りに行きます。</p><div class="acts"><button class="btn primary" data-act="scrapeRun">全商品のページを自動で集められたらどうなるか見る</button></div>'));
   const row=(n,ok)=>`<div class="wafrow ${ok?'pass':'block'}"><b>${ok?'通過':'ブロック'}</b><code>198.51.100.77　GET /items/${n}${ok?'':'　ボットと判定'}</code></div>`;
   const gap=t=>`<p class="small muted" style="padding:2px 12px;margin:0">${t}</p>`;
   let rows;
@@ -1256,7 +1257,7 @@ function fwLogHTML(){
   const ssh=S.cfg.inf.fwSsh||'any',fixed=ssh==='admin',r=S.fwRes;
   if(r)cNotes.push(r.open?note('結果',`<p><b>1,000回試しても止まらない</b></p><p>${ssh==='port'?'番号を2222に変えても、開いている番号を順番に探せば見つかる。':''}サーバーに直接つなげるので、入口のレート制限もボットの判定もかからない。弱いパスワードなら、いつか当たる</p>`,'danger')
     :note('結果','<p><b>つながらない</b></p><p>ファイアウォールが、管理者以外からの接続を捨てる。ログインを試すことすらできない</p>','ok'));
-  cNotes.push(note('再現：サーバーに直接つなぐ',`<p>入口（CDN）を通らず、サーバーのIPアドレス ${SERVER_IP} に直接つないで、管理用ログイン（SSH）を試し続けます。</p><div class="acts"><button class="btn primary" data-act="fwTry">直接つないで、ログインを1,000回試す</button></div>`));
+  cNotes.push(note('再現：サーバーに直接つなぐ',`<p>入口（CDN）を通らず、サーバーのIPアドレス ${SERVER_IP} に直接つないで、管理用ログイン（SSH）を試し続けます。</p><div class="acts"><button class="btn primary" data-act="fwTry">サーバーに直接つながれたらどうなるか見る</button></div>`));
   // ターミナルに出るのは、本物のコマンドとその出力だけ（説明はシロのメモに書く）
   const P='<span class="tp">app@shop-server-01:~$</span> ',port=ssh==='port'?' port 2222':'',fail=(u,ip)=>`Failed password for ${u} from ${ip}${port}`;
   const tail=fixed?['Accepted publickey for app from 192.0.2.10']
@@ -1275,7 +1276,7 @@ function dbLogHTML(){
   if(r)cNotes.push(r.open?note('結果','<p><b>つながった</b></p><p>インターネットから、DBに直接ログインを試せる。パスワードが当たれば、注文と会員の情報を丸ごと読み出せる</p>','danger')
     :r.priv?note('結果','<p><b>届かない</b></p><p>DBには、もうパブリックIPアドレスがない。インターネットからは、たどり着く道がない</p>','ok')
     :note('結果','<p><b>つながらない</b></p><p>セキュリティグループが接続を捨てた。ただしDBは、まだパブリックIPアドレスを持ち、インターネットから届く場所にいる</p>'));
-  cNotes.push(note('再現：インターネットからDBにつなぐ',`<p>インターネットから、shop-db-01 のIPアドレス ${DB_PUB_IP} の5432番（データベース）に直接つないで、ログインを試します。</p><div class="acts"><button class="btn primary" data-act="dbTry">直接つないで、ログインを試す</button></div>`));
+  cNotes.push(note('再現：インターネットからDBにつなぐ',`<p>インターネットから、shop-db-01 のIPアドレス ${DB_PUB_IP} の5432番（データベース）に直接つないで、ログインを試します。</p><div class="acts"><button class="btn primary" data-act="dbTry">DBに直接つながれたらどうなるか見る</button></div>`));
   // ターミナルに出るのは、本物のコマンドとその出力だけ（説明はシロのメモに書く）
   const P='<span class="tp">app@shop-db-01:~$</span> ',ext=ip=>['LOG:  connection received: host='+ip,'FATAL:  password authentication failed for user "postgres"'];
   const tail=!open?['LOG:  connection received: host=10.0.1.15','LOG:  connection authorized: user=app database=shop']:r?ext('203.0.113.99'):ext('198.51.100.77');
@@ -1302,7 +1303,7 @@ function skimmerDemo(){
   const page=`<div class="pg" data-focus><div class="co-head">お支払い</div><div class="pg-b">
     <div class="signup-form"><input disabled placeholder="カード番号 4242 4242 4242 4242"></div>
     <button class="btn primary" data-act="skimPay" style="margin-top:8px">カード情報を入力して送信</button></div></div>`;
-  const how=note('解説：このページが読み込んでいるスクリプト',`<div class="dbdump"><div>/js/app.js（自分のサイト）</div><div>cdn.payments.example/pay.js（決済サービス）${p==='strict'?off:''}</div><div class="${p==='none'?'warnT':''}">cdn.analytics-free.example/track.js ${p==='none'?'← 差し替え済み':off}</div></div>`,p==='none'?'danger':'');
+  const how=note('解説：このページが読み込んでいるスクリプト',`<div class="dbdump"><div>/js/app.js（自分のサイト）</div><div>cdn.payments.example/pay.js（決済サービス）${p==='strict'?off:''}</div><div class="${p==='none'?'warnT':''}">cdn.analytics-free.example/track.js ${p==='none'?'（差し替え済み）':off}</div></div>`,p==='none'?'danger':'');
   let n='';
   if(r)n=r.stolen?note('結果','<p><b>外部へ送信された</b></p><p>差し替えられた track.js が、入力を攻撃者のサーバーへコピーした</p>','danger')
     :r.dead?note('結果','<p><b>支払いができない</b></p><p>決済サービスのスクリプトまで読み込めず、ボタンを押しても何も起きない</p>')
@@ -1320,7 +1321,7 @@ function apikeyDemo(){
   headers: { "Authorization":
     ${safe?'&lt;サーバー側で付与&gt;':'<span class="hot">"Bearer sk_live_9f2a7c4e1b8d6…"</span>'} }
 })</pre></div>`;
-  const how=note('解説：ページのソース',`<p>公開中のJavaScriptは、検証ツールで誰でも見られます。</p><div class="acts"><button class="btn primary" data-act="keyView">このキーをコピーして使ってみる</button></div>`);
+  const how=note('解説：ページのソース',`<p>公開中のJavaScriptは、検証ツールで誰でも見られます。</p><div class="acts"><button class="btn primary" data-act="keyView">このキーを拾われたらどうなるか見る</button></div>`);
   let n='';
   if(r)n=r.abused?note('結果','<p><b>そのまま使えた</b></p><p>見えるキーは誰でも悪用できる。不正利用で請求が急増する</p>','danger')
     :note('結果','<p><b>キーが無い</b></p><p>キーはサーバー側だけ。ブラウザからは取り出せない</p>','ok');
@@ -1358,7 +1359,7 @@ function domainDemoHTML(){
     :note('結果',`<p><b>拒否された</b></p><p>移管ロックが、なりすましの申請を止めた${i.reg2fa?'。アカウントも、2段階認証で守られている':''}</p>`,'ok'));
   cNotes.push(note('再現：なりすましの移管申請','<p>攻撃者が持ち主のふりをして、ドメインの移管を申請します。</p><div class="acts"><button class="btn primary" data-act="domTry">なりすましの移管申請が来た場合を再現する</button></div>'));
   return `<div class="sec" data-focus><h3>登録者変更・移管の申請</h3>
-    <div class="dbdump" style="padding:8px 12px"><div>受付　：本日 03:12</div><div>申請者：${S.whois?'（登録者情報：公開代行）':'山田 太郎'}</div><div>内容　：${esc(DOM())} を他社へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認の返信待ち（期限までに断らなければ、自動で承認）'}</div></div></div>`;
+    <div class="dbdump" style="padding:8px 12px"><div>受付　：本日 03:12</div><div>申請者：${S.whois?'（登録者情報：公開代行）':'小林 健太'}</div><div>内容　：${esc(DOM())} を他社へ移管</div><div class="${i.regLock?'':'warnT'}">状態　：${i.regLock?'移管ロック中のため、受け付けません':'確認の返信待ち（期限までに断らなければ、自動で承認）'}</div></div></div>`;
 }
 // 25日目：良えWS「監視」の、夜間の通信ログ
 function exfilDemoHTML(){
@@ -1367,9 +1368,9 @@ function exfilDemoHTML(){
   if(r)cNotes.push(r.leaked?note('結果','<p><b>素通りした</b></p><p>外向きが自由なので、少量ずつ会員データを持ち出せた</p>','danger')
     :r.none?note('結果','<p><b>遮断した</b></p><p>ただし、決済サービスやメールへの接続まで止まっている</p>')
     :note('結果',`<p><b>遮断した</b></p><p>許可した宛先ではないので、ファイアウォールが送信を止めた${S.cfg.inf.alarmOut?'。アラームが、異常として通知した':''}</p>`,'ok'));
-  cNotes.push(note('再現：外向きの通信','<p>深夜の記録と同じ宛先へ、サーバーからデータを送ってみます。</p><div class="acts"><button class="btn primary" data-act="exfilRun">この外向き通信を試す</button></div>'));
+  cNotes.push(note('再現：外向きの通信','<p>深夜の記録と同じ宛先へ、サーバーからデータを送ってみます。</p><div class="acts"><button class="btn primary" data-act="exfilRun">外へ持ち出されたらどうなるか見る</button></div>'));
   return `<div class="sec" data-focus><h3>夜間の通信ログ</h3><div class="pg-b"><div class="mon-h">外向きの通信（深夜帯）</div>
-    <div class="dbdump" style="padding:0"><div>02:14  → unknown-host.example  2 KB</div><div>02:41  → unknown-host.example  3 KB</div><div>03:08  → unknown-host.example  2 KB</div><div>…ほか 41 件</div></div></div></div>`;
+    <div class="dbdump" style="padding:0"><div>02:14  送信先 unknown-host.example  2 KB</div><div>02:41  送信先 unknown-host.example  3 KB</div><div>03:08  送信先 unknown-host.example  2 KB</div><div>…ほか 41 件</div></div></div></div>`;
 }
 /* --- 「対策を入れる」ときに、コードが書き換わるアニメ --- */
 const SNIP={
@@ -1615,7 +1616,7 @@ function netBurst(x,y,cls,n){
 function netAnim(el,cls,ms){if(!el)return;el.classList.remove(cls);void el.getBoundingClientRect();el.classList.add(cls);evT.push(setTimeout(()=>el.classList.remove(cls),ms));}
 function netLine(st){
   if(st.reveal)return `<div class="lh atk"><span class="af">${castSpr(attackerOf().id||'tochou',2,'')}</span><span>攻撃者の画面</span></div>`;
-  if(st.atk)return `<div class="ln b ${st.k}"><span>›</span><span>${esc(st.t)}${st.code?` <code>${esc(st.code)}</code>`:''}</span></div>`;
+  if(st.atk)return `<div class="ln b ${st.k}"><span class="bul" aria-hidden="true"></span><span>${esc(st.t)}${st.code?` <code>${esc(st.code)}</code>`:''}</span></div>`;
   const c=st.tag==='HTTP'?'bad':(st.tag==='TLS'||st.tag==='HTTPS')?'ok':'';
   return `<div class="ln"><span class="tg ${c}">${st.tag}</span><span>${esc(st.t)}${st.note?`<span class="${c}">（${st.note}）</span>`:''}</span></div>`;
 }
@@ -1756,7 +1757,7 @@ function whoisBox(){
   cNotes.push(note('解説：持ち主の情報が、誰でも見られる','<p>WHOISは、ドメインの持ち主を誰でも調べられる仕組みです。いまは、きみの氏名・住所・電話番号がそのまま出ています。</p><p>攻撃者は、この情報でドメイン会社に本人のふりをして連絡し、<b>ドメインごと乗っ取る</b>きっかけにします。</p>','danger'));
   return '<div class="box" style="margin:10px 12px 12px">'
     +'<p class="small" style="margin:0 0 6px"><b>現在のWHOIS公開情報</b></p>'
-    +'<div class="dbdump"><div>登録者　山田 太郎</div><div>住所　　東京都○○区△△ 1-2-3</div><div>電話　　090-1234-5678</div><div>メール　tencho@'+d+'</div></div>'
+    +'<div class="dbdump"><div>登録者　小林 健太</div><div>住所　　東京都○○区△△ 1-2-3</div><div>電話　　090-1234-5678</div><div>メール　tencho@'+d+'</div></div>'
     +'<p class="small muted" style="margin:8px 0 0">WHOIS情報公開代行を設定すると、登録者の欄に当社の情報が表示されます（無料）。</p>'
     +'<button class="btn primary" data-act="whoisOn" style="margin-top:8px">WHOIS情報公開代行を設定する</button></div>';
 }
@@ -1900,8 +1901,8 @@ function vpcMapSVG(){
   const X=[20,122,224],W=96,Y1=150,Y2=238,H=52;
   // 下から順に：VPC・サブネットの枠 → 線 → 機器の箱（線は箱の裏を通る）
   let g=`<rect class="vm-vpc" x="6" y="100" width="328" height="222"/><text x="14" y="115" class="vm-h">pixeldo-vpc（10.0.0.0/16）</text>`;
-  g+=`<rect class="vm-sn" x="14" y="126" width="312" height="92"/><text x="22" y="141" class="vm-h">public-a　10.0.1.0/24</text><text x="318" y="141" text-anchor="end" class="vm-s">0.0.0.0/0 → igw-0a1b</text>`;
-  g+=`<rect class="vm-sn" x="14" y="228" width="312" height="86"/><text x="22" y="306" class="vm-h">private-a　10.0.2.0/24</text><text x="318" y="306" text-anchor="end" class="vm-s">0.0.0.0/0 → ${rt==='nat'&&i.nat?'nat-07c2':rt==='igw'?'igw-0a1b':'なし'}</text>`;
+  g+=`<rect class="vm-sn" x="14" y="126" width="312" height="92"/><text x="22" y="141" class="vm-h">public-a　10.0.1.0/24</text><text x="318" y="141" text-anchor="end" class="vm-s">外への道 igw-0a1b</text>`;
+  g+=`<rect class="vm-sn" x="14" y="228" width="312" height="86"/><text x="22" y="306" class="vm-h">private-a　10.0.2.0/24</text><text x="318" y="306" text-anchor="end" class="vm-s">外への道 ${rt==='nat'&&i.nat?'nat-07c2':rt==='igw'?'igw-0a1b':'なし'}</text>`;
   g+=`<path class="vm-l" d="M85 32V42H230V52${i.edge?'M255 32V42H230':''}M230 84V126"/>`;
   g+=pub?`<path class="vm-l" d="M68 202V210H272V202"/><text x="170" y="213" text-anchor="middle" class="vm-s vm-lab">5432</text>`
     :`<path class="vm-l" d="M68 202V264H122"/><text x="74" y="259" class="vm-s">5432</text>`;
@@ -1925,9 +1926,9 @@ function cloudVpcHTML(){
   h+=`<div class="sec"><h3>NATゲートウェイ</h3>`+(i.nat?`<div class="row"><div class="desc">nat-07c2<span class="note">置き場所：public-a　パブリックIPアドレス 203.0.113.88</span></div><span class="small msg-ok">稼働中</span></div></div>`
     :`${intro('プライベートサブネットのサーバーが外へ接続するとき、代わりに送り出します。外から中へは通しません。')}<div class="row"><div class="desc">NATゲートウェイを作る<span class="note">置き場所：public-a（パブリックサブネット）</span></div><button class="btn" data-act="natMake">作成する</button></div></div>`);
   h+=`<div class="sec"><h3>ルート表</h3>
-    <div class="row"><div class="desc">public-a<span class="note">10.0.0.0/16 → local（VPCの中）　／　0.0.0.0/0 → igw-0a1b</span></div></div>
-    <div class="row"><label class="desc" for="inf-privRoute">private-a の外への道（0.0.0.0/0）<span class="note">10.0.0.0/16 → local（VPCの中）は、変えられません</span></label>${infSel('privRoute',[['none','なし（VPCの中だけ）']].concat(i.nat?[['nat','nat-07c2（NATゲートウェイ）']]:[],[['igw','igw-0a1b（インターネットゲートウェイ）']]))}</div></div>`;
-  if(pub)cNotes.push(note('解説：パブリックとプライベート','<p>ルート表に「0.0.0.0/0 → インターネットゲートウェイ」があるサブネットが、<b>パブリックサブネット</b>。パブリックIPアドレスを持つサーバーは、インターネットと直接やりとりできる。</p><p>その道がないのが<b>プライベートサブネット</b>。ここに置いたものには、インターネットから届かない。DBのように、お店のサーバーとしか話さないものは、こちらに置く。</p>'));
+    <div class="row"><div class="desc">public-a<span class="note">10.0.0.0/16 の送り先は local（VPCの中）　／　0.0.0.0/0 の送り先は igw-0a1b</span></div></div>
+    <div class="row"><label class="desc" for="inf-privRoute">private-a の外への道（0.0.0.0/0）<span class="note">10.0.0.0/16 の送り先 local（VPCの中）は、変えられません</span></label>${infSel('privRoute',[['none','なし（VPCの中だけ）']].concat(i.nat?[['nat','nat-07c2（NATゲートウェイ）']]:[],[['igw','igw-0a1b（インターネットゲートウェイ）']]))}</div></div>`;
+  if(pub)cNotes.push(note('解説：パブリックとプライベート','<p>ルート表で「0.0.0.0/0」の送り先がインターネットゲートウェイになっているサブネットが、<b>パブリックサブネット</b>。パブリックIPアドレスを持つサーバーは、インターネットと直接やりとりできる。</p><p>その道がないのが<b>プライベートサブネット</b>。ここに置いたものには、インターネットから届かない。DBのように、お店のサーバーとしか話さないものは、こちらに置く。</p>'));
   else if(rt==='igw')cNotes.push(note('解説：インターネットゲートウェイは、両方向の道','<p>インターネットゲートウェイを通れるのは、パブリックIPアドレスを持つものだけ。DBにはもうないので、この道があっても外へは出られない。</p><p>中から外へ出るだけの道は、パブリックサブネットに置く<b>NATゲートウェイ</b>で作る。NATゲートウェイが自分のパブリックIPアドレスで代わりに送り出し、返事だけを中へ戻す。</p>'));
   else if(rt!=='nat')cNotes.push(note('解説：DBから外へ出る道がない','<p>DBは、外から届かなくなった。でも private-a のルート表には外への道がないので、DBからも外へ出られない。セキュリティ更新の取得や、バックアップの送信が止まる。</p><p>中から外へ出るだけの道は、パブリックサブネットに置く<b>NATゲートウェイ</b>で作る。作ったら、private-a のルート表で、外への道をそこに向けよう。</p>'));
   return h;
@@ -2280,7 +2281,7 @@ function showEnd(){
       <li>通信編：HTTPS・暗号の更新・HSTS</li>
       <li>アプリ編：SQLi・パスワード保存・価格・XSS・セッション・CSRF・IDOR・クーポン</li>
       <li>防壁編：入口（CDN）とWAF・レート制限・多層防御・ボット対策・ファイアウォール・VPCとサブネット</li>
-      <li>運用編：証明書更新・OS/ライブラリ更新・CSP・APIキー・ドメイン・情報持ち出し</li>
+      <li>運用編：証明書更新・OSとライブラリの更新・CSP・APIキー・ドメイン・情報持ち出し</li>
     </ul>
     <p class="small">共通していたのは「悪用される前に気づいて、根本からふさぐ」こと。おつかれさま！</p>
     <div class="acts"><button class="btn primary" data-act="ending">エンディングをもう一度見る</button><button class="btn" data-act="toTitle">タイトルへ戻る</button><button class="btn" data-act="close">閉じる</button></div>`);
@@ -2594,7 +2595,7 @@ document.addEventListener('click',e=>{
   else if(a==='doSearch'){const el=$('shopQ');S.shopQ=el?el.value:'';S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(a==='postReview'){const el=$('reviewQ');S.reviewQ=el?el.value:'';S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
-      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのCithubで直そう'}]);}}}
+      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（Cookie）まで攻撃者に送られてる。これがXSS。「管理」タブのCithubで直そう'}]);}}}
   else if(a==='xssPlay'){xssNav(S.day);}
   else if(a==='xssBack'){if(S.reviewRes){S.reviewRes.redir=false;save();render();}}
   else if(a==='storeRead'){S.storeRes={read:true};save();render();pcFocus($('p-console'));
@@ -2696,7 +2697,7 @@ document.addEventListener('keydown',e=>{
   else if(e.target.id==='shopQ'){e.preventDefault();const el=$('shopQ');S.shopQ=el.value;S.shopRes=demoSearch(S.shopQ);save();render();sqliSeen();}
   else if(e.target.id==='reviewQ'){e.preventDefault();const el=$('reviewQ');S.reviewQ=el.value;S.reviewRes=demoReview(S.reviewQ);save();render();
     if(S.reviewRes.xss){const day=S.day;setTimeout(()=>{xssNav(day);},850);
-      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（クッキー）まで攻撃者に送られてる。これがXSS。「管理」タブのCithubで直そう'}]);}}}
+      if(!S.seenXss){S.seenXss=true;save();say([{who:SHIRO,t:'ほら、レビューを開いた人の画面が、勝手に別のサイトに切り替わった'},{who:SHIRO,t:'しかも、その人のログイン状態（Cookie）まで攻撃者に送られてる。これがXSS。「管理」タブのCithubで直そう'}]);}}}
 });
 
 /* ---------- 再開 ---------- */

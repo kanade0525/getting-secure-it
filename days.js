@@ -29,8 +29,8 @@ const DAYS={
   success:()=>[{who:SHIRO,t:'攻撃者には、意味のないデータしか見えなくなった！'},{who:SHIRO,t:'1日目クリアだ'}],
   check(c){
     if(!c.https) return {ok:false,pkt:'password=neko1234',why:'まだHTTPのままだ。証明書を発行して、HTTPSを有効にしよう',lines:[
-      {k:'info',t:'お客さん → POST http://pixeldo.example/login'},
-      {k:'bad',t:'email=tanaka@example.jp'},
+      {k:'info',t:'お客さんから POST http://pixeldo.example/login'},
+      {k:'bad',t:'email=tanaka@example.com'},
       {k:'bad',t:'password=neko1234'},
       {k:'bad',t:'Cookie: session=7f3a9c21e0'},
       {k:'bad',t:'パスワードとログイン状態を入手した',m:'-'}]};
@@ -38,7 +38,7 @@ const DAYS={
       {k:'info',t:'お客さんのブラウザ：「この接続ではプライバシーが保護されません」',m:'s>c'},
       {k:'bad',t:'警告を見て帰ってしまうお客さんが続出',m:'-'},
       {k:'bad',t:'攻撃者が自作の偽証明書で割り込む',m:'a>c'},
-      {k:'bad',t:'警告に慣れたお客さんが「詳細設定 → 進む」を押した',m:'c>a'},
+      {k:'bad',t:'警告に慣れたお客さんが「詳細設定」から「進む」を押した',m:'c>a'},
       {k:'bad',t:'password=neko1234'}]};
     if(c.installed==='cert') return {ok:false,blocked:true,trap:'中間証明書を入れ忘れた',guest:{id:'suzuki',t:'スマホで開けなかった すずき'},voices:[{who:'すずき',t:'スマホだと証明書のエラーが出て開けません。パソコンだと大丈夫なのに……'}],why:'中間証明書がないと、端末によっては「発行元を確認できない」とエラーになる。中間証明書つきの fullchain.crt を設置しよう',lines:[
       {k:'ok',t:'パソコンのお客さん：暗号化されていて読めない'},
@@ -46,11 +46,11 @@ const DAYS={
       {k:'bad',t:'お店を開けないお客さんがいる'}]};
     if(!c.redirect) return {ok:false,pkt:'password=sakura77',why:'https:// で来たお客さんは守れたけど、http:// で来たお客さんはまだ平文だ。http:// から https:// への転送も設定しよう',lines:[
       {k:'ok',t:'https:// のお客さん：暗号化されていて読めない'},
-      {k:'info',t:'http:// のお客さん → POST /login',p:'open'},
+      {k:'info',t:'http:// のお客さんから POST /login',p:'open'},
       {k:'bad',t:'password=sakura77',p:'open'},
       {k:'bad',t:'http:// のままでも使えるので、まだ盗める',m:'-'}]};
     return {ok:true,lines:[
-      {k:'info',t:'お客さん → https://pixeldo.example/login'},
+      {k:'info',t:'お客さんから https://pixeldo.example/login へ'},
       {k:'ok',t:'17 03 03 00 4a 9c e1 07 5b d2 ……'},
       {k:'ok',t:'http:// で来ても https:// に転送された',m:'s>c'},
       {k:'ok',t:'中身を読めない',m:'-'}]};
@@ -77,7 +77,7 @@ const DAYS={
   check(c){
     const on=c.ciph, any=on.aes||on.chacha||on.rc4||on.des3;
     if(!any) return {ok:false,trap:'暗号の方式を全部止めた',why:'暗号の方式を全部止めると、お客さんも接続できなくなる。今の標準の方式は残そう',lines:[
-      {k:'info',t:'お客さん → https://pixeldo.example',p:'open'},
+      {k:'info',t:'お客さんから https://pixeldo.example へ',p:'open'},
       {k:'bad',t:'接続エラー：使える暗号の方式がありません',m:'s>c'},
       {k:'bad',t:'お客さんがお店を開けなくなった',m:'-'}]};
     const oldV=c.tlsMin==='1.0'||c.tlsMin==='1.1', weakC=on.rc4||on.des3;
