@@ -477,8 +477,8 @@ button.nav:hover{background:var(--br-strip)}
 .toast .tt{display:block;font-size:12px;color:var(--muted)}
 .toast .tt .newtag{margin:0 8px 0 0}
 .toast .tb{font-size:14px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-input[type="text"]{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:4px 8px;min-height:44px}
-input[type="text"]:disabled{opacity:.6}
+input[type="text"],input[type="password"]{font:inherit;color:var(--ink);background:var(--bg);border:3px solid var(--line);padding:4px 8px;min-height:44px}
+input[type="text"]:disabled,input[type="password"]:disabled{opacity:.6}
 .domrow{display:flex;gap:8px;align-items:center;padding:10px 12px;flex-wrap:wrap}
 .domrow input{flex:1 1 140px;min-width:0}
 .res{padding:0 12px 12px;margin:0}
@@ -586,7 +586,7 @@ body.ending-on .dim{background:transparent}
 .sub{flex:none;font:inherit;font-size:13px;line-height:1.3;white-space:nowrap;background:var(--surface);color:var(--muted);border:2px solid var(--line);padding:4px 10px;min-height:36px;cursor:pointer}
 .sub[aria-selected="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .vmap{margin:8px 12px 12px;overflow-x:auto}
-.vmap svg{display:block;width:100%;min-width:300px;max-width:520px;height:auto;margin:0 auto}
+.vmap svg{display:block;width:100%;max-width:420px;height:auto;margin:0 auto}
 .vm-b rect{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
 .vm-vpc{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
 .vm-sn{fill:var(--soft);stroke:var(--line);stroke-width:1}
@@ -1171,7 +1171,7 @@ function idorBrowserHTML(){
       subHead('ご注文の確認','ようこそ、店長さん')+body),'あなたのパソコン')
     +notes(n))+`<div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
-function resetDemoRes(){S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;S.scrapeRes=null;S.fwRes=null;S.dbRes=null;}
+function resetDemoRes(){S.shopRes=null;S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;S.scrapeRes=null;S.fwRes=null;S.dbRes=null;}
 /* --- 第3章 防壁編（サイトタブに出るもの）。ページの中＝お店のフォーム／外＝再現ボタンと結果 ---
    対策は良えWSの設定（c.inf）。入口（CDN）の設定は、ドメインが入口を向いているときだけ効く（edgeOn） */
 function signupDemo(){
@@ -1965,7 +1965,7 @@ function certCloudHTML(){
   // 設置した証明書の中身（ファイルに書かれている情報）
   h+=`<div class="row"><div class="desc">3. 設置<span class="note">秘密鍵といっしょに設置済み</span></div><button class="link" data-act="reinstall">設置し直す</button></div>`;
   h+=`<div class="capanel"><p class="small muted" style="margin:0 0 6px">設置した証明書</p><div class="kv"><span>対象</span><b>${D}</b><span>発行者</span><b>${self?D+'（自己署名）':ca.n+'（中間CA：'+ca.ica+'）'}</b><span>有効期間</span><b>${self?'10年':ca.v}</b><span>ファイル</span><b>${c.installed==='fullchain'?'fullchain.crt':'server.crt'}</b></div></div>`;
-  if(!self)h+=`<div class="row"><div class="desc">自動更新（ACME）<span class="note">期限が切れる前に、このサーバーが認証局へ申請し直し、設置までやり直します</span></div>${sw('autorenew',!!c.autoRenew,false)}</div>`;
+  if(!self&&S.day>=19)h+=`<div class="row"><div class="desc">自動更新（ACME）<span class="note">期限が切れる前に、このサーバーが認証局へ申請し直し、設置までやり直します</span></div>${sw('autorenew',!!c.autoRenew,false)}</div>`;
   h+=`<div class="row"><div class="desc">HTTPSの有効化は「通信設定」で行います</div><button class="btn" data-act="sub" data-sub="net">通信設定を開く</button></div>`;
   return h+'</div>';
 }
@@ -2046,7 +2046,7 @@ function guideTarget(){
 // 管理タブ：「あなたのパソコン」のブラウザに、会社ごとのタブが並ぶ。次に開くとよいタブには矢印が立つ
 const SITE={
   registrar:{name:'おなまえや.com',role:'ドメイン会社',tag:'ドメインナビ',url:()=>'https://onamaeya.example/'+(S.domain?'domains/'+S.domain:'search')},
-  cloud:{name:'良えWS',role:'クラウド',tag:'マネジメントコンソール',url:()=>'https://console.eews.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
+  cloud:{name:'良えWS',role:'クラウド',tag:'マネジメントコンソール',url:()=>'https://console.eews.example/'+({cert:'certificates',net:'network',edge:'cdn/pixeldo-edge',waf:'waf/rules',fw:'firewall',vpc:'vpc/pixeldo-vpc',secret:'secrets',mon:'monitoring'}[S.sub]||'servers/shop-server-01')},
   ca:{name:'',role:'認証局',tag:'証明書の注文',url:()=>'https://letsangou.example/orders'},
   hub:{name:'Cithub',role:'コード共有',tag:'pixeldo / shop',url:()=>'https://cithub.example/pixeldo/shop'}
 };
@@ -2207,7 +2207,7 @@ function jumpDay(n,toFix){
   if(toFix){initDay(n);S.phase='fix';S.badge.console=true;save();render();}
   else startDay(n);
 }
-function showModal(html){$('sheet').innerHTML=html;$('modal').hidden=false;const b=$('sheet').querySelector('button');if(b)b.focus();}
+function showModal(html){const sh=$('sheet');sh.innerHTML=html;$('modal').hidden=false;sh.scrollTop=0;const b=sh.querySelector('button');if(b)b.focus({preventScroll:true});}   // ボタンはまとめの最後。見出しから読めるよう、先頭を見せたまま
 function hideModal(){$('modal').hidden=true;}
 function copyText(s){
   try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s);return true;}}catch(e){}
@@ -2271,7 +2271,7 @@ function showEnd(){
     <ul>
       <li>通信編：HTTPS・暗号の更新・HSTS</li>
       <li>アプリ編：SQLi・パスワード保存・価格・XSS・セッション・CSRF・IDOR・クーポン</li>
-      <li>防壁編：入口（CDN）とWAF・レート制限・多層防御・ボット対策・ファイアウォール</li>
+      <li>防壁編：入口（CDN）とWAF・レート制限・多層防御・ボット対策・ファイアウォール・VPCとサブネット</li>
       <li>運用編：証明書更新・OS/ライブラリ更新・CSP・APIキー・ドメイン・情報持ち出し</li>
     </ul>
     <p class="small">共通していたのは「悪用される前に気づいて、根本からふさぐ」こと。おつかれさま！</p>
@@ -2551,7 +2551,7 @@ document.addEventListener('click',e=>{
   else if(a==='install'){
     const r=document.querySelector('input[name="inst"]:checked');
     if(!r){S.instMsg='設置するファイルを選んでください';render();return;}
-    c.installed=r.value;c.cert=true;S.instMsg='';save();render();say([{who:SHIRO,t:'設置できた。「通信設定」でHTTPSを有効にできるよ'},{who:SHIRO,t:'証明書には期限がある。切れると来た人みんなが警告画面になるから、「自動更新」をオンにしておこう'}]);}
+    c.installed=r.value;c.cert=true;S.instMsg='';save();render();say([{who:SHIRO,t:'設置できた。「通信設定」でHTTPSを有効にできるよ'}]);}
   else if(a==='autorenew'){c.autoRenew=!c.autoRenew;save();render();if(c.autoRenew)say([{who:SHIRO,t:'自動更新オン。期限が切れる前に、申請から設置まで自動でやり直してくれる。更新忘れで事故る心配が減るよ'}]);}
   else if(a==='https'){c.https=!c.https;if(!c.https){c.redirect=false;c.hsts=false;}save();render();}
   else if(a==='redirect'){c.redirect=!c.redirect;if(!c.redirect)c.hsts=false;save();render();}
@@ -2782,7 +2782,9 @@ if(S.rev<3){
   S.rev=3;save();
 }
 // 版4（18日目にVPCを足した）より前の保存データ：日付はもうずらしてある。18日目を過ぎていれば、その対策が入った状態にする
-if(S.rev<4){if(S.phase==='end'||S.day>18)DAYS[18].solve(S.cfg);S.rev=4;save();}
+if(S.rev<4){if(S.phase==='end'||S.day>18){DAYS[18].solve(S.cfg);S.cleared=Math.max(S.cleared||0,18);}S.rev=4;save();}
+// 自動更新は19日目から出す。前の版で1日目からオンにできたセーブは、19日目の朝まではオフに戻す（19日目の前提が崩れないように）
+if(S.cfg&&(S.day<19||(S.day===19&&S.phase==='incident'))&&S.phase!=='end')S.cfg.autoRenew=false;
 // 記録が壊れていて描けないときは、その記録をよけて（gsi-demo-v2-broken）、まっさらな状態で始める。
 // ここで止まると、タイトルが出ず、前の記録の画面が残ったままになる
 try{render();}catch(e){

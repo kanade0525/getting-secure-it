@@ -17,7 +17,7 @@ const inf=c=>c.inf||{};
 const D={
 /* ===== 12日目 bot大量登録：入口（CDN）を作って、WAFで人間確認 ===== */
 12:{
-  title:'12日目　あふれる偽アカウント',attacker:'scanbot',svc:'cloud',sub:'edge',dnsEdge:true,
+  title:'12日目　あふれる偽アカウント',attacker:'fakeacct',svc:'cloud',sub:'edge',dnsEdge:true,
   start:[{who:SHIRO,t:'昨日気づいた、急に増えた1000個近いアカウント。あれ、人間じゃなさそうだ'},{who:YOU,t:'人間じゃない、か。……そういえばシロって、何者なの？'},{who:SHIRO,t:'ホワイトハッカーだよ。最初に言ったでしょ。ほら、お知らせが来るよ'}],
   voices:[
     {who:'監視',sys:true,t:'会員登録：直近1時間で982件（通常は1日数件）。メールアドレスはどれも規則的な自動生成です。'},
@@ -163,7 +163,7 @@ const D={
 },
 /* ===== 16日目 スクレイピング：WAFのボット対策 ===== */
 16:{
-  title:'16日目　根こそぎコピー',attacker:'scanbot',svc:'cloud',sub:'waf',
+  title:'16日目　根こそぎコピー',attacker:'scraper',svc:'cloud',sub:'waf',
   start:[{who:SHIRO,t:'お店は落ちてない。でも入口の記録に、妙に行儀のいい相手がいるんだ'}],
   voices:[
     {who:'たなか',t:'ピクセル堂そっくりのサイトを見つけました。写真も説明も同じで、値段だけ安いんです。本物ですか？'},
@@ -199,7 +199,7 @@ const D={
 },
 /* ===== 17日目 サーバーへ直接来る総当たり：ファイアウォールで受け付ける相手を絞る ===== */
 17:{
-  title:'17日目　裏口をたたく音',attacker:'keypick',svc:'cloud',sub:'server',
+  title:'17日目　裏口をたたく音',attacker:'knocker',svc:'cloud',sub:'server',
   start:[{who:SHIRO,t:'入口は固めたはずなのに、サーバーのログイン記録が失敗だらけなんだ'}],
   voices:[
     {who:'監視',sys:true,t:'サーバーの管理用ログイン（SSH）：世界中から、1時間に4,800回の失敗。root、admin、ubuntu などの名前を順番に試しています。'},

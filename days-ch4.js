@@ -40,7 +40,7 @@ const D={
 },
 /* ===== 20日目 サーバーOS・ミドルウェアの未更新：溜まっていたセキュリティ更新を当てる（OSはそのまま） ===== */
 20:{
-  title:'20日目　土台の穴',attacker:'keypick',svc:'cloud',sub:'server',
+  title:'20日目　土台の穴',attacker:'scanbot',svc:'cloud',sub:'server',
   start:[{who:SHIRO,t:'次はサーバーそのもの。OSや土台のソフトの更新を溜めていると、公開済みの穴から入られる'}],
   voices:[
     {who:'監視',sys:true,t:'脆弱性スキャン：未適用のセキュリティ更新 12件（OpenSSL、OpenSSH、カーネルなど）。うち3件は「緊急」です。'},

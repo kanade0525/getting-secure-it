@@ -189,7 +189,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  sslstrip: {name:"SSLストリップ屋", role:"3日目", group:"attacker", rows:[
+  sslstrip: {name:"SSLストリップ屋", role:"3・19日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -333,7 +333,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  coupon: {name:"クーポン連打部隊", role:"11・12日目", group:"attacker", rows:[
+  coupon: {name:"クーポン連打部隊", role:"11日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -405,7 +405,7 @@ cast: {
     "....KPK..KPK....",
     "....KK....KK...."
   ]},
-  domain: {name:"ドメイン泥棒", role:"17日目", group:"attacker", rows:[
+  domain: {name:"ドメイン泥棒", role:"24日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -423,7 +423,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  scanbot: {name:"古い部品狙いの自動巡回ボット", role:"18日目", group:"attacker", rows:[
+  scanbot: {name:"古い部品狙いの自動巡回ボット", role:"20・21日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -459,7 +459,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  skimmer: {name:"カード情報スキマー", role:"19日目", group:"attacker", rows:[
+  skimmer: {name:"カード情報スキマー", role:"22日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKPPPPPPKK...",
@@ -477,7 +477,7 @@ cast: {
     "....KPK..KPK....",
     "....KK....KK...."
   ]},
-  keypick: {name:"鍵拾い屋", role:"20日目", group:"attacker", rows:[
+  keypick: {name:"鍵拾い屋", role:"23日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -495,7 +495,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  midnight: {name:"深夜のデータ持ち出し屋", role:"21日目", group:"attacker", rows:[
+  midnight: {name:"深夜のデータ持ち出し屋", role:"25日目", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKPPPPPPKK...",
@@ -544,3 +544,12 @@ icons: {
   warn: [".KKKKK.","KRRWRRK","KRRWRRK","KRRWRRK","KRRRRRK","KRRWRRK",".KKKKK."]
 }
 };
+// 姿は同じで、役名と出る日だけが違う攻撃者（攻撃者はみな同じ影の姿）
+(() => {
+  const C = window.GSI_SPRITES.cast, rows = C.scanbot.rows;
+  Object.assign(C, {
+    fakeacct: {name:"偽アカウント量産ボット", role:"12日目", group:"attacker", rows},
+    scraper: {name:"商品ページの丸写し屋", role:"16日目", group:"attacker", rows},
+    knocker: {name:"裏口ノック屋", role:"17日目", group:"attacker", rows},
+  });
+})();
