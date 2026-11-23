@@ -136,6 +136,9 @@ body.talking #p-net:not([hidden]){height:calc(var(--net-h) - 164px)}
 .nal{font-size:11px;fill:var(--danger)}
 .natk.def .nal{fill:var(--muted)}
 .nd{fill:var(--danger)}
+.nfx.bad{fill:var(--danger)}
+.nfx.ok{fill:var(--safe)}
+.nt,.nshi,.pkb{transform-box:fill-box;transform-origin:50% 50%}
 .natk.def .nd{fill:var(--muted)}
 .netsvg .off{display:none}
 @keyframes nflow{0%{opacity:1}28%{opacity:.3}100%{opacity:.3}}
@@ -144,9 +147,23 @@ body.talking #p-net:not([hidden]){height:calc(var(--net-h) - 164px)}
 @media (prefers-reduced-motion:no-preference){
   .natk.flow:not(.def) .nd{animation:nflow 1.12s steps(1,end) infinite;animation-delay:calc(var(--i) * -0.14s)}
   .natk.in .nd{animation:nin .01s linear both;animation-delay:calc(var(--i) * 45ms)}
-  .natk.in .nt.atk,.natk.in .nal{animation:nblink .3s steps(1,end) 1}
-  .nsh.hit{animation:nblink .3s steps(1,end) 1}
+  .natk.in .nt.atk{animation:atkIn .56s linear both}
+  .natk.in .nal{animation:nin .2s steps(2,end) .45s both}
+  #nAtk.atk-lose .nt.atk{animation:atkLose .6s steps(1,end)}
+  #nAtk.atk-win .nt.atk{animation:atkWin .5s steps(1,end)}
+  .nsh.hit .nshi{animation:nPop .32s steps(4,end)}
+  .nt.shake{animation:nShake .3s steps(1,end)}
+  .pkb{animation:pkBob .24s linear infinite}
+  .nfx{animation:nfx .5s steps(5,end) forwards}
 }
+/* 攻撃の再現：攻撃者は下から歩いて現れ、防がれると身をすくめ、成功すると跳ねる。パケットは跳ねながら進み、当たると砕ける */
+@keyframes atkIn{0%{transform:translateY(34px);opacity:0}12%{opacity:1}25%{transform:translateY(22px)}37%{transform:translateY(25px)}50%{transform:translateY(12px)}62%{transform:translateY(15px)}75%{transform:translateY(3px)}87%{transform:translateY(5px)}100%{transform:none}}
+@keyframes atkLose{0%{transform:translateX(-3px)}15%{transform:translateX(3px)}30%{transform:translateX(-3px)}45%{transform:translate(2px,3px)}60%{transform:translateY(4px)}100%{transform:none}}
+@keyframes atkWin{0%,40%,80%{transform:none}20%,60%{transform:translateY(-7px)}}
+@keyframes nPop{from{transform:scale(1.45)}to{transform:none}}
+@keyframes nShake{0%{transform:translateX(-3px)}25%{transform:translateX(3px)}50%{transform:translateX(-2px)}75%{transform:translateX(2px)}100%{transform:none}}
+@keyframes pkBob{0%,49%{transform:none}50%,100%{transform:translateY(-2px)}}
+@keyframes nfx{from{transform:none;opacity:1}to{transform:translate(var(--dx),var(--dy));opacity:0}}
 .netlog{flex:1 1 0;min-height:76px;overflow-y:auto;margin:10px 0 0;padding:6px 10px 8px;background:var(--win-bg);color:#c9cff5;border:3px solid var(--line);font-size:13px;line-height:1.5;overflow-wrap:anywhere}
 .netlog .lh{display:flex;align-items:center;gap:8px;font-size:11px;color:#9aa0cc;margin:0 0 3px}
 .netlog .lh.atk{color:#ff8a94;margin:7px -10px 4px;padding:7px 10px 0;border-top:2px dashed #4a2a3c}
@@ -1532,10 +1549,10 @@ function netPath(pk,tapX,carrier){
   if(pk.a==='attacker'||pk.b==='attacker')ms=Math.max(ms,pk.stop?560:760);   // 攻撃者まわりは見せ場なのでゆっくり
   return {pts,len,ms,lag:Math.round(lag)};
 }
-const netPlace=(rows,cx,cy,px)=>sprG(rows,+(cx-rows[0].length*px/2).toFixed(1),+(cy-rows.length*px/2).toFixed(1),px);
+const netPlace=(rows,cx,cy,px,id)=>sprG(rows,+(cx-rows[0].length*px/2).toFixed(1),+(cy-rows.length*px/2).toFixed(1),px,id);
 function netSVG(v){
   const X=NG.X,Y=NG.WY,tapX=netTap(v.kind),off=on=>on?'':' off';
-  const tile=(key,cx,cy,rows,cls)=>`<g class="nt${cls||''}" data-n="${key}"><rect class="ntb" x="${cx-24}" y="${cy-24}" width="48" height="48"/>${netPlace(rows,cx,cy,2.5)}</g>`;
+  const tile=(key,cx,cy,rows,cls,sid)=>`<g class="nt${cls||''}" data-n="${key}"><rect class="ntb" x="${cx-24}" y="${cy-24}" width="48" height="48"/>${netPlace(rows,cx,cy,2.5,sid)}</g>`;
   const lab=(cx,t)=>`<text x="${cx}" y="27" text-anchor="middle" class="nl">${t}</text>`;
   const px=(X.net+X.server)/2;
   let h=`<svg id="netSvg" class="netsvg" viewBox="${v.idle?'0 6 360 88':'0 0 360 186'}" role="img" aria-label="通信図：お客さん、ルーター、インターネット、ショップ${v.atk?'。'+NET_SUB[v.kind]:''}">`;
@@ -1555,11 +1572,18 @@ function netSVG(v){
   if(!v.idle){
     const left=v.kind==='server',wl=left||v.kind==='wifi';
     h+=`<g id="nWarn" class="${off(v.warn).trim()}">${netPlace(IC.warn,X.client+22,Y+22,2)}</g>`;
-    h+=`<g id="nAtk" class="${acls}">${tile('attacker',tapX,NG.AY,attackerOf().rows,' atk')}<text x="${left?tapX-30:tapX+30}" y="${NG.AY+4}" text-anchor="${left?'end':'start'}" class="nal">攻撃者</text></g>`;
-    h+=`<g id="nShield" class="nsh${off(v.def)}">${netPlace(IC.shield,tapX,NG.SY,2)}<text x="${wl?tapX-13:tapX+13}" y="${NG.SY+4}" text-anchor="${wl?'end':'start'}" class="nok">防いだ</text></g>`;
+    h+=`<g id="nAtk" class="${acls}">${tile('attacker',tapX,NG.AY,attackerOf().rows,' atk','nAtkSpr')}<text x="${left?tapX-30:tapX+30}" y="${NG.AY+4}" text-anchor="${left?'end':'start'}" class="nal">攻撃者</text></g>`;
+    h+=`<g id="nShield" class="nsh${off(v.def)}"><g class="nshi">${netPlace(IC.shield,tapX,NG.SY,2)}</g><text x="${wl?tapX-13:tapX+13}" y="${NG.SY+4}" text-anchor="${wl?'end':'start'}" class="nok">防いだ</text></g>`;
   }
-  return h+'</svg>';
+  return h+'<g id="nFx"></g></svg>';
 }
+// 当たった所に、パケットのかけらを飛び散らせる（bad＝攻撃が砕ける／ok＝正しい通信が届く）
+function netBurst(x,y,cls,n){
+  const fx=$('nFx');if(RM||!fx)return;
+  let h='';for(let i=0;i<n;i++){const a=i/n*Math.PI*2+.4,r=24+(i*7%5)*3;h+=`<rect class="nfx ${cls}" x="${x-2}" y="${y-2}" width="4" height="4" style="--dx:${(Math.cos(a)*r).toFixed(1)}px;--dy:${(Math.sin(a)*r).toFixed(1)}px"/>`;}
+  fx.insertAdjacentHTML('beforeend','<g>'+h+'</g>');const g=fx.lastElementChild;evT.push(setTimeout(()=>g.remove(),560));
+}
+function netAnim(el,cls,ms){if(!el)return;el.classList.remove(cls);void el.getBoundingClientRect();el.classList.add(cls);evT.push(setTimeout(()=>el.classList.remove(cls),ms));}
 function netLine(st){
   if(st.reveal)return `<div class="lh atk"><span class="af">${castSpr(attackerOf().id||'tochou',2,'')}</span><span>攻撃者の画面</span></div>`;
   if(st.atk)return `<div class="ln b ${st.k}"><span>›</span><span>${esc(st.t)}${st.code?` <code>${esc(st.code)}</code>`:''}</span></div>`;
@@ -1604,7 +1628,7 @@ function netTick(){
   if(evJ===0)netStepStart(st);
   const ms=hop?netHop(hop,netTap(kind)):0;
   evTimer=setTimeout(()=>{
-    if(hop)netHopEnd(hop);
+    if(hop)netHopEnd(hop,netTap(kind));
     if(evJ<st.hops.length-1){evJ++;netTick();return;}
     netStepEnd(st,kind);evI++;evJ=0;
     evTimer=setTimeout(netTick,st.reveal?620:st.atk?640:120);
@@ -1624,41 +1648,51 @@ function netStepEnd(st,kind){
   const sn=evSn,q=id=>$(id)||{classList:{add(){},remove(){}}};
   if(st.tube){q('nTube').classList.remove('off');q('nProto').classList.remove('off');}
   if(!st.atk)return;
-  if(st.k==='ok'&&(sn.ok||sn.blocked)){q('nShield').classList.remove('off');document.querySelectorAll('#netSvg .natk').forEach(g=>g.classList.add('def'));}
+  if(st.k==='ok'&&(sn.ok||sn.blocked)){q('nShield').classList.remove('off');document.querySelectorAll('#netSvg .natk').forEach(g=>g.classList.add('def'));netAnim($('nAtk'),'atk-lose',620);}
+  if(st.k==='bad'&&!sn.ok&&!sn.blocked)netAnim($('nAtk'),'atk-win',520);
   if(st.k==='bad'){if(sn.blocked)q('nWarn').classList.remove('off');else if(!sn.ok&&kind==='wifi'&&sn.https){q('nTube').classList.add('broken');q('nProto').classList.add('broken');}}
 }
 function netHop(hop,tapX){
   const layer=$('nPkt');if(!layer)return 0;
   const gs=[];let html='',total=0;
+  const runs=[];   // 攻撃のパケットは、うすい残像を2つ後ろに引く（全体の時間は本体で決まる）
   hop.forEach((pk,i)=>{
     const g=netPath(pk,tapX,gs[0]);gs.push(g);if(!g)return;
     const [x0,y0]=g.pts[0],path='M 0 0'+g.pts.slice(1).map(p=>` L ${(p[0]-x0).toFixed(1)} ${(p[1]-y0).toFixed(1)}`).join('');
-    html+=`<g id="nP${i}"${g.lag?' opacity="0"':''}>${netPlace(IC['pk_'+pk.look],x0,y0,2)}<animateMotion id="nM${i}" path="${path}" dur="${(g.ms/1000).toFixed(3)}s" begin="indefinite" fill="freeze" calcMode="linear"/></g>`;
+    const ghosts=pk.look==='bad'&&!RM?[[.4,55],[.18,110]]:[];
+    [[1,0],...ghosts].reverse().forEach(([op,d])=>{const id=i+'_'+d;runs.push({id,op,lag:g.lag+d});
+      html+=`<g id="nP${id}" opacity="0"><g class="pkb">${netPlace(IC['pk_'+pk.look],x0,y0,2)}</g><animateMotion id="nM${id}" path="${path}" dur="${(g.ms/1000).toFixed(3)}s" begin="indefinite" fill="freeze" calcMode="linear"/></g>`;});
     total=Math.max(total,g.lag+g.ms);
   });
   layer.innerHTML=html;
-  gs.forEach((g,i)=>{
-    if(!g)return;
-    const go=()=>{const el=$('nP'+i),m=$('nM'+i);if(!el||!m)return;el.removeAttribute('opacity');try{m.beginElement();}catch(e){}};
-    if(g.lag)evT.push(setTimeout(go,g.lag));else requestAnimationFrame(go);   // 挿入と同じフレームで begin すると動かないことがある
+  runs.forEach(r=>{
+    const go=()=>{const el=$('nP'+r.id),m=$('nM'+r.id);if(!el||!m)return;if(r.op<1)el.setAttribute('opacity',r.op);else el.removeAttribute('opacity');try{m.beginElement();}catch(e){}};
+    if(r.lag)evT.push(setTimeout(go,r.lag));else requestAnimationFrame(go);   // 挿入と同じフレームで begin すると動かないことがある
   });
   netHi(hop,true);
   return total||480;
 }
 function netHi(hop,on){hop.forEach(pk=>[pk.a,pk.b].forEach(k=>{const t=document.querySelector(`#netSvg [data-n="${k}"]`);if(t)t.classList.toggle('on',on);}));}
-function netHopEnd(hop){
+function netHopEnd(hop,tapX){
   netHi(hop,false);
   const layer=$('nPkt');if(layer)layer.innerHTML='';
+  const lost=evSn&&!evSn.ok&&!evSn.blocked;
   hop.forEach(pk=>{   // 届いた合図：止められたら盾が点滅、届いたら相手の枠が一瞬だけ色づく（赤＝被害／緑＝防いだ）
+    const el=document.querySelector(`#netSvg [data-n="${pk.b}"]`);
+    // 攻撃が通る日は、攻撃者の送ったものが標的に当たった瞬間に、標的が揺れてかけらが散る
+    if(lost&&pk.a==='attacker'&&!pk.stop&&el){netAnim(el,'shake',320);netBurst(NG.X[pk.b],NG.WY,'bad',12);}
     if(pk.look!=='bad'&&pk.look!=='ok')return;
-    if(pk.stop){const sh=$('nShield');if(sh){sh.classList.remove('hit');void sh.getBoundingClientRect();sh.classList.add('hit');}return;}
-    const el=document.querySelector(`#netSvg [data-n="${pk.b}"]`),c=pk.look==='bad'?'hb':'hg';
+    if(pk.stop){const sh=$('nShield');if(sh){sh.classList.remove('hit');void sh.getBoundingClientRect();sh.classList.add('hit');}netBurst(tapX,pk.a==='attacker'?NG.SY+14:NG.SY-14,'bad',10);return;}
+    const c=pk.look==='bad'?'hb':'hg';
     if(el){el.classList.add(c);evT.push(setTimeout(()=>el.classList.remove(c),340));}
+    if(pk.b==='attacker'){if(c==='hb')netAnim($('nAtk'),'atk-win',520);}   // 盗んだものを受け取ると、攻撃者が跳ねる
+    else netBurst(NG.X[pk.b],NG.WY,pk.look,c==='hb'?12:8);
   });
 }
 Object.keys(CAST).forEach(k=>{CAST[k].id=k;});
 let tick=0;
 if(!RM)setInterval(()=>{tick^=1;
+  const as=$('nAtkSpr');if(as&&as.getClientRects().length){const def=!!as.closest('.def');as.innerHTML=rects(frameRows(attackerOf().rows,def?0:tick));}   // 通信図の攻撃者も、待機中は2コマで揺れる（防がれたら止まる）
   if(!$('title').hidden||!$('ending').hidden||!$('roll').hidden)document.querySelectorAll('.ch[data-cast],.rsp[data-cast],.sting-ch[data-cast]').forEach(el=>{el.innerHTML=spr(frameRows(CAST[el.dataset.cast].rows,tick),+el.dataset.s,'');});},520);
 
 let caBusy=false,relBusy=false,clip='';
