@@ -265,7 +265,7 @@ const check = (what, ok) => { if (ok) return; fails.push(what); log('NG', what);
   check('エンディング：会話が流れる（' + talk.length + 'こと）', talk.length >= 14 && /今日の営業を終えた/.test(talk[0]) && !talk.some(t => /店じまい/.test(t)) && talk.some(t => /まちがえた設定も、\d+回あった/.test(t)));
   check('エンディング：「セキュリティ対策に終わりはない」と伝える', talk.some(t => /セキュリティ対策に終わりはない/.test(t)));
   check('エンディング：シロが正体（古い銀の鈴に宿る守り神）を明かし、薄れて、消える', talk.some(t => /古い銀の鈴/.test(t)) && talk.some(t => /きみが、このお店の守り神だ/.test(t)) && !talk.some(t => /「穴」から生まれた/.test(t)) && shiro.some(c => /flick/.test(c)) && /gone/.test(shiro[shiro.length - 1]) && !/flick|gone/.test(shiro[0]) && /いつもどおりに店を開けた/.test(talk[talk.length - 1]));
-  check('エンディング：もとは祟るほうで、迎えられて守るほうになった（雇われて守る側に回るのと同じ）と明かす', talk.some(t => /昔のぼくは、祟るほうだった/.test(t)) && talk.some(t => /雇われて守る側に回る/.test(t)) && talk.some(t => /鈴は、ときどき磨いてね/.test(t)));
+  check('エンディング：もとは祟る「黒鈴」で、店長に磨かれ名前をもらって守るほうになった（黒い帽子から白い帽子へ）と明かし、鈴を磨く約束をする', talk.some(t => /黒鈴/.test(t)) && talk.some(t => /うちのお守りだ、シロ/.test(t)) && talk.some(t => /白い帽子/.test(t)) && talk.some(t => /鈴は、ときどき磨いて/.test(t)));
   check('エンドロール：会話のあとに始まる', (await page.locator('#roll').isVisible()) && !(await page.locator('#ending').isVisible()));
   const roll = await page.locator('#roll').innerText();
   const s = await state();

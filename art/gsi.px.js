@@ -54,71 +54,76 @@ sprite("logo_hub", { w: 8, h: 8 }, `
 
 
 // ---------- 商品アイコン（12×12） ----------
-sprite("item_robot", { w: 12, h: 12 }, `
+// 柱時計：木の箱に文字盤と振り子
+sprite("item_clock", { w: 12, h: 12 }, `
   ...KKKK...
-  ..KnnnnK..
-  ..KnKKnK..
-  ..KnnnnK..
-  .KKKKKKKK.
-  KnLLLLLLnK
-  KnLrLLrLnK
-  KnLLLLLLnK
-  KnLLLLLLnK
-  .KnnnnnnK.
-  ..KK..KK..
-  ..KK..KK..`)
-sprite("item_mug", { w: 12, h: 12 }, `
+  ..KTTTTK..
+  .KTWWWWTK.
+  .KTWKWWTK.
+  .KTWKKWTK.
+  .KTWWWWTK.
+  .KTTTTTTK.
+  .KTKyyKTK.
+  .KTKyyKTK.
+  .KTKKYKTK.
+  .KTTTTTTK.
+  .KKKKKKKK.`)
+// 古伊万里の小皿：白地に藍の絵付け
+sprite("item_plate", { w: 12, h: 12 }, `
   ..........
-  ..LLLLLL..
-  .LWWWWWWL.
-  .LWbbbbWLK
-  .LWbbbbWKK
-  .LWbbbbWKK
-  .LWbbbbWLK
-  .LWWWWWWL.
-  .LLLLLLLL.
-  ..LLLLLL..
+  ...KKKK...
+  ..KWWWWK..
+  .KWbWWbWK.
+  .KWWBBWWK.
+  .KWbBBbWK.
+  .KWWBBWWK.
+  .KWbWWbWK.
+  ..KWWWWK..
+  ...KKKK...
   ..........
   ..........`)
-sprite("item_sign", { w: 12, h: 12 }, `
-  KKKKKKKKKK
-  KRRRRRRRRK
-  KRWWWWWWRK
-  KRWRRRRWRK
-  KRWRYYRWRK
-  KRWRYYRWRK
-  KRWRRRRWRK
-  KRWWWWWWRK
-  KRRRRRRRRK
-  KKKKKKKKKK
-  ...KKKK...
-  ...KKKK...`)
-sprite("item_bottle", { w: 12, h: 12 }, `
+// 真鍮のランプ：ガラスのほやに小さな火
+sprite("item_lamp", { w: 12, h: 12 }, `
   ....KK....
-  ....Kt K..
+  ...KWWK...
+  ...KWyK...
+  ...KyOK...
+  ..KKWWKK..
+  ..KYYYYK..
+  .KYyYYYYK.
+  .KYYYYYOK.
+  ..KYYYYK..
+  ...KYYK...
+  ..KYYYYK..
+  ..KKKKKK..`)
+// ガラスのインク壺：コルクの栓と、底にたまった藍のインク
+sprite("item_ink", { w: 12, h: 12 }, `
+  ..........
+  ....KK....
+  ...KTTK...
   ...KttK...
-  ...KbbK...
-  ..KbbbbK..
-  ..KbWbbK..
-  ..KbbbbK..
-  ..KbbbbK..
-  ..KbbbbK..
-  ..KbbbbK..
-  ..KKKKKK..
+  ..KKLLKK..
+  .KLWLLLLK.
+  .KLBBBBLK.
+  .KLBBBBLK.
+  .KLBbBBLK.
+  .KLLLLLLK.
+  .KKKKKKKK.
   ..........`)
-sprite("item_cat", { w: 12, h: 12 }, `
-  .K.....K..
-  KyK...KyK.
-  KyyKKKyyK.
-  KyWWWWWyK.
-  KyWKWKWyK.
-  KyWWWWWyK.
-  KyWWRWWyK.
-  .KyWWWyK..
-  ..KyyyK...
-  ..KyRyK...
-  ..KyyyK...
-  ..KKKKK...`)
+// 万年筆：黒い軸に金の帯、銀のペン先
+sprite("item_pen", { w: 12, h: 12 }, `
+  ........KK
+  .......KNK
+  ......KNNK
+  .....KNNK.
+  ....KNNK..
+  ...KYYK...
+  ..KNNK....
+  ..KNK.....
+  .KLK......
+  .KWK......
+  KK........
+  ..........`)
 // 古い銀の鈴（非売品）：シロが宿っている。結び目はシロの翼の色、舌（ぜつ）はシロの芯の色
 sprite("item_bell", { w: 10, h: 12 }, `
   ...CKKC...

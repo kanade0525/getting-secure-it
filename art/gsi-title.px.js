@@ -79,18 +79,18 @@ function tex(w, h, fill) {
 const WALL_H = 34
 // 正面（左の壁）48×34：ショーウィンドウ・ドア・ショーウィンドウ。上のほうは、ひさしに隠れる
 const FRONT = tex(48, WALL_H, (i, r) => (r < 2 ? "t" : r < 27 ? "T" : r === 27 ? "t" : r < 32 ? "T" : r === 32 ? "H" : "K"))
-  // 左のショーウィンドウ（ブリキのロボットとマグカップ）
+  // 左のショーウィンドウ（柱時計と真鍮のランプ）
   .rect(2, 12, 16, 15, "H").rect(3, 13, 14, 12, "y").rect(3, 25, 14, 1, "t")
-  .grid(4, 18, [".nn..", "nKKn.", "nrrn.", ".nn..", "nnnn.", "n..n.", "n..n."])
-  .grid(11, 20, ["LLLL.", "LbbLL", "LbbL.", "LbbLL", "LLLL."])
+  .grid(4, 16, ["TTTT", "TWWT", "TWKT", "TWWT", "TTTT", "TYYT", "TTYT", "TTTT", "T..T"])
+  .grid(10, 17, ["..W..", ".WOW.", "..W..", ".YYY.", "YYYYY", ".YYY.", "..Y..", ".YYY."])
   .grid(4, 14, ["W", "W"]).grid(5, 13, ["W"])
   // ドア（上半分はガラス）
   .rect(20, 10, 10, 22, "H").rect(21, 11, 8, 21, "h").rect(22, 12, 6, 9, "y").grid(22, 12, ["WW", "W"]).rect(27, 23, 1, 2, "Y").rect(21, 22, 8, 1, "H")
-  // 右のショーウィンドウ（ホーロー看板・びん・まねき猫）
+  // 右のショーウィンドウ（古伊万里の小皿とインク壺、奥に古い銀の鈴）
   .rect(32, 12, 14, 15, "H").rect(33, 13, 12, 12, "y").rect(33, 25, 12, 1, "t")
-  .grid(34, 15, ["RRRR", "RWWR", "RWWR", "RRRR"])
-  .grid(34, 21, ["b.", "bb", "bb", "bb"])
-  .grid(39, 19, ["W..W.", "WWWW.", "WKWK.", "WWWW.", "WrrW.", "WWWW."])
+  .grid(34, 16, [".WWW.", "WbBbW", "WBBBW", "WbBbW", ".WWW."])
+  .grid(35, 21, [".TT.", "LLLL", "LBBL", "LLLL"])
+  .grid(41, 18, [".C.", ".L.", "LLL", "LLL", ".y."])
   .grid(33, 13, ["WW", "W"])
   .rows()
 // 横（右の壁）32×34：窓・はり紙・配管
@@ -162,13 +162,13 @@ scene("title", { w: TW, h: TH },
       wallL(sx0, sx1, sy, zt, 13, rows)
       wallL(sx0 + 2, sx0 + 3, sy, zt - 13, 2, "N"); wallL(sx1 - 3, sx1 - 2, sy, zt - 13, 2, "N")   // 脚
     }
-    // ひさし（赤白のしま）。壁の高さ AW から、手前に3マス・4px下がる
+    // ひさし（深緑と生成りのしま。骨董屋らしく落ち着いた色）。壁の高さ AW から、手前に3マス・4px下がる
     const AW = Hh - 4
-    slopeL(X0, X1, Y1, AW, 3, 4, (s, t) => (fr(s / 4) < 0.5 ? "R" : "W"))
+    slopeL(X0, X1, Y1, AW, 3, 4, (s, t) => (fr(s / 4) < 0.5 ? "G" : "y"))
     // ひさしの垂れ（下のふち）
     { const d = 3, drop = 4
       for (let i = 0; i < (X1 - X0) * 2; i++) {
-        const s = i / 2, k = fr(s / 4) < 0.5 ? "r" : "L", [bx, by] = P(X0, Y1 + d, AW - drop)
+        const s = i / 2, k = fr(s / 4) < 0.5 ? "G" : "t", [bx, by] = P(X0, Y1 + d, AW - drop)
         put(bx + i, by + ((i + 1) >> 1), k); if (fr(s / 2) < 0.5) put(bx + i, by + ((i + 1) >> 1) + 1, k)
       }
     }
@@ -194,15 +194,15 @@ scene("title", { w: TW, h: TH },
 
 // ---------- お店のアイコン（16×16）。ヘッダー・サイトのロゴ・ファビコンで共通 ----------
 // 16px でも「お店」と読めるよう、正面を平らに見せて、屋根と右の壁で奥行きを出す
-// 赤白のひさし・明かりのついたショーウィンドウ・ガラスのドア・横の窓
+// 深緑と生成りのひさし・明かりのついたショーウィンドウ・ガラスのドア・横の窓
 const SHOP = [
   "....KKKKKKKKKKK.",
   "...KLLLLLLLLLLKK",
   "..KLLLLLLLLLLKhK",
   ".KKKKKKKKKKKKhhK",
-  ".KRRWWRRWWRRKhhK",
-  ".KRRWWRRWWRRKhyK",
-  ".KrrLLrrLLrrKhyK",
+  ".KGGyyGGyyGGKhhK",
+  ".KGGyyGGyyGGKhyK",
+  ".KGGttGGttGGKhyK",
   ".KTTTTTTTTTTKhhK",
   ".KtWyyytHHHtKhhK",
   ".KtyyyytHyHtKhhK",

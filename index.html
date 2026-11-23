@@ -495,7 +495,7 @@ input[type="text"]:disabled,input[type="password"]:disabled{opacity:.6}
 .res{padding:0 12px 12px;margin:0}
 .msg-err{color:var(--danger)}
 .msg-ok{color:var(--safe)}
-/* ---------- タイトル：夜空に浮かぶ、よろず屋ピクセル堂のジオラマ（アイソメ）。昼夜のテーマによらず、夜の1種類 ---------- */
+/* ---------- タイトル：夜空に浮かぶ、骨董ピクセル堂のジオラマ（アイソメ）。昼夜のテーマによらず、夜の1種類 ---------- */
 .title-screen,.rsting{--stars-a:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 130' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M85 124h1v1h-1zM15 12h1v1h-1zM96 77h1v1h-1zM132 30h1v1h-1zM20 33h1v1h-1zM111 10h1v1h-1zM152 124h1v1h-1z'/%3E%3Cpath fill='%23c3c7d6' d='M41 53h1v1h-1zM17 119h1v1h-1zM26 73h1v1h-1zM152 53h1v1h-1z'/%3E%3Cpath fill='%237a8099' d='M140 15h1v1h-1zM114 56h1v1h-1zM60 83h1v1h-1z'/%3E%3C/svg%3E");--stars-b:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 190' shape-rendering='crispEdges'%3E%3Cpath fill='%235c86d6' d='M118 146h1v1h-1zM51 50h1v1h-1zM160 50h1v1h-1zM26 140h1v1h-1zM155 104h1v1h-1z'/%3E%3Cpath fill='%238f6ac9' d='M222 122h1v1h-1zM208 134h1v1h-1zM27 117h1v1h-1zM210 180h1v1h-1z'/%3E%3Cpath fill='%237a8099' d='M221 153h1v1h-1zM124 164h1v1h-1zM80 39h1v1h-1zM165 13h1v1h-1z'/%3E%3C/svg%3E");--stars-c:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 310 270' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M151 44h1v1h1v1h-1v1h-1v-1h-1v-1h1zM219 196h1v1h1v1h-1v1h-1v-1h-1v-1h1zM274 185h1v1h1v1h-1v1h-1v-1h-1v-1h1zM139 230h1v1h-1zM10 116h1v1h-1z'/%3E%3Cpath fill='%23ffe08a' d='M11 159h1v1h1v1h-1v1h-1v-1h-1v-1h1zM69 101h1v1h-1z'/%3E%3C/svg%3E");
   --cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1z'/%3E%3C/svg%3E");}
 .title-screen{
@@ -848,12 +848,12 @@ function renderTabs(){
   document.body.dataset.tab=S.tab;
 }
 const CATALOG=[
-  {icon:'item_robot',name:'ブリキのロボット',price:'¥1,800'},
-  {icon:'item_mug',name:'レトロなマグカップ',price:'¥980'},
-  {icon:'item_sign',name:'ホーローの看板',price:'¥3,200'},
-  {icon:'item_bottle',name:'すりガラスのびん',price:'¥600'},
-  {icon:'item_cat',name:'まねき猫の貯金箱',price:'¥1,200'},
-  {icon:'item_bell',name:'古い銀の鈴',price:'非売品',nfs:true}   // 売りものではない。シロが宿っている（エンディングで明かす）
+  {icon:'item_clock',name:'柱時計',price:'¥28,000'},
+  {icon:'item_plate',name:'古伊万里の小皿',price:'¥2,400'},
+  {icon:'item_lamp',name:'真鍮のランプ',price:'¥6,800'},
+  {icon:'item_ink',name:'ガラスのインク壺',price:'¥1,500'},
+  {icon:'item_pen',name:'万年筆',price:'¥3,200'},
+  {icon:'item_bell',name:'古い銀の鈴',price:'非売品',nfs:true}   // 売りものではない。シロが宿っている（エンディングで明かす。骨董市で箱ごと仕入れた中に入っていた、真っ黒な「黒鈴」を店長が磨いた）
 ];
 /* ---------- サイトタブ：パソコンのディスプレイに映るブラウザ ----------
    画面の中（pcHTML の中身）＝ゲームの世界で実際に見えているもの。お店のページ・検証ツール・別サイトなど
@@ -965,12 +965,12 @@ function browserHTML(){
   const sr=searchResult();if(sr.notes)N.push(sr.notes);
   const fn={order:orderDemo,review:reviewDemo,coupon:couponDemo,csrf:csrfIntro,idor:idorIntro,session:sessionIntro,signup:signupDemo,login:loginDemo,cert:certOkDemo,skimmer:skimmerDemo,apikey:apikeyDemo}[kind];
   if(fn)add(fn());
-  const page=`<div class="store-head">${spr(IC.shop,2.5,'')}<span class="sh-name"><span class="nm">よろず屋ピクセル堂</span><span class="sh-tag">レトロ雑貨のネットショップ</span></span><span class="cart">カート ${S.cart||0}</span></div>
-      <div class="hero"><span class="hero-t">レトロ雑貨、あつめました。</span><span class="hero-s">昭和のブリキからホーロー看板まで。</span></div>
+  const page=`<div class="store-head">${spr(IC.shop,2.5,'')}<span class="sh-name"><span class="nm">骨董ピクセル堂</span><span class="sh-tag">骨董と古道具のネットショップ</span></span><span class="cart">カート ${S.cart||0}</span></div>
+      <div class="hero"><span class="hero-t">骨董と古道具、あつめました。</span><span class="hero-s">明治の柱時計から、藍の小皿まで。</span></div>
       <div class="store-search"><input type="text" id="shopQ" placeholder="商品名で検索" value="${esc(S.shopQ||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn" data-act="doSearch">検索</button></div>
       <div class="store-body">${sr.page}</div>${P.join('')}
-      <div class="store-foot">© よろず屋ピクセル堂${local?'':'　'+esc(S.domain)}</div>`;
-  return pcHTML(browserWin({k:'store',title:'よろず屋ピクセル堂',url:local?'localhost:3000':(sec?'https://':'http://')+S.domain,sec:local?'':sec?'ok':'no',reload:'doSearch'},page),'あなたのパソコン',true)
+      <div class="store-foot">© 骨董ピクセル堂${local?'':'　'+esc(S.domain)}</div>`;
+  return pcHTML(browserWin({k:'store',title:'骨董ピクセル堂',url:local?'localhost:3000':(sec?'https://':'http://')+S.domain,sec:local?'':sec?'ok':'no',reload:'doSearch'},page),'あなたのパソコン',true)
     +notes(...N);
 }
 function orderDemo(){
@@ -1032,8 +1032,8 @@ function demoOff(){return S.phase==='intro'||S.phase==='setup'||S.phase==='day0'
 const SESS_SID='a1b2c3d4e5f6';
 const subHead=(name,tag)=>`<div class="store-head">${spr(IC.shop,2.5,'')}<span class="sh-name"><span class="nm">${name}</span><span class="sh-tag">${tag}</span></span></div>`;
 function mypagePC(url,who,k,back){
-  return pcHTML(browserWin({k,title:'マイページ - よろず屋ピクセル堂',url,sec:'ok',back},`${subHead('マイページ','ようこそ、店長さん')}
-      <div class="ordpage"><div class="orow"><span>登録メール</span><b>tencho@${esc(DOM())}</b></div><div class="orow"><span>最近の注文</span><b>ブリキのロボット ×1</b></div></div>`),who);
+  return pcHTML(browserWin({k,title:'マイページ - 骨董ピクセル堂',url,sec:'ok',back},`${subHead('マイページ','ようこそ、店長さん')}
+      <div class="ordpage"><div class="orow"><span>登録メール</span><b>tencho@${esc(DOM())}</b></div><div class="orow"><span>最近の注文</span><b>真鍮のランプ ×1</b></div></div>`),who);
 }
 function sessionIntro(){
   return {notes:note('やってみよう',`<p>あなたは今、ピクセル堂に<b>ログイン中</b>です。ログイン中の「マイページ」を開いて、ブラウザのアドレス欄を見てみましょう。</p>
@@ -1178,7 +1178,7 @@ function idorBrowserHTML(){
     body=`<div class="ordpage"><p class="muted small" style="margin:0">その番号の注文はありません。</p></div>`;
   }
   return pcPair(notes(note('やってみよう','<p>この<b>アドレス欄は編集できます</b>（本物のブラウザと同じ）。末尾の番号を変えて <b>Enter</b> か「開く」で移動し、他人の注文が見えてしまわないか試します。</p>'))
-    +pcHTML(browserWin({k:'idor',title:'注文確認 - よろず屋ピクセル堂',back:'idorBack',edit:{id:'idorUrl',value:DOM()+'/order?id='+id,label:'アドレス欄（編集できます）',go:'idorGo'}},
+    +pcHTML(browserWin({k:'idor',title:'注文確認 - 骨董ピクセル堂',back:'idorBack',edit:{id:'idorUrl',value:DOM()+'/order?id='+id,label:'アドレス欄（編集できます）',go:'idorGo'}},
       subHead('ご注文の確認','ようこそ、店長さん')+body),'あなたのパソコン')
     +notes(n))+`<div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
@@ -2094,7 +2094,7 @@ function hubHTML(){
     .concat(S.day>=8?[{n:8,k:8.5,t:'お問い合わせフォームを追加',how:'直接コミット',undo:''}]:[]).sort((a,b)=>b.k-a.k),show=merged.slice(0,4);
   h+=`<div class="sec"><h3>コミット履歴</h3>${show.map(r=>`<div class="row"><div class="desc">${esc(r.t)}<span class="note">${r.how}　／　${ago(r.n)}</span></div>${r.undo?`<button class="link" data-act="undoFix" data-key="${r.undo}">取り消す</button>`:''}</div>`).join('')}
     ${merged.length>show.length?`<p class="small muted" style="padding:8px 12px;margin:0">…ほか ${merged.length-show.length} 件</p>`:''}
-    <div class="row"><div class="desc">よろず屋ピクセル堂を公開<span class="note">最初のコミット　／　${ago(0)}</span></div></div></div>`;
+    <div class="row"><div class="desc">骨董ピクセル堂を公開<span class="note">最初のコミット　／　${ago(0)}</span></div></div></div>`;
   if(!fx)cNotes.push(note('解説','<p>『Cithub』は、お店のコードの置き場所です。今日は、ここで入れる修正はありません。</p>'));
   return h;
 }
@@ -2164,7 +2164,7 @@ function setTab(t){
 }
 function startIntro(){
   say([
-    {who:YOU,t:'ついに自作のネットショップ「よろず屋ピクセル堂」ができたぞ！'},
+    {who:YOU,t:'ついに自作のネットショップ「骨董ピクセル堂」ができたぞ！'},
     {who:SHIRO,t:'おめでとう。ホワイトハッカーのシロだよ。困ったら相談して'},
     {who:YOU,t:'わっ。……きみ、いつからそこにいたの？'},
     {who:SHIRO,t:'ずっと前から、ここにいたよ。まあ、それはいいじゃない'},
@@ -2344,7 +2344,7 @@ function noticeSheet(id){
 function showEnd(){
   S.phase='end';save();render();
   showModal(`<h2 id="mTitle">全${LAST_DAY}日、守りきった！</h2>
-    <p>よろず屋ピクセル堂は、通信・アプリの中身・防壁・運用のすべてを守れるお店になりました。</p>
+    <p>骨董ピクセル堂は、通信・アプリの中身・防壁・運用のすべてを守れるお店になりました。</p>
     <p class="muted small">きみが身につけた守り</p>
     <ul>
       <li>通信編：HTTPS・暗号の更新・HSTS</li>
@@ -2358,8 +2358,10 @@ function showEnd(){
 /* ---------- エンディングとエンドロール ----------
    エンディング：夜の街角（タイトルと同じジオラマ）で、店長とシロが話す。物陰にいた攻撃者は、もういない。
      シロは正体（お店の棚にある、売りものでない「古い銀の鈴」に宿る守り神）を明かし、姿が見えなくなる。「セキュリティ対策に終わりはない」もここで伝える。
-     もとは祟るほうで、店長に「お店のお守り」として迎えられて守るほうになった（悪さをしていた腕利きが、雇われてホワイトハッカーになるのと同じ筋）。
-     伏線：冒頭の「ずっと前から、ここにいたよ」／お店の棚の「古い銀の鈴（非売品）」／12日目の「シロって、何者なの？」／冒頭の名乗り「ホワイトハッカーのシロだよ」
+     生まれ：骨董市で箱ごと仕入れた中に入っていた、真っ黒な鈴。前の持ち主たちは「黒鈴」と呼んだ。鈴のある店では、夜のうちに鍵が開き、帳簿が狂い、品物が消えた（攻撃の昔版）。
+       店長が白く光るまで磨き、「白くなったな。うちのお守りだ、シロ」とつぶやいた。名前と居場所をもらって、守るほうに回った（黒い帽子から白い帽子へ。ホワイトハッカー）。
+       お店が危ないあいだだけ姿を持てる。お店をネットに出した瞬間に鈴が鳴り、シロが現れた。磨くのをやめると、また黒くくすむ（手入れをやめると穴があく、と重ねる）。
+     伏線：冒頭の「ずっと前から、ここにいたよ」／公開した直後の鈴の音／お店の棚の「古い銀の鈴（非売品）」／12日目の「シロって、何者なの？」「ホワイトって、白？」／19日目の「前より薄く見える」
    エンドロール：主演 → 案内役 → お客さん →（ゲスト出演）→ 攻撃者のみなさん（登場順。役名はここで初めて明かす）→ 協力 → スペシャルサンクス → 制作 → 引っかかったトラップ
      →「そして、お店は今日も営業中」→ 最後の場面（シロがひとりで現れ、震えて、黒い姿に変わって飛び去る。言葉はない）→ おわり */
 const END_CAST=[['houjin',43,19],['yamada',33.5,24.5],['tencho',17.5,24.5],['shiro',26,25,4],['suzuki',30,27.5],['tanaka',12.5,27.5],['tomo',21.5,29]];
@@ -2377,37 +2379,42 @@ function startEnding(done){
   const vw=window.innerWidth,vh=window.innerHeight,st=(window.devicePixelRatio||1)>=2?2:1;
   const sc=Math.max(1,Math.min(4,Math.floor(Math.min((vw-32)/TS.w,(vh-250)/TS.h)*st)/st));
   $('ending').innerHTML=`<div class="ebox"><p class="ekick">${LAST_DAY}日目の夜</p>
-    <div class="scene" style="width:${TS.w*sc}px;height:${TS.h*sc}px" role="img" aria-label="夜の街角。よろず屋ピクセル堂の前に、店長とシロ、お客さんたちが並んでいる"><img src="title.png" alt="" width="${TS.w*sc}" height="${TS.h*sc}">${castAt(END_CAST,sc)}</div></div>`;
+    <div class="scene" style="width:${TS.w*sc}px;height:${TS.h*sc}px" role="img" aria-label="夜の街角。骨董ピクセル堂の前に、店長とシロ、お客さんたちが並んでいる"><img src="title.png" alt="" width="${TS.w*sc}" height="${TS.h*sc}">${castAt(END_CAST,sc)}</div></div>`;
   $('ending').hidden=false;document.body.classList.add('ending-on');
   const n=S.traps.length,known=(S.trapsFrom||0)<=1;   // known＝最初からトラップを数えている記録
   const shiro=()=>$('ending').querySelector('.ch[data-cast="shiro"]');
-  // シロの正体：お店の棚にある「古い銀の鈴」（非売品）に宿る守り神。もとは祟るほうだったが、店長に「お店のお守り」として迎えられて、守るほうになった。
-  // 悪さをしていた腕利きが、雇われて守る側に回る（クラッカー → ホワイトハッカー）のと同じ筋。祟るものを神として迎えて納める、という考え方（御霊信仰）にならう。
-  // エンドロール後の黒い姿は、その「祟るほう」の姿。理由は語らない。途中の {fn} は、場面のシロを薄れさせ、消す
+  // シロの正体：上の説明のとおり。祟るものを名前で迎えて納める、という考え方（御霊信仰）にならう。
+  // エンドロール後の黒い姿は、その「黒鈴」の姿。理由は語らない。途中の {fn} は、場面のシロを薄れさせ、消す
   say([
-    {who:'',t:LAST_DAY+'日目の夜。よろず屋ピクセル堂は、今日の営業を終えた'},
+    {who:'',t:LAST_DAY+'日目の夜。骨董ピクセル堂は、今日の営業を終えた'},
     {who:YOU,t:'お店を公開したら、それで完成だと思ってたよ'},
     {who:SHIRO,t:'公開は、はじまりだったね。通信、アプリ、防壁、運用。ぜんぶ、きみが自分の手で直した'}
   ].concat(n?[{who:SHIRO,t:'まちがえた設定も、'+n+'回あった。でも、お知らせを読んで、気づいて、直した。それでいいんだ'}]:known?[{who:SHIRO,t:'設定をまちがえて、お客さんを困らせることもなかった。たいしたものだよ'}]:[]).concat([
     {who:SHIRO,t:'でもね、セキュリティ対策に終わりはないんだ。新しい部品、新しいページ、まだ誰も知らない手口。手入れをやめた所から、また穴があく'},
     {who:YOU,t:'そのときは、また教えてよ。いつもみたいに'},
     {who:SHIRO,t:'……それが、もうできないんだ'},
-    {who:SHIRO,t:'黙っててごめん。ぼくは、人間じゃない。棚にある、売りものじゃない古い銀の鈴。あそこに、ずっと宿っていたんだ'},
-    {who:YOU,t:'あの鈴に……。だから最初の日、「ずっと前からいた」って言ったのか'},
-    {who:SHIRO,t:'昔のぼくは、祟るほうだった。持ち主に悪さばかりして、店から店へ、たらい回しにされてきた'},
-    {who:SHIRO,t:'でもきみは、あの鈴を磨いて、「お店のお守りだ」って棚に置いてくれた。迎えてもらえたから、守るほうになれたんだ'},
-    {who:SHIRO,t:'悪さをしていた腕利きが、雇われて守る側に回ることがあるでしょ。「ホワイトハッカー」って名乗ったのは、そういうわけ'},
-    {who:YOU,t:'手口をぜんぶ知ってたのも、そういうことか……'},
+    {who:SHIRO,t:'ねえ、棚のいちばん端にある、古い銀の鈴。覚えてる？ 骨董市で箱ごと仕入れた中に入ってた。あのころは、真っ黒だった'},
+    {who:YOU,t:'売りものにならなくて、磨いてお守りにしたやつ……'},
+    {who:SHIRO,t:'あれが、ぼくなんだ'},
+    {who:YOU,t:'え……？ だから最初の日、「ずっと前からいた」って'},
+    {who:SHIRO,t:'前の持ち主たちは、ぼくを「黒鈴」って呼んでた。ぼくがいる店は、夜のうちに鍵が開いて、帳簿の数字が狂って、品物が消える。祟る鈴だって、店から店へ回されてきた'},
+    {who:YOU,t:'鍵を開けて、帳簿を書き換えて……それって'},
+    {who:SHIRO,t:'うん。今回の攻撃者たちと、やってることは同じ。だから手口なら、ぜんぶ知ってた'},
+    {who:SHIRO,t:'でもきみは、その鈴を白く光るまで磨いて、「白くなったな。うちのお守りだ、シロ」って言った'},
+    {who:YOU,t:'……言った。独り言のつもりだった'},
+    {who:SHIRO,t:'名前をもらって、迎えてもらえたから、守るほうに回れたんだ。黒い帽子を、白い帽子にかぶり替えたってわけ。ホワイトハッカーって名乗ったのは、冗談半分、本気半分だよ'},
     {fn:()=>{const e=shiro();if(e)e.classList.add('flick');}},
-    {who:SHIRO,t:'お店が危ないあいだだけ、ぼくはこうして姿を持てた'},
-    {who:YOU,t:'もう、危なくないから……？'},
-    {who:SHIRO,t:'ううん。危ないことは、これからも起きる。でも、気づいて、確かめて、直せる店長がいる。だからもう、ぼくが出てこなくても大丈夫なんだ'},
+    {who:SHIRO,t:'お店が危ないあいだだけ、ぼくはこうして姿を持てた。最初の日、きみがお店をネットに出した瞬間に、鈴が鳴ったんだ'},
+    {who:YOU,t:'あの音……気のせいじゃなかったのか。じゃあ、もう危なくないから……？'},
+    {who:SHIRO,t:'ううん。危ないことは、これからも起きる。でも、お知らせを読んで、確かめて、直せる店長がいる。だからもう、ぼくが出てこなくても大丈夫なんだ'},
     {who:YOU,t:'いやだよ。まだ教わりたいことが、たくさんあるのに'},
-    {who:SHIRO,t:'見えなくなるだけだよ。棚のどこかで、ちゃんと見てる。……鈴は、ときどき磨いてね'},
-    {who:SHIRO,t:'これからは、きみが、このお店の守り神だ'},
+    {who:SHIRO,t:'見えなくなるだけだよ。棚の端で、ちゃんと見てる'},
+    {who:SHIRO,t:'ひとつだけ約束して。鈴は、ときどき磨いて。磨くのをやめたら、またくすんでしまうから'},
+    {who:YOU,t:'……それって、お店の手入れと同じだな'},
+    {who:SHIRO,t:'そう。これからは、きみが、このお店の守り神だ'},
     {fn:()=>{const e=shiro();if(e){e.classList.remove('flick');e.classList.add('gone');}}},
     {who:YOU,t:'……ありがとう、シロ'},
-    {who:'',t:'次の朝も、よろず屋ピクセル堂は、いつもどおりに店を開けた'}
+    {who:'',t:'次の朝も、骨董ピクセル堂は、いつもどおりに店を開けた'}
   ]),startRoll);
 }
 const rollLine=(id,role,who)=>`<div class="cr">${id?`<span class="rsp" data-cast="${id}" data-s="4">${spr(frameRows(CAST[id].rows,tick),4,'')}</span>`:''}${role?`<div class="rrole">${esc(role)}</div>`:''}<div class="rwho">${esc(who)}</div></div>`;
@@ -2721,7 +2728,7 @@ document.addEventListener('click',e=>{
       if(!as.length)S.relMsg=esc(S.domain)+' に A レコード（名前 @）がありません。DNSに、このサーバーのIPアドレス（'+SERVER_IP+'）を登録してください';
       else if(!as.some(r=>r.value===SERVER_IP))S.relMsg=esc(S.domain)+' の A レコードは '+esc(as[0].value)+' です。このサーバーのIPアドレス（'+SERVER_IP+'）にしてください';
       else{S.relMsg='';S.dnsOk=true;S.phase='day0';S.cleared=Math.max(S.cleared,0);save();render();
-        say([{who:SHIRO,t:'リリースおめでとう！ これで誰でも '+S.domain+' からお店に来られる'},{who:SHIRO,t:'……ところで、そのお店、ちゃんと守れてる？'},{who:YOU,t:'守る？ 何から？'},{who:SHIRO,t:'まあ、すぐにわかるよ'}],()=>startDay(1));return;}
+        say([{who:SHIRO,t:'リリースおめでとう！ これで誰でも '+S.domain+' からお店に来られる'},{who:YOU,t:'……いま、どこかで鈴が鳴らなかった？'},{who:SHIRO,t:'気のせいだよ。それより、そのお店、ちゃんと守れてる？'},{who:YOU,t:'守る？ 何から？'},{who:SHIRO,t:'まあ、すぐにわかるよ'}],()=>startDay(1));return;}
       save();render();
     },RM?200:1400);
   }
@@ -2878,8 +2885,8 @@ function showTitle(confirm){
     return `<span class="ch${cls?' '+cls:''}" data-cast="${id}" data-s="${sc}" style="left:${x*sc}px;top:${y*sc}px">${spr(frameRows(CAST[id].rows,tick),sc,'')}</span>`;
   }).join('');
   title.innerHTML=`<div class="tbox${two?' two':''}">
-    <div class="thead"><p class="tkick">よろず屋ピクセル堂を守れ</p><h1 class="tname">Getting<br>Secure It</h1></div>
-    <div class="scene" style="width:${TS.w*sc}px;height:${TS.h*sc}px" aria-label="夜の街角に建つ、よろず屋ピクセル堂" role="img"><img src="title.png" alt="" width="${TS.w*sc}" height="${TS.h*sc}">${chars}</div>
+    <div class="thead"><p class="tkick">骨董ピクセル堂を守れ</p><h1 class="tname">Getting<br>Secure It</h1></div>
+    <div class="scene" style="width:${TS.w*sc}px;height:${TS.h*sc}px" aria-label="夜の街角に建つ、骨董ピクセル堂" role="img"><img src="title.png" alt="" width="${TS.w*sc}" height="${TS.h*sc}">${chars}</div>
     <div class="tmenu"><p class="tsub">ネットショップを、1日ずつ守っていこう</p>
       <div class="menu" role="menu" aria-label="メニュー">${menu}</div><p class="tver" data-t="ver">全4章・${LAST_DAY}日（通信／アプリ／防壁／運用）${DEBUG?'　デバッグ中':''}</p></div></div>`;
   title.hidden=false;

