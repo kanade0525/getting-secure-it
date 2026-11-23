@@ -526,12 +526,19 @@ input[type="text"]:disabled,input[type="password"]:disabled{opacity:.6}
 body.ending-on .dim{background:transparent}
 .ending .ch.flick{opacity:.55}
 .ending .ch.gone{opacity:0}
+.ending .ch.hide{opacity:0}
+.ending .glint{position:absolute;display:block;line-height:0;opacity:0;pointer-events:none}
+.ending .glint.on{opacity:1}
 @media (prefers-reduced-motion:no-preference){
+  .ending .ch.come{animation:chCome 1.2s steps(6,end) both}
+  .ending .glint.on{animation:glint .5s steps(1,end) 4 forwards}
   .ending .ch.flick{animation:chFlick .7s steps(2,end) infinite}
   .ending .ch.gone{animation:chGone 1.6s steps(8,end) forwards}
 }
 @keyframes chFlick{from{opacity:1}to{opacity:.35}}
 @keyframes chGone{from{opacity:.6;transform:none}to{opacity:0;transform:translateY(-10px)}}
+@keyframes chCome{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes glint{0%{opacity:1}50%{opacity:0}100%{opacity:0}}
 .roll{position:fixed;inset:0;z-index:31;background:#000;color:#fff;color-scheme:dark;overflow:hidden}
 .roll[hidden]{display:none}
 .rtrack{position:absolute;left:0;right:0;top:100%;display:flex;flex-direction:column;align-items:center;gap:26px;padding:0 20px 40px;text-align:center}
@@ -2162,12 +2169,28 @@ function setTab(t){
     else if(S.step==='read')say([{who:SHIRO,t:'先に「お知らせ」を読もう。何が起きているか分かってから、原因を見にいこう'}]);
   }
 }
+/* オープニング：お店の中（opening.png。元データは art/gsi.px.js の opening）。棚のいちばん端に古い銀の鈴。
+   鈴が光って鳴り、シロがその上に現れる（エンディングで「鈴に宿っていた」と明かす伏線）。会話がサイトの話に移るところで閉じる */
+const OP={w:160,h:100},GLINT=['..y..','..W..','yWWWy','..W..','..y..'];
 function startIntro(){
+  const vw=window.innerWidth,vh=window.innerHeight,st=(window.devicePixelRatio||1)>=2?2:1;
+  const sc=Math.max(1,Math.min(4,Math.floor(Math.min((vw-32)/OP.w,(vh-250)/OP.h)*st)/st));
+  const ch=(id,x,y,cls)=>`<span class="ch${cls?' '+cls:''}" data-cast="${id}" data-s="${sc}" style="left:${x*sc}px;top:${y*sc}px">${spr(frameRows(CAST[id].rows,tick),sc,'')}</span>`;
+  $('ending').innerHTML=`<div class="ebox"><p class="ekick">0日目の夜</p>
+    <div class="scene" style="width:${OP.w*sc}px;height:${OP.h*sc}px" role="img" aria-label="お店の中。帳場にノートパソコン、棚に骨董の品。棚のいちばん端に、古い銀の鈴"><img src="opening.png" alt="" width="${OP.w*sc}" height="${OP.h*sc}">${ch('tencho',48,64)}${ch('shiro',133,36,'hide')}<span class="glint" style="left:${138*sc}px;top:${52*sc}px">${spr(GLINT,sc,'')}</span></div></div>`;
+  $('ending').hidden=false;document.body.classList.add('ending-on');
+  const q=sel=>$('ending').querySelector(sel);
+  const close=()=>{$('ending').hidden=true;document.body.classList.remove('ending-on');};
   say([
+    {who:'',t:'骨董ピクセル堂の帳場。店長は、お店のネットショップを作り終えたところだった'},
     {who:YOU,t:'ついに自作のネットショップ「骨董ピクセル堂」ができたぞ！'},
+    {fn:()=>{const g=q('.glint');if(g)g.classList.add('on');}},
+    {who:'',t:'チリン。棚のいちばん端で、古い銀の鈴が小さく鳴った'},
+    {fn:()=>{const e=q('.ch[data-cast="shiro"]');if(e){e.classList.remove('hide');e.classList.add('come');}}},
     {who:SHIRO,t:'おめでとう。ホワイトハッカーのシロだよ。困ったら相談して'},
     {who:YOU,t:'わっ。……きみ、いつからそこにいたの？'},
     {who:SHIRO,t:'ずっと前から、ここにいたよ。まあ、それはいいじゃない'},
+    {fn:close},
     {who:SHIRO,t:'でも、まだきみのパソコンの中にあるだけだね。ネットに公開するには、まずドメイン（お店の住所）が必要だよ'},
     {who:SHIRO,t:'「管理」タブのドメイン会社『おなまえや.com』で取ってみよう'}
   ],()=>{S.phase='setup';S.badge.console=true;save();render();});
@@ -2360,8 +2383,8 @@ function showEnd(){
      シロは正体（お店の棚にある、売りものでない「古い銀の鈴」に宿る守り神）を明かし、姿が見えなくなる。「セキュリティ対策に終わりはない」もここで伝える。
      生まれ：骨董市で箱ごと仕入れた中に入っていた、真っ黒な鈴。前の持ち主たちは「黒鈴」と呼んだ。鈴のある店では、夜のうちに鍵が開き、帳簿が狂い、品物が消えた（攻撃の昔版）。
        店長が白く光るまで磨き、「白くなったな。うちのお守りだ、シロ」とつぶやいた。名前と居場所をもらって、守るほうに回った（黒い帽子から白い帽子へ。ホワイトハッカー）。
-       お店が危ないあいだだけ姿を持てる。お店をネットに出した瞬間に鈴が鳴り、シロが現れた。磨くのをやめると、また黒くくすむ（手入れをやめると穴があく、と重ねる）。
-     伏線：冒頭の「ずっと前から、ここにいたよ」／公開した直後の鈴の音／お店の棚の「古い銀の鈴（非売品）」／12日目の「シロって、何者なの？」「ホワイトって、白？」／19日目の「前より薄く見える」
+       お店が危ないあいだだけ姿を持てる。ネットショップを作った夜（オープニング）に鈴が鳴ってシロが現れ、公開したときにもまた鳴る。磨くのをやめると、また黒くくすむ（手入れをやめると穴があく、と重ねる）。
+     伏線：オープニングの絵（棚の端の鈴が鳴り、シロがその上に現れる）と「ずっと前から、ここにいたよ」／公開した直後の鈴の音／お店の棚の「古い銀の鈴（非売品）」／12日目の「シロって、何者なの？」「ホワイトって、白？」／19日目の「前より薄く見える」
    エンドロール：主演 → 案内役 → お客さん →（ゲスト出演）→ 攻撃者のみなさん（登場順。役名はここで初めて明かす）→ 協力 → スペシャルサンクス → 制作 → 引っかかったトラップ
      →「そして、お店は今日も営業中」→ 最後の場面（シロがひとりで現れ、震えて、黒い姿に変わって飛び去る。言葉はない）→ おわり */
 const END_CAST=[['houjin',43,19],['yamada',33.5,24.5],['tencho',17.5,24.5],['shiro',26,25,4],['suzuki',30,27.5],['tanaka',12.5,27.5],['tomo',21.5,29]];
@@ -2404,8 +2427,8 @@ function startEnding(done){
     {who:YOU,t:'……言った。独り言のつもりだった'},
     {who:SHIRO,t:'名前をもらって、迎えてもらえたから、守るほうに回れたんだ。黒い帽子を、白い帽子にかぶり替えたってわけ。ホワイトハッカーって名乗ったのは、冗談半分、本気半分だよ'},
     {fn:()=>{const e=shiro();if(e)e.classList.add('flick');}},
-    {who:SHIRO,t:'お店が危ないあいだだけ、ぼくはこうして姿を持てた。最初の日、きみがお店をネットに出した瞬間に、鈴が鳴ったんだ'},
-    {who:YOU,t:'あの音……気のせいじゃなかったのか。じゃあ、もう危なくないから……？'},
+    {who:SHIRO,t:'お店が危ないあいだだけ、ぼくはこうして姿を持てた。きみがネットショップを作った夜、鈴が鳴ったでしょ。あれは、お店が危なくなる合図だったんだ'},
+    {who:YOU,t:'公開したときにも、鳴ってた……気のせいじゃなかったのか。じゃあ、もう危なくないから……？'},
     {who:SHIRO,t:'ううん。危ないことは、これからも起きる。でも、お知らせを読んで、確かめて、直せる店長がいる。だからもう、ぼくが出てこなくても大丈夫なんだ'},
     {who:YOU,t:'いやだよ。まだ教わりたいことが、たくさんあるのに'},
     {who:SHIRO,t:'見えなくなるだけだよ。棚の端で、ちゃんと見てる'},
@@ -2728,7 +2751,7 @@ document.addEventListener('click',e=>{
       if(!as.length)S.relMsg=esc(S.domain)+' に A レコード（名前 @）がありません。DNSに、このサーバーのIPアドレス（'+SERVER_IP+'）を登録してください';
       else if(!as.some(r=>r.value===SERVER_IP))S.relMsg=esc(S.domain)+' の A レコードは '+esc(as[0].value)+' です。このサーバーのIPアドレス（'+SERVER_IP+'）にしてください';
       else{S.relMsg='';S.dnsOk=true;S.phase='day0';S.cleared=Math.max(S.cleared,0);save();render();
-        say([{who:SHIRO,t:'リリースおめでとう！ これで誰でも '+S.domain+' からお店に来られる'},{who:YOU,t:'……いま、どこかで鈴が鳴らなかった？'},{who:SHIRO,t:'気のせいだよ。それより、そのお店、ちゃんと守れてる？'},{who:YOU,t:'守る？ 何から？'},{who:SHIRO,t:'まあ、すぐにわかるよ'}],()=>startDay(1));return;}
+        say([{who:SHIRO,t:'リリースおめでとう！ これで誰でも '+S.domain+' からお店に来られる'},{who:YOU,t:'……いま、また鈴が鳴らなかった？'},{who:SHIRO,t:'気のせいだよ。それより、そのお店、ちゃんと守れてる？'},{who:YOU,t:'守る？ 何から？'},{who:SHIRO,t:'まあ、すぐにわかるよ'}],()=>startDay(1));return;}
       save();render();
     },RM?200:1400);
   }

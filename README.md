@@ -39,6 +39,7 @@ WAF のレート制限のような値は、管理画面で選び直せます。�
 | `art/gsi-net.px.js` | 通信図の素材の元データ（機器・パケット・盾など） |
 | `art/gsi-title.px.js` | タイトルのジオラマ（アイソメ）・お店のアイコン・ファビコンの元データ |
 | `title.png` `favicon.png` `apple-touch-icon.png` | 上の元データから作った画像（下の手順で作り直す） |
+| `opening.png` | オープニングのお店の中（元データは `art/gsi.px.js` の `opening`。`art/out/scenes/opening.png` を置く） |
 
 ## 絵を作り直す
 
