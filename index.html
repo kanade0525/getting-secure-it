@@ -245,7 +245,12 @@ body.fab-on .shop-foot{min-height:62px}   /* 会話中も空けておく（会�
   #p-shop:has(>.pc.fill)>.notes,#p-console:has(>.pc.fill)>.notes{grid-column:2;grid-row:2;align-self:start;margin:8px 0 12px;max-height:calc(var(--shop-h) - 46px);overflow-y:auto;overscroll-behavior:contain}
   body.fab-on #p-shop:has(>.pc.fill)>.notes,body.fab-on #p-console:has(>.pc.fill)>.notes{max-height:calc(var(--shop-h) - 46px - 62px)}
   body.fab-on #p-shop:has(>.pc.fill)>.shop-foot,body.fab-on #p-console:has(>.pc.fill)>.shop-foot{min-height:0}   /* ボタンはメモの列の下なので、ディスプレイは下まで使える */
-  body:has(#p-shop:not([hidden])>.pc.fill) .fab,body:has(#p-console:not([hidden])>.pc.fill) .fab{right:max(14px,calc(env(safe-area-inset-right,0px) + 14px),calc(50vw - 576px))}
+  /* ディスプレイと説明のひと組（pcPair）。説明は前後どちらのものも右の列に、上から順に並べる */
+  main:has(>#p-shop:not([hidden])>.pcpair){max-width:1180px}
+  #p-shop>.pcpair{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,30vw,360px);column-gap:16px;align-items:start}
+  #p-shop>.pcpair>.pc{grid-column:1;grid-row:1/span 4}
+  #p-shop>.pcpair>.notes{grid-column:2;margin:8px 0 0}
+  body:has(#p-shop:not([hidden])>.pcpair) .fab,body:has(#p-shop:not([hidden])>.pc.fill) .fab,body:has(#p-console:not([hidden])>.pc.fill) .fab{right:max(14px,calc(env(safe-area-inset-right,0px) + 14px),calc(50vw - 576px))}
 }
 /* ディスプレイ本体：ふち・画面・あご（電源ランプ）・首・台 */
 .pc{position:relative;display:flex;flex-direction:column;margin:8px 0 12px;min-width:0}
@@ -404,6 +409,7 @@ button.nav:hover{background:var(--br-strip)}
 /* シロのメモ（ディスプレイの外に置く。ゲームの世界のものではなく、解説だとわかるように） */
 .notes{display:flex;flex-direction:column;gap:8px;margin:0 0 10px}
 .notes:empty{display:none}
+.pcpair{display:flex;flex-direction:column}
 .hj-meta{margin:0;border:2px solid var(--line);border-left:6px solid var(--accent);background:var(--soft);padding:9px 12px 10px}
 .hj-meta p{margin:0 0 6px;font-size:13px;line-height:1.7}
 .hj-meta p:last-child{margin-bottom:0}
@@ -859,6 +865,8 @@ const yen=n=>'¥'+Number(n).toLocaleString();
 // シロのメモ。kind：なし＝説明／danger＝まずいこと／ok＝防げたこと
 const note=(label,body,kind)=>`<div class="hj-meta${kind?' '+kind:''}"><div class="note-hd">${castSpr('shiro',1.5,'')}<span class="hj-meta-h">${label}</span></div>${body}</div>`;
 const notes=(...a)=>`<div class="notes">${a.join('')}</div>`;
+// ディスプレイと、その前後の説明をひと組にする。広い画面では説明をディスプレイの右に並べる（お客さんのブラウザの画面など、ディスプレイが主画面でないもの）
+const pcPair=(...a)=>`<div class="pcpair">${a.join('')}</div>`;
 // ディスプレイ。who＝だれのパソコンか（画面の外の札）。fill＝タブの残りの高さいっぱいに広げる
 function pcHTML(inner,who,fill){
   return `<div class="pc${fill?' fill':''}"><span class="pc-who">${who}</span>
@@ -917,10 +925,10 @@ function xssNav(day){
 function hijackHTML(nav){
   const o={k:'hj',title:nav==='loading'?'読み込み中…':'特別当選センター',fav:mono(GLYPH.diamond,2),url:'http://当選プレゼント.example/login',sec:'bad',evil:true,back:'xssBack'};
   if(nav==='loading'){
-    return notes(note('解説',`<p>レビューを開いた瞬間、ブラウザが <b>${esc(DOM())} から別のサイトへ勝手に移動</b>しはじめました。</p>`))
-      +pcHTML(browserWin(o,'<div class="hj-load">当選プレゼント.example を開いています…</div>'),'お客さんのパソコン');
+    return pcPair(notes(note('解説',`<p>レビューを開いた瞬間、ブラウザが <b>${esc(DOM())} から別のサイトへ勝手に移動</b>しはじめました。</p>`))
+      +pcHTML(browserWin(o,'<div class="hj-load">当選プレゼント.example を開いています…</div>'),'お客さんのパソコン'));
   }
-  return notes(note('解説：いま起きていること',`<p>レビューを開いただけで、ブラウザが <b>${esc(DOM())} から下の別サイトへ勝手に移動</b>しました。お店とは無関係の、攻撃者が用意したページです（ログイン画面もニセモノ。入力はできないようにしてあります）。</p>`))
+  return pcPair(notes(note('解説：いま起きていること',`<p>レビューを開いただけで、ブラウザが <b>${esc(DOM())} から下の別サイトへ勝手に移動</b>しました。お店とは無関係の、攻撃者が用意したページです（ログイン画面もニセモノ。入力はできないようにしてあります）。</p>`))
     +pcHTML(browserWin(o,`<div class="evil-head"><span class="evil-logo">${mono(GLYPH.diamond,2)}</span><span>特別当選センター</span></div>
         <div class="phish">
           <div class="phish-h">【重要】ログインの有効期限が切れました</div>
@@ -929,7 +937,7 @@ function hijackHTML(nav){
           <label class="phish-f"><span>パスワード</span><input type="password" disabled placeholder="••••••••"></label>
           <button class="btn primary" disabled>ログイン</button>
         </div>`),'お客さんのパソコン')
-    +notes(note('解説：画面には出ないけど、同時に起きたこと',`<p>この瞬間、お客さんのログイン状態が攻撃者の手元へ送られました。</p><code class="hj-steal-c">cookie: SESSION=pixeldo_8f3ad92c17b4e6…</code><p style="margin:6px 0 0">これがあれば、パスワードを知らなくても、そのお客さんとしてログインできてしまいます。</p>`,'danger'))
+    +notes(note('解説：画面には出ないけど、同時に起きたこと',`<p>この瞬間、お客さんのログイン状態が攻撃者の手元へ送られました。</p><code class="hj-steal-c">cookie: SESSION=pixeldo_8f3ad92c17b4e6…</code><p style="margin:6px 0 0">これがあれば、パスワードを知らなくても、そのお客さんとしてログインできてしまいます。</p>`,'danger')))
     +`<div class="hj-back"><button class="btn" data-act="xssBack">お店のサイト（${esc(DOM())}）に戻る</button></div>`;
 }
 function browserHTML(){
@@ -1026,14 +1034,14 @@ function sessionBrowserHTML(){
   const back='<button class="btn" data-act="sessBack">サイトに戻る</button>';
   let h=notes(note('解説：ログイン中の「マイページ」を開いたところ','<p>下は、あなたのパソコンのブラウザです。<b>アドレス欄</b>に注目してください。</p>'))
     +mypagePC(onCookie?base:sidUrl,'あなたのパソコン','sess','sessBack');
-  if(onCookie)return h+notes(note('解説：対策後','<p>アドレス欄に合言葉がありません。ログインの合言葉は<b>Cookieの中</b>にあり、URLには出ません。だからこのページのリンクを誰かに渡しても、その人はログインできません。</p>','ok'))+`<div class="hj-back">${back}</div>`;
+  if(onCookie)return pcPair(h,notes(note('解説：対策後','<p>アドレス欄に合言葉がありません。ログインの合言葉は<b>Cookieの中</b>にあり、URLには出ません。だからこのページのリンクを誰かに渡しても、その人はログインできません。</p>','ok')))+`<div class="hj-back">${back}</div>`;
   h+=notes(note('解説：ここが危ない',`<p>アドレス欄の末尾 <code>sid=${SESS_SID}</code> が、ログインの合言葉そのものです。URLは<b>ブラウザの履歴・共有したリンク・リファラ（紹介元）</b>に残ります。たとえばブラウザの履歴にはこう残ります。</p>
       <code class="hj-steal-c">履歴  ${esc(sidUrl)}</code>
       <p style="margin:6px 0 0">この合言葉入りのリンクを手に入れた人が、そのまま開くと…</p>`,'danger'));
-  if(!shared)return h+`<div class="hj-back"><button class="btn" data-act="sessShare">そのリンクを別の人が開いた画面を見る</button>${back}</div>`;
-  return h+notes(note('解説：そのリンクを受け取った別の人のブラウザ','<p>別の端末で同じリンクを開いただけ。パスワードは入力していません。</p>','danger'))
+  if(!shared)return pcPair(h)+`<div class="hj-back"><button class="btn" data-act="sessShare">そのリンクを別の人が開いた画面を見る</button>${back}</div>`;
+  return pcPair(h)+pcPair(notes(note('解説：そのリンクを受け取った別の人のブラウザ','<p>別の端末で同じリンクを開いただけ。パスワードは入力していません。</p>','danger'))
     +mypagePC(sidUrl,'別の人のパソコン','sess2')
-    +notes(note('結果','<p>URLの合言葉だけで、<b>あなたとしてログインできてしまいました</b>。</p>','danger'))+`<div class="hj-back">${back}</div>`;
+    +notes(note('結果','<p>URLの合言葉だけで、<b>あなたとしてログインできてしまいました</b>。</p>','danger')))+`<div class="hj-back">${back}</div>`;
 }
 /* --- 管理タブに出るデモ。ページの中（戻り値）＝管理画面に実際に出るもの／外（cNotes）＝シロのメモ --- */
 let cNotes=[];   // renderConsole が描くたびに空にして、各ページがメモを足す
@@ -1126,7 +1134,7 @@ function csrfIntro(){
 }
 function csrfBrowserHTML(){
   const o=DAYS[S.day].demo,token=S.cfg.code.csrf==='token';
-  return notes(note('解説：いま起きていること','<p>お客さんが開いたのは、ごくふつうに見えるページ。でもこのページには<b>見えない仕掛け</b>があり、そのお客さんのログインを使って、裏でピクセル堂に操作を送ります。<b>このページ自体はピクセル堂を名指ししていません</b>——同じ仕掛けは広告やメールのリンクにも隠せ、たまたまログイン中の人にだけ当たります。</p>'))
+  return pcPair(notes(note('解説：いま起きていること','<p>お客さんが開いたのは、ごくふつうに見えるページ。でもこのページには<b>見えない仕掛け</b>があり、そのお客さんのログインを使って、裏でピクセル堂に操作を送ります。<b>このページ自体はピクセル堂を名指ししていません</b>——同じ仕掛けは広告やメールのリンクにも隠せ、たまたまログイン中の人にだけ当たります。</p>'))
     +pcHTML(browserWin({k:'csrf',title:o.trap.name,fav:mono(GLYPH.diamond,2),url:o.trap.url,sec:'bad',evil:true,back:'csrfBack'},
       `<div class="evil-head"><span class="evil-logo">${mono(GLYPH.diamond,2)}</span><span>${esc(o.trap.name)}</span></div>
         <div class="phish"><p style="margin:0">人気の無料ゲームまとめ 第1位〜第50位！</p></div>`),'お客さんのパソコン')
@@ -1134,7 +1142,7 @@ function csrfBrowserHTML(){
 （ログイン中のお客さんとして）
 ・お届け先の住所を、攻撃者の住所に書き換え</code>
       ${token?'':'<p style="margin:8px 0 0">お店は「ログイン済みの本人」と信じて<b>受理</b>。支払い操作もないまま、お届け先の住所だけが静かに書き換わりました。次の注文は攻撃者の住所に届いてしまいます。</p>'}`,token?'':'danger')
-      +(token?note('結果','<p>お店が合言葉（トークン）を確認。別サイトからで合言葉がないので<b>拒否</b>されました。</p>','ok'):''))
+      +(token?note('結果','<p>お店が合言葉（トークン）を確認。別サイトからで合言葉がないので<b>拒否</b>されました。</p>','ok'):'')))
     +`<div class="hj-back"><button class="btn" data-act="csrfBack">サイトに戻る</button></div>`;
 }
 function idorIntro(){
@@ -1158,10 +1166,10 @@ function idorBrowserHTML(){
   }else{
     body=`<div class="ordpage"><p class="muted small" style="margin:0">その番号の注文はありません。</p></div>`;
   }
-  return notes(note('やってみよう','<p>この<b>アドレス欄は編集できます</b>（本物のブラウザと同じ）。末尾の番号を変えて <b>Enter</b> か「開く」で移動し、他人の注文が見えてしまわないか試します。</p>'))
+  return pcPair(notes(note('やってみよう','<p>この<b>アドレス欄は編集できます</b>（本物のブラウザと同じ）。末尾の番号を変えて <b>Enter</b> か「開く」で移動し、他人の注文が見えてしまわないか試します。</p>'))
     +pcHTML(browserWin({k:'idor',title:'注文確認 - よろず屋ピクセル堂',back:'idorBack',edit:{id:'idorUrl',value:DOM()+'/order?id='+id,label:'アドレス欄（編集できます）',go:'idorGo'}},
       subHead('ご注文の確認','ようこそ、店長さん')+body),'あなたのパソコン')
-    +notes(n)+`<div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
+    +notes(n))+`<div class="hj-back"><button class="btn" data-act="idorBack">サイトに戻る</button></div>`;
 }
 function resetDemoRes(){S.reviewQ='';S.reviewRes=null;S.storeRes=null;S.csrfRes=null;S.idorRes=null;S.idorId=null;S.couponRes=null;S.sessionRes=null;S.orderRes=null;S.botRes=null;S.bruteN=0;S.bruteRes=null;S.dosRes=null;S.wafRes=null;S.wafEnc=false;S.vulnShown=false;S.skimRes=null;S.keyRes=null;S.domRes=null;S.exfilRes=null;S.scrapeRes=null;S.fwRes=null;S.dbRes=null;}
 /* --- 第3章 防壁編（サイトタブに出るもの）。ページの中＝お店のフォーム／外＝再現ボタンと結果 ---

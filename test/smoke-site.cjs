@@ -92,7 +92,9 @@ const DAYS = {
         const P = document.querySelector('main .panel:not([hidden])'), r = e => e && e.getBoundingClientRect();
         const pc = r(P.querySelector(':scope>.pc.fill')), ns = !pc ? [] : [...P.querySelectorAll(':scope>.notes')].filter(n => n.childElementCount).map(r), f = document.querySelector('.fab:not([hidden])');
         const prev = (a, i) => i === 0 || a.top >= ns[i - 1].bottom;   // メモが2つなら、重ならずに上から順に
-        return { side: ns.every((a, i) => a.left >= pc.right && prev(a, i)) && (!ns.length || Math.abs(ns[0].top - pc.top) < 2), clear: !ns.length || !f || ns[ns.length - 1].bottom <= r(f).top, wide: document.documentElement.scrollWidth > innerWidth };
+        // ディスプレイと説明のひと組（.pcpair）：説明はそのディスプレイの右に、上から順に並ぶ
+        const pairs = [...P.querySelectorAll(':scope>.pcpair')].every(g => { const d = r(g.querySelector(':scope>.pc')), m = [...g.querySelectorAll(':scope>.notes')].filter(n => n.childElementCount).map(r); return m.every((a, i) => a.left >= d.right && (i === 0 || a.top >= m[i - 1].bottom)); });
+        return { side: pairs && ns.every((a, i) => a.left >= pc.right && prev(a, i)) && (!ns.length || Math.abs(ns[0].top - pc.top) < 2), clear: !ns.length || !f || ns[ns.length - 1].bottom <= r(f).top, wide: document.documentElement.scrollWidth > innerWidth };
       });
       check('広い画面では、メモがディスプレイの右に並ぶ', w.side);
       check('広い画面で、メモが「防げたか確かめる」に隠れない', w.clear);
