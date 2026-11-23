@@ -85,6 +85,19 @@ const DAYS = {
       else check('未対策は「まずいこと」のメモが出る', v.danger >= 1);
       if (D.tab === 'console') check(fixed ? '対策後は、案内の矢印が立たない' : '未対策は、対策を入れる場所に案内の矢印が立つ（' + (D.guide || 'いま開いている画面') + '）', v.guide === (fixed ? '' : D.guide));
       await page.screenshot({ path: path.join(OUT, 'site-' + String(day).padStart(2, '0') + (fixed ? '-b' : '-a') + '.png') });
+      // 広い画面：シロのメモは主画面のディスプレイ（.pc.fill）の右に並ぶ（下に積んでディスプレイを縮めない）。「防げたか確かめる」に隠れない
+      //   お客さんのブラウザの画面（7〜10日目）は、説明とディスプレイが交互の読み物なので縦積みのまま（はみ出しだけ確かめる）
+      await page.setViewportSize({ width: 1280, height: 800 }); await page.waitForTimeout(60);
+      const w = await page.evaluate(() => {
+        const P = document.querySelector('main .panel:not([hidden])'), r = e => e && e.getBoundingClientRect();
+        const pc = r(P.querySelector(':scope>.pc.fill')), ns = !pc ? [] : [...P.querySelectorAll(':scope>.notes')].filter(n => n.childElementCount).map(r), f = document.querySelector('.fab:not([hidden])');
+        const prev = (a, i) => i === 0 || a.top >= ns[i - 1].bottom;   // メモが2つなら、重ならずに上から順に
+        return { side: ns.every((a, i) => a.left >= pc.right && prev(a, i)) && (!ns.length || Math.abs(ns[0].top - pc.top) < 2), clear: !ns.length || !f || ns[ns.length - 1].bottom <= r(f).top, wide: document.documentElement.scrollWidth > innerWidth };
+      });
+      check('広い画面では、メモがディスプレイの右に並ぶ', w.side);
+      check('広い画面で、メモが「防げたか確かめる」に隠れない', w.clear);
+      check('広い画面でも横にはみ出さない', !w.wide);
+      await page.screenshot({ path: path.join(OUT, 'site-' + String(day).padStart(2, '0') + (fixed ? '-b' : '-a') + '-wide.png') });
       await page.close();
     }
     log(day + '日目 OK');

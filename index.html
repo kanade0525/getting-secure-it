@@ -234,6 +234,19 @@ body[data-tab="shop"].talking main,body[data-tab="console"].talking main{padding
 .shop-hd p{margin:0}
 .shop-foot{margin:auto 0 0;display:flex;align-items:flex-end}
 body.fab-on .shop-foot{min-height:62px}   /* 会話中も空けておく（会話の開閉でディスプレイの高さが変わらないように） */
+/* 広い画面では、シロのメモをディスプレイの右に並べる（下に積むと、ディスプレイが縮むので）。「防げたか確かめる」もメモの列の下へ */
+@media (min-width:960px){
+  /* 主画面のディスプレイ（.pc.fill）がある画面だけ。7〜10日目のお客さんのブラウザの画面は、説明とディスプレイが交互に並ぶ読み物なので縦積みのまま */
+  main:has(>#p-shop:not([hidden])>.pc.fill),main:has(>#p-console:not([hidden])>.pc.fill){max-width:1180px}
+  #p-shop:not([hidden]):has(>.pc.fill),#p-console:not([hidden]):has(>.pc.fill){display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,30vw,360px);grid-template-rows:auto 1fr auto;column-gap:16px}
+  #p-shop:has(>.pc.fill)>*,#p-console:has(>.pc.fill)>*{grid-column:1/-1}
+  #p-shop>.pc.fill,#p-console>.pc.fill{grid-row:2}
+  #p-shop:has(>.notes:not(:empty))>.pc.fill,#p-console:has(>.notes:not(:empty))>.pc.fill{grid-column:1}
+  #p-shop:has(>.pc.fill)>.notes,#p-console:has(>.pc.fill)>.notes{grid-column:2;grid-row:2;align-self:start;margin:8px 0 12px;max-height:calc(var(--shop-h) - 46px);overflow-y:auto;overscroll-behavior:contain}
+  body.fab-on #p-shop:has(>.pc.fill)>.notes,body.fab-on #p-console:has(>.pc.fill)>.notes{max-height:calc(var(--shop-h) - 46px - 62px)}
+  body.fab-on #p-shop:has(>.pc.fill)>.shop-foot,body.fab-on #p-console:has(>.pc.fill)>.shop-foot{min-height:0}   /* ボタンはメモの列の下なので、ディスプレイは下まで使える */
+  body:has(#p-shop:not([hidden])>.pc.fill) .fab,body:has(#p-console:not([hidden])>.pc.fill) .fab{right:max(14px,calc(env(safe-area-inset-right,0px) + 14px),calc(50vw - 576px))}
+}
 /* ディスプレイ本体：ふち・画面・あご（電源ランプ）・首・台 */
 .pc{position:relative;display:flex;flex-direction:column;margin:8px 0 12px;min-width:0}
 #p-shop>.pc.fill,#p-console>.pc.fill{flex:1 1 auto;min-height:min(calc(var(--shop-h) - 46px),max(360px,calc(var(--shop-h) * .58)))}
