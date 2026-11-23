@@ -38,7 +38,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"DotGothic16","H
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:3px solid var(--line);padding:8px 14px;display:flex;align-items:center;gap:10px}
 .chap{display:block;font-size:12px;color:var(--muted);line-height:1.3}
-.dayl{display:block;font-size:18px;line-height:1.4}
+.dayl{display:block;font-size:18px;line-height:1.4;word-break:keep-all;overflow-wrap:anywhere}
+@media (max-width:420px){.dayl{font-size:16px}}
 /* 画面上部の日付：押すと「日を選ぶ」が開く */
 .daybtn{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;text-align:left;cursor:pointer;min-width:0}
 /* 日を選ぶ：クリアした日は選べる。まだの日は鍵つきで選べない（デバッグ中はどの日も選べる） */
@@ -212,7 +213,7 @@ select:disabled{opacity:.45}
 .optl{grid-column:2;font-size:15px}
 .optc{grid-column:2;display:block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;background:var(--win-bg);color:#c9cff5;border:2px solid var(--line);padding:4px 8px;margin:2px 0;overflow-x:auto;white-space:pre;overflow-wrap:normal}
 .optn{grid-column:2;font-size:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;padding:10px 0}
 .item{background:var(--surface);border:3px solid var(--line);padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .item .iname{line-height:1.3}
 .item .iprice{color:var(--gold)}
@@ -244,12 +245,19 @@ body.fab-on .shop-foot{min-height:62px}   /* 会話中も空けておく（会�
   #p-shop:has(>.notes:not(:empty))>.pc.fill,#p-console:has(>.notes:not(:empty))>.pc.fill{grid-column:1}
   #p-shop:has(>.pc.fill)>.notes,#p-console:has(>.pc.fill)>.notes{grid-column:2;grid-row:2;align-self:start;margin:8px 0 12px;max-height:calc(var(--shop-h) - 46px);overflow-y:auto;overscroll-behavior:contain}
   body.fab-on #p-shop:has(>.pc.fill)>.notes,body.fab-on #p-console:has(>.pc.fill)>.notes{max-height:calc(var(--shop-h) - 46px - 62px)}
-  body.fab-on #p-shop:has(>.pc.fill)>.shop-foot,body.fab-on #p-console:has(>.pc.fill)>.shop-foot{min-height:0}   /* ボタンはメモの列の下なので、ディスプレイは下まで使える */
+  body.fab-on #p-shop:has(>.notes:not(:empty))>.shop-foot,body.fab-on #p-console:has(>.notes:not(:empty))>.shop-foot{min-height:0}   /* ボタンはメモの列の下なので、ディスプレイは下まで使える */
   /* ディスプレイと説明のひと組（pcPair）。説明は前後どちらのものも右の列に、上から順に並べる */
   main:has(>#p-shop:not([hidden])>.pcpair){max-width:1180px}
   #p-shop>.pcpair{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,30vw,360px);column-gap:16px;align-items:start}
   #p-shop>.pcpair>.pc{grid-column:1;grid-row:1/span 4}
   #p-shop>.pcpair>.notes{grid-column:2;margin:8px 0 0}
+  /* 通信タブ：図とログを横に並べる（縦に積むと、図が高さを取ってログが数行しか見えない） */
+  main:has(>#p-net:not([hidden])>.netlog){max-width:1180px}
+  #p-net:not([hidden]):has(>.netlog){display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:16px}
+  #p-net:has(>.netlog)>h2,#p-net:has(>.netlog)>p.small{grid-column:1/-1}
+  #p-net:has(>.netlog)>.netsvg{grid-column:1;grid-row:3;align-self:start;max-height:100%}
+  #p-net:has(>.netlog)>.netlog{grid-column:2;grid-row:3;margin:0;min-height:0;font-size:14px}
+  body:has(#p-net:not([hidden])>.netlog) .fab,
   body:has(#p-shop:not([hidden])>.pcpair) .fab,body:has(#p-shop:not([hidden])>.pc.fill) .fab,body:has(#p-console:not([hidden])>.pc.fill) .fab{right:max(14px,calc(env(safe-area-inset-right,0px) + 14px),calc(50vw - 576px))}
 }
 /* ディスプレイ本体：ふち・画面・あご（電源ランプ）・首・台 */
@@ -273,7 +281,7 @@ body.fab-on .shop-foot{min-height:62px}   /* 会話中も空けておく（会�
 .btab{flex:0 1 230px;min-width:0;display:flex;align-items:center;gap:6px;margin-left:4px;padding:4px 8px 5px;font-size:12px;line-height:1.35;background:var(--br-bar);color:var(--br-ink);border-radius:6px 6px 0 0}
 /* 管理タブ：会社ごとにブラウザのタブを並べる。開いていないタブは狭くなり、アイコンだけになる */
 button.btab{font:inherit;font-size:12px;border:0;cursor:pointer;text-align:left;position:relative;flex:1 1 0;min-width:34px;max-width:150px;min-height:34px;margin-left:0;container-type:inline-size}
-button.btab[aria-selected="true"]{flex:0 1 auto;max-width:none;container-type:normal}
+button.btab[aria-selected="true"]{min-width:max-content;container-type:normal}   /* 幅はほかのタブと同じ。ただし題名が入る幅より細くしない */
 button.btab[aria-selected="false"]{background:transparent;color:var(--br-mut)}
 button.btab[aria-selected="false"]:hover{background:var(--br-bar)}
 button.btab[aria-selected="false"] .spr{opacity:.75}
