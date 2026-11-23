@@ -207,7 +207,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  sqli: {name:"SQLインジェクション役のハッカー", role:"4日目", group:"attacker", rows:[
+  sqli: {name:"SQLインジェクション役のハッカー", role:"4日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKPPPPPPKK...",
@@ -225,7 +225,7 @@ cast: {
     "....KPK..KPK....",
     "....KK....KK...."
   ]},
-  reuse: {name:"パスワード使い回し狩り", role:"5日目", group:"attacker", rows:[
+  reuse: {name:"パスワード使い回し狩り", role:"5日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -243,7 +243,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  ichien: {name:"1円購入犯", role:"6日目", group:"attacker", rows:[
+  ichien: {name:"1円購入犯", role:"6日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -261,7 +261,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  xss: {name:"レビュー欄の落書き屋", role:"7日目", group:"attacker", rows:[
+  xss: {name:"レビュー欄の落書き屋", role:"7日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKPPPPPPKK...",
@@ -279,7 +279,7 @@ cast: {
     "....KPK..KPK....",
     "....KK....KK...."
   ]},
-  session: {name:"セッションハイジャック役のハッカー", role:"8日目", group:"attacker", rows:[
+  session: {name:"セッションハイジャック役のハッカー", role:"8日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -297,7 +297,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  csrf: {name:"お届け先すり替えの仕掛け人", role:"9日目", group:"attacker", rows:[
+  csrf: {name:"お届け先すり替えの仕掛け人", role:"9日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKPPPPPPKK...",
@@ -315,7 +315,7 @@ cast: {
     "....KPK..KPK....",
     "....KK....KK...."
   ]},
-  idor: {name:"URLの数字を変えてみた人", role:"10日目", group:"attacker", rows:[
+  idor: {name:"URLの数字を変えてみた人", role:"10日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",
@@ -333,7 +333,7 @@ cast: {
     "....KDK..KDK....",
     "....KK....KK...."
   ]},
-  coupon: {name:"クーポン連打部隊", role:"11日目", group:"attacker", rows:[
+  coupon: {name:"クーポン連打部隊", role:"11日目（再現）", group:"attacker", rows:[
     "..K.........K...",
     "..KK.......KK...",
     "...KKDDDDDDKK...",

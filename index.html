@@ -126,7 +126,7 @@ body.talking #p-net:not([hidden]){height:calc(var(--net-h) - 164px)}
 .np.ok,.nok{fill:var(--safe)}
 .np.bad,.broken .np.ok{fill:var(--danger)}
 .nok{font-size:11px}
-.np.sm{font-size:9px}
+.np.sm,.nl.sm{font-size:9px}
 .nz{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
 .nzl{font-size:10px;fill:var(--muted);paint-order:stroke;stroke:var(--net-bg);stroke-width:7px;stroke-linejoin:round}
 .ntb{fill:var(--surface);stroke:var(--line);stroke-width:2}
@@ -183,6 +183,8 @@ body.talking #p-net:not([hidden]){height:calc(var(--net-h) - 164px)}
 /* 「防げたか確かめる」：対策フェーズのあいだ、どのタブでも右下（タブの上）に固定。本文の右端にそろえる */
 .fab{position:fixed;z-index:6;right:max(14px,calc(env(safe-area-inset-right,0px) + 14px),calc(50vw - 346px));bottom:calc(71px + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 16px 6px 12px;font-size:15px;line-height:1.3;box-shadow:3px 3px 0 0 var(--line),0 0 0 3px var(--bg),3px 3px 0 3px var(--bg)}
 .fab[hidden],body.talking .fab{display:none}
+.fab.tuck{padding:6px 10px}
+.fab.tuck #fabLabel{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .fab .spr{flex:none}
 body.fab-on:not(.talking):not([data-tab="net"]):not([data-tab="shop"]):not([data-tab="console"]) main{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))}
 body.fab-on:not(.talking) #p-net:not([hidden]){height:calc(var(--net-h) - 64px)}
@@ -634,7 +636,7 @@ body.ending-on .dim{background:transparent}
 .ca-tag{margin-left:auto;color:var(--gold);font-size:12px}
 .ca-tag.ok{color:var(--safe)}
 .ca-code{padding:15px 13px;font-size:13px;line-height:1.75;overflow-x:auto}
-.ca-row{display:flex;gap:13px;white-space:pre}
+.ca-row{display:flex;gap:13px;white-space:pre-wrap;overflow-wrap:anywhere}
 .ca-ln{color:#4a4f70;user-select:none;min-width:14px;text-align:right}
 .ca-tx{color:var(--ink)}
 .ca-row.chg .ca-tx{color:#ff9aa6}
@@ -757,7 +759,7 @@ if(S.dnsOk&&(!S.dns||!S.dns.length))S.dns=[{type:'A',name:'@',value:SERVER_IP}];
 if(S.cfg.cert&&!S.cfg.installed)Object.assign(S.cfg,{ca:'free',keyMade:true,token:'DONE-DONE',issued:true,installed:'fullchain'});
 // stale＝別のタブ（同じサイトを開いた、もうひとつの画面）が記録を書き換えた。このタブの状態はもう古いので、保存しない。
 // そのままにすると、別のタブで「はじめから」にしても、こちらの古い状態で上書きして、前の記録が戻ってしまう。このタブに戻ってきたら、読み込み直す
-let stale=false;
+let stale=false,loadFail=false;   // loadFail＝前回の記録を読み込めなかった（記録は残したまま。タイトルで選んでもらう）
 function save(){if(stale)return;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null)stale=true;});
 const reloadIfStale=()=>{if(stale&&document.visibilityState!=='hidden')location.reload();};
@@ -781,7 +783,7 @@ const FINE_PTR=!!(window.matchMedia&&matchMedia('(pointer:fine)').matches);
 let talkFocus=null;
 function setTalking(on){
   if(document.body.classList.contains('talking')===on)return;
-  document.body.classList.toggle('talking',on);
+  document.body.classList.toggle('talking',on);if(!on&&typeof fabLater==='function')fabLater();
   win.hidden=!on;dim.hidden=!on;
   TALK_BG.forEach(el=>{if(el)el.inert=on;});
   if(on){const a=document.activeElement;talkFocus=a&&a!==document.body&&a.id?a.id:null;win.focus({preventScroll:true});return;}
@@ -830,7 +832,19 @@ function renderFab(){
   fab.hidden=!on;document.body.classList.toggle('fab-on',on);
   fab.disabled=evPlaying;
   $('fabLabel').textContent=evPlaying?'確かめています…':'防げたか確かめる';
+  fab.setAttribute('aria-label',$('fabLabel').textContent);
+  fabTuck();
 }
+// 「防げたか確かめる」が、ページのボタンにかぶるときは、盾だけの小さな形にたたむ（かぶらなくなったら戻す）
+function fabTuck(){
+  if(fab.hidden)return;
+  fab.classList.remove('tuck');const r=fab.getBoundingClientRect();
+  const hit=[...document.querySelectorAll('main .panel:not([hidden]) button,main .panel:not([hidden]) select,main .panel:not([hidden]) input')].some(b=>{const q=b.getBoundingClientRect();return q.width&&q.right>r.left&&q.left<r.right&&q.bottom>r.top&&q.top<r.bottom;});
+  fab.classList.toggle('tuck',hit);
+}
+let fabRaf=0;const fabLater=()=>{if(!fabRaf)fabRaf=requestAnimationFrame(()=>{fabRaf=0;fabTuck();});};
+window.addEventListener('scroll',fabLater,{passive:true});window.addEventListener('resize',fabLater);
+document.addEventListener('scroll',fabLater,{passive:true,capture:true});
 
 /* ---------- 描画 ---------- */
 function render(){
@@ -1250,13 +1264,13 @@ function wafDemoHTML(){
 function scrapeDemoHTML(){
   if(demoOff())return '';
   const fixed=edgeOn()&&S.cfg.inf.bot==='challenge',r=S.scrapeRes;
-  if(r)cNotes.push(r.all?note('結果',`<p><b>全1,240商品を取得できた</b></p><p>${r.ua?'ふつうのブラウザの名前を名乗っただけで、すべて通った。':''}写真・説明・値段を丸ごと集められる。そっくりの偽サイトも作れてしまう</p>`,'danger')
+  if(r)cNotes.push(r.all?note('結果',`<p><b>全240点の商品を取得できた</b></p><p>${r.ua?'ふつうのブラウザの名前を名乗っただけで、すべて通った。':''}写真・説明・値段を丸ごと集められる。そっくりの偽サイトも作れてしまう</p>`,'danger')
     :note('結果',`<p><b>${r.got}件で止まった</b></p><p>入口がボットと判定して、ブラウザかどうかの確認を出した</p>`,'ok'));
   cNotes.push(note('再現：商品ページを集める','<p>プログラムで、商品ページを番号順に全部取りに行きます。</p><div class="acts"><button class="btn primary" data-act="scrapeRun">全商品のページを自動で集められたらどうなるか見る</button></div>'));
   const row=(n,ok)=>`<div class="wafrow ${ok?'pass':'block'}"><b>${ok?'通過':'ブロック'}</b><code>198.51.100.77　GET /items/${n}${ok?'':'　ボットと判定'}</code></div>`;
   const gap=t=>`<p class="small muted" style="padding:2px 12px;margin:0">${t}</p>`;
   let rows;
-  if(r)rows=r.all?row(1,1)+row(2,1)+row(3,1)+gap('…')+row('1,240',1):row(1,1)+gap(`…ほか ${r.got-1} 件`)+row(r.got+1,0)+row(r.got+2,0);
+  if(r)rows=r.all?row(1,1)+row(2,1)+row(3,1)+gap('…')+row('240',1):row(1,1)+gap(`…ほか ${r.got-1} 件`)+row(r.got+1,0)+row(r.got+2,0);
   else rows=fixed?gap('記録はまだありません'):row(1,1)+row(2,1)+row(3,1)+gap('…ほか 1,237 件');
   return `<div class="sec" data-focus><h3>入口の記録</h3>${rows}</div>`;
 }
@@ -1326,7 +1340,7 @@ function apikeyDemo(){
   const page=`<div class="devtools" data-focus aria-label="Chromeの検証ツール" style="margin-bottom:12px">
       <div class="dt-win"><i></i><i></i><i></i><span class="t">検証ツール</span><span class="f12">F12</span></div>
       <div class="dt-tabs"><span class="t">要素</span><span class="t">コンソール</span><span class="t on">ソース</span><span class="t">ネットワーク</span><span class="t">アプリ</span></div>
-      <div class="dt-reqhead"><span>pay.js</span><span></span><span></span></div>
+      <div class="dt-reqhead"><span>checkout.js</span><span></span><span></span></div>
       <pre class="dt-code">${safe?`fetch("/api/pay", { method: "POST" })
 // キーは付けない。お店のサーバーが付けて、決済サービスへ送る`:`fetch("https://api.payments.example/v1/charges", {
   headers: { "Authorization":
@@ -1387,33 +1401,32 @@ function exfilDemoHTML(){
 const SNIP={
   search:{file:'search.py',lines:[
     ['sql = "SELECT name, price FROM products"','sql = "SELECT name, price FROM products"'],
-    ['sql += " WHERE name = \'" + input + "\'"   // 連結','sql += " WHERE name = ?"               // プレースホルダ'],
-    ['db.run(sql)','db.run(sql, [input])']]},
+    ['sql += " WHERE name = \'" + q + "\'"   # 連結','sql += " WHERE name = %s"             # プレースホルダ'],
+    ['rows = db.execute(sql)','rows = db.execute(sql, [q])']]},
   hash:{file:'users.py',lines:[
-    ['db.save(user, {','db.save(user, {'],
-    ['  password: input          // そのまま','  password: bcrypt(input, salt)'],
-    ['})','})']]},
+    ['db.save(user,','db.save(user,'],
+    ['        password=raw)          # そのまま','        password=bcrypt.hash(raw))']]},
   price:{file:'order.py',lines:[
-    ['item  = body                 // 画面の値を信用','item  = catalog.get(body.id) // 台帳から取得'],
-    ['// 数量の確認なし','if (body.qty < 1 || body.qty > 99) deny()'],
-    ['total = item.price * body.qty','total = item.price * body.qty'],
-    ['createOrder(total)','createOrder(total)']]},
+    ['item  = body                  # 画面の値を信用','item  = catalog.get(body["id"])  # 台帳から取得'],
+    ['# 数量の確認なし','if not 1 <= body["qty"] <= 99: deny()'],
+    ['total = item["price"] * body["qty"]','total = item["price"] * body["qty"]'],
+    ['create_order(total)','create_order(total)']]},
   review:{file:'review.py',lines:[
     ['html = "<p>" + review + "</p>"','html = "<p>" + escape(review) + "</p>"'],
     ['render(html)','render(html)']]},
   csrf:{file:'account.py',lines:[
-    ['@route("/account/address", methods=["GET", "POST"])','@route("/account/address", methods=["POST"])'],
-    ['if (user.loggedIn) {','if (user.loggedIn && tokenOK(body)) {'],
-    ['  updateAddress(params)  // 無条件で受理','  updateAddress(body)'],
-    ['}','}']]},
+    ['@app.route("/account/address", methods=["GET", "POST"])','@app.route("/account/address", methods=["POST"])'],
+    ['def update_address():','def update_address():'],
+    ['    if user.logged_in:          # 無条件で受理','    if user.logged_in and token_ok(request.form):'],
+    ['        save_address(request.values)','        save_address(request.form)']]},
   access:{file:'order.py',lines:[
-    ['order = Order.get(body.id)','order = Order.get(body.id)'],
-    ['// 持ち主チェックなし','if (order.owner != me) deny()'],
+    ['order = Order.get(body["id"])','order = Order.get(body["id"])'],
+    ['# 持ち主チェックなし','if order.owner != me: deny()'],
     ['return order','return order']]},
   coupon:{file:'checkout.py',lines:[
-    ['if (coupon.unused)      // 確認','n = coupon.useOnce()    // 確認と記録を1回で'],
-    ['  apply(coupon)         // この隙間で割り込み','if (n == 1)'],
-    ['coupon.markUsed()       // 記録（別）','  apply(coupon)']]},
+    ['if coupon.unused:          # 確認','n = coupon.use_once()      # 確認と記録を1回で'],
+    ['    apply(coupon)          # この隙間で割り込み','if n == 1:'],
+    ['coupon.mark_used()         # 記録（別）','    apply(coupon)']]},
   session:{file:'config/session.py',lines:[
     ['SESSION_STORE       = "cookie"  # Cookieに入れる','SESSION_STORE       = "cookie"  # Cookieに入れる'],
     ['SESSION_IN_URL      = True      # URLにも付ける','SESSION_IN_URL      = False     # URLには付けない'],
@@ -1423,13 +1436,13 @@ const SNIP={
     ['SESSION_MAX_AGE     = None      # 無期限','SESSION_MAX_AGE     = 1209600   # 2週間'],
     ['LOGOUT_ON_PW_CHANGE = False','LOGOUT_ON_PW_CHANGE = True      # 変更時は他端末もログアウト']]},
   defense:{file:'contact.py',lines:[
-    ['no  = json(body).order_no      # \\u0027 は \' に戻る','no  = json(body).order_no'],
-    ['sql = "SELECT * FROM orders WHERE no = \'" + no + "\'"  // 連結','sql = "SELECT * FROM orders WHERE no = ?"   // プレースホルダ'],
-    ['db.run(sql)','db.run(sql, [no])']]},
+    ['no  = json.loads(body)["order_no"]   # \\u0027 は \' に戻る','no  = json.loads(body)["order_no"]'],
+    ['sql = "SELECT * FROM orders WHERE no = \'" + no + "\'"   # 連結','sql = "SELECT * FROM orders WHERE no = %s"   # プレースホルダ'],
+    ['rows = db.execute(sql)','rows = db.execute(sql, [no])']]},
   deps:{file:'requirements.txt',lines:[
-    ['image-lib==1.2.0     # 遠隔コード実行の穴','image-lib==3.4.1'],
-    ['web-util==0.9.3','web-util==2.1.0']]},
-  apikey:{file:'pay.js',lines:[
+    ['image-lib==1.2.0     # 遠隔コード実行の穴','image-lib==1.2.1'],
+    ['web-util==0.9.3','web-util==0.9.4']]},
+  apikey:{file:'static/checkout.js',lines:[
     ['const KEY = "sk_live_9f2a…"  // 丸見え','// キーはサーバー側だけで扱う'],
     ['fetch(PAY_API, {key: KEY})  // 決済サービスへ直接','fetch("/api/pay")   // サーバーが「シークレット」から読んで、決済サービスへ']]}
 };
@@ -1481,7 +1494,7 @@ function searchResult(){
   const r=S.shopRes;
   const card=p=>`<div class="item">${spr(IC[p.icon],3,p.name)}<div class="iname small">${esc(p.name)}</div><div class="iprice small">${esc(p.price)}</div>${p.nfs?'<span class="inote small">お店のお守りです</span>':'<button class="btn mini" data-act="cart">カートに入れる</button>'}</div>`;
   const grid=rows=>`<div class="grid">${rows.map(card).join('')}</div>`;
-  if(!r)return {page:grid(CATALOG)};
+  if(!r)return {page:'<p class="sres-h">店主のおすすめ</p>'+grid(CATALOG)};
   const q=r.q==null?(S.shopQ||''):r.q;
   if(r.leak)return {page:`<p class="sres-h">「${esc(q)}」の検索結果：${r.members.length}件</p><div class="sres">${r.members.map(m=>`<div class="leakrow"><span>${esc(m.name)}</span><span class="lmail">${esc(m.mail)}</span></div>`).join('')}</div>`,
     notes:note('解説：いま起きたこと','<p><b>検索結果に、会員の個人情報が出てきてしまった</b></p>','danger')};
@@ -1513,7 +1526,8 @@ function renderVoices(){
   // その日のお知らせを開いたら、次は「通信」で原因を見る（通信タブにも目印が付く）
   if(S.phase==='incident'&&S.step==='net')h+=notes(note('次は','<p>読めたら、下の「通信」タブを開こう。何が起きているのか、通信のようすで確かめられるよ。</p>'));
   if(!S.voices.length)h+=`<div class="box"><p class="muted">まだ声は届いていません。</p></div>`;
-  else h+=`<div class="box">${S.voices.map(v=>`<div class="voice${v.unread?' new':''}">${voiceIcon(v)}<div><div class="vn">${esc(v.who)}${v.unread?'<span class="tag newtag">新着</span>':''}<span class="tag">${v.sys?'アラート':v.mail?'メール':'投稿'}</span><span class="tag">${v.day}日目</span></div><div>${esc(v.t)}</div></div></div>`).join('')}</div>`;
+  const vs=[];S.voices.forEach(v=>{const g=vs[vs.length-1];if(g&&g[0].day===v.day)g.unshift(v);else vs.push([v]);});   // 日ごとには新しい順、同じ日の中は届いた順（「その〜」が、指す内容より先に出ないように）
+  if(S.voices.length)h+=`<div class="box">${vs.flat().map(v=>`<div class="voice${v.unread?' new':''}">${voiceIcon(v)}<div><div class="vn">${esc(v.who)}${v.unread?'<span class="tag newtag">新着</span>':''}<span class="tag">${v.sys?'アラート':v.mail?'メール':'投稿'}</span><span class="tag">${v.day}日目</span></div><div>${esc(v.t)}</div></div></div>`).join('')}</div>`;
   $('p-voice').innerHTML=h;
 }
 const attackerOf=()=>CAST[(DAYS[S.day]&&DAYS[S.day].attacker)||'tochou'];
@@ -1580,9 +1594,11 @@ function netSteps(sn,kind){
     {tag:'TCP',t:sn.via?'入口に接続する':'サーバーに接続する',hops:[H('client',T),H(T,'client'),H('client',T)]}];
   if(sn.pre==='certfail')st.push({tag:'TLS',t:'証明書を確かめる',note:'期限が切れていて、確かめられない',bad:true,hops:[H('client',T),H(T,'client')]});
   else{
-    if(!http)st.push({tag:'TLS',t:sn.via?'入口の証明書を確かめ、暗号の鍵を決める':'証明書を確かめ、暗号の鍵を決める',tube:true,hops:[H('client',T),H(T,'client'),H('client',T)]});
+    const weak=sn.pre==='weak';   // 2日目：古い方式で暗号化されている（解読できる）
+    if(!http)st.push(weak?{tag:'TLS',t:'古い方式（TLS 1.0・弱い暗号）で鍵を決める',bad:true,tube:true,hops:[H('client',T),H(T,'client'),H('client',T)]}
+      :{tag:'TLS',t:sn.via?'入口の証明書を確かめ、暗号の鍵を決める':'証明書を確かめ、暗号の鍵を決める',tube:true,hops:[H('client',T),H(T,'client'),H('client',T)]});
     const u=http&&sn.https,hops=sn.via?[H('client','edge',pg,u),H('edge','server',pg),H('server','edge',pg),H('edge','client',pg,u)]:[H('client','server',pg,u),H('server','client',pg,u)];
-    st.push({tag:http?'HTTP':'HTTPS',t:'ページを受け取る',note:http?(sn.pre==='http'?'暗号化なし。http:// のリンクから来た':'暗号化なし'):sn.via?'暗号化されている。入口がショップへ取り次ぐ':'暗号化されている',hops});
+    st.push({tag:http?'HTTP':'HTTPS',t:'ページを受け取る',note:http?(sn.pre==='http'?'暗号化なし。http:// のリンクから来た':'暗号化なし'):weak?'暗号化されている。ただし古い方式で、解読できる':sn.via?'暗号化されている。入口がショップへ取り次ぐ':'暗号化されている',bad:weak,hops});
   }
   if(sn.lines.length)st.push({reveal:true,hops:[]});
   // 攻撃に使う文字列（' OR 1=1 -- など、コードらしいものだけ）は、手口の行に添える
@@ -1658,7 +1674,7 @@ function netSVG(v){
   }
   h+=`<g id="nPkt"></g>`;
   h+=tile('client',X.client,Y,CAST.tanaka.rows)+tile('router',X.router,Y,IC.router)+tile('net',X.net,Y,IC.cloud)+(v.edge?tile('edge',X.edge,Y,IC.edge):'')+tile('server',X.server,Y,IC.server);
-  h+=lab(X.client,'お客さん')+lab(X.router,'ルーター')+lab(X.net,netName)+(v.edge?lab(X.edge,'入口'):'')+lab(X.server,'ショップ');
+  h+=lab(X.client,'お客さん')+lab(X.router,'ルーター')+lab(X.net,netName)+(v.edge?lab(X.edge,'入口'):'')+(S.day>=18&&!v.idle?`<text x="${X.server}" y="27" text-anchor="middle" class="nl sm">ショップ・DB</text>`:lab(X.server,'ショップ'));
   h+=`<g id="nProto" class="${v.broken?'broken':''}${off(!v.https||v.tube)}">${netPlace(v.https?IC.lock:IC.lock_open,px,Y-18,2)}<text x="${px}" y="${Y+22}" text-anchor="middle" class="np ${v.https?'ok':'bad'}${v.edge?' sm':''}">${v.https?'HTTPS':'HTTP'}</text></g>`;
   if(!v.idle){
     const left=v.kind==='server',wl=left||v.kind==='wifi';
@@ -1677,7 +1693,7 @@ function netBurst(x,y,cls,n){
 }
 function netAnim(el,cls,ms){if(!el)return;el.classList.remove(cls);void el.getBoundingClientRect();el.classList.add(cls);evT.push(setTimeout(()=>el.classList.remove(cls),ms));}
 function netLine(st){
-  if(st.reveal)return `<div class="lh atk"><span class="af">${castSpr(attackerOf().id||'tochou',2,'')}</span><span>${DAYS[S.day]&&DAYS[S.day].hypo?'もし攻撃者が来たら':'攻撃者の画面'}</span></div>`;
+  if(st.reveal)return `<div class="lh atk"><span class="af">${castSpr(attackerOf().id||'tochou',2,'')}</span><span>${(DAYS[S.day]&&DAYS[S.day].head)||(DAYS[S.day]&&DAYS[S.day].hypo?'もし攻撃者が来たら':'攻撃者の画面')}</span></div>`;
   if(st.atk)return `<div class="ln b ${st.k}"><span class="bul" aria-hidden="true"></span><span>${esc(st.t)}${st.code?` <code>${esc(st.code)}</code>`:''}</span></div>`;
   const c=st.bad||st.tag==='HTTP'?'bad':(st.tag==='TLS'||st.tag==='HTTPS')?'ok':'';
   return `<div class="ln"><span class="tg ${c}">${st.tag}</span><span>${esc(st.t)}${st.note?`<span class="${c}">（${st.note}）</span>`:''}</span></div>`;
@@ -1960,7 +1976,7 @@ function cloudFwHTML(){
   if(S.day>=18)h+=`<div class="sec"${S.day===18&&S.phase!=='clear'?' data-focus':''}><h3>shop-db-01 のインバウンド</h3>${intro('データベース（shop-db-01）が、どこからの接続を受け付けるかを決めます。セキュリティグループ：sg-db（shop-server-01 は sg-web）')}
     <div class="row"><label class="desc" for="inf-dbSg">PostgreSQL（5432番）<span class="note">お店のデータベース</span></label>${infSel('dbSg',[['any','すべての相手（0.0.0.0/0）'],['vpc','VPCの中すべて（10.0.0.0/16）'],['web','sg-web からだけ']])}</div></div>`;
   if(S.day>=25)h+=`<div class="sec"><h3>アウトバウンド（出ていく通信）</h3>${intro('shop-server-01 と shop-db-01 から、外のどこへ接続してよいかを決めます（sg-web・sg-db の両方に入れます）。宛先は、名前から引いたIPアドレスで登録します。')}
-    <div class="row"><label class="desc" for="inf-fwOut">宛先<span class="note">許可リスト：決済サービス（api.payments.example）・メール（smtp.mail.example）・OSの更新（archive.ubuntu.com・security.ubuntu.com）・バックアップの保管先</span></label>${infSel('fwOut',[['any','すべて許可'],['allow','許可リストの宛先だけ'],['none','すべて拒否']])}</div></div>`;
+    <div class="row"><label class="desc" for="inf-fwOut">宛先<span class="note">許可リスト：決済サービス（api.payments.example）・メール（smtp.mail.example）・OSの更新（archive.ubuntu.com・security.ubuntu.com）・証明書の自動更新（認証局のACME）・バックアップの保管先</span></label>${infSel('fwOut',[['any','すべて許可'],['allow','許可リストの宛先だけ'],['none','すべて拒否']])}</div></div>`;
   return h;
 }
 // VPC：お店のネットワーク。サブネット（区画）ごとに、置いたサーバーと、外への道（ルート表）が決まる。18日目〜
@@ -2766,7 +2782,7 @@ document.addEventListener('click',e=>{
   else if(a==='storeRead'){S.storeRes={read:true};save();render();pcFocus($('p-console'));
     if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、データベースを読んだだけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブの『Cithub』で直そう'}]);}}
   else if(a==='csrfOpen'){S.csrfRes={open:true};save();render();
-    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、裏でこのお店にお届け先の変更が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブの『Cithub』で直そう'}]);}}
+    if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、お店の住所変更のURLへ移動させられて、お届け先が書き換わった'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブの『Cithub』で直そう'}]);}}
   else if(a==='csrfBack'){if(S.csrfRes)S.csrfRes.open=false;save();render();}
   else if(a==='idorOpen'){S.idorRes={open:true};S.idorId=DAYS[S.day].demo.myId;save();render();}
   else if(a==='idorBack'){if(S.idorRes)S.idorRes.open=false;save();render();}
@@ -2821,7 +2837,8 @@ document.addEventListener('click',e=>{
   else if(a==='goCert'){S.svc='cloud';S.sub='cert';setTab('console');}
   /* --- Cithub：プルリクエストの中身（コードの差分）を見て、マージする --- */
   else if(a==='applyFix'){const key=b.dataset.key,v=b.dataset.v;
-    const go=()=>{c.code[key]=v;resetDemoRes();save();render();const r=DAYS[S.day].check(CFG());
+    c.code[key]=v;resetDemoRes();save();   // 押した時点で記録する（書き換えの演出の途中で閉じても、マージは残る）
+    const go=()=>{render();const r=DAYS[S.day].check(CFG());
       say([{who:SHIRO,t:'マージできた。お店のコードに、修正が入ったよ'},{who:SHIRO,t:r.ok?'右下の「防げたか確かめる」で試してみよう':r.why}]);};
     if(RM)go();else playCodeAnim(key,go);}
   else if(a==='undoFix'){delete c.code[b.dataset.key];resetDemoRes();save();render();}
@@ -2895,7 +2912,8 @@ function showTitle(confirm){
   const info=(S.phase==='end'?'全'+LAST_DAY+'日クリア':(S.day+'日目'))+(S.domain?'　'+esc(S.domain):'');
   const pick=DEBUG||(sv&&S.cleared>=0),PICK=pick?'<button role="menuitem" data-t="days">日を選ぶ</button>':'';
   let menu;
-  if(confirm)menu=`<p class="tq">いまの記録は消えます。はじめからにしますか？</p><button role="menuitem" data-t="yes">はい</button><button role="menuitem" data-t="no">いいえ</button>`;
+  if(loadFail)menu=`<p class="tq">前回の記録を読み込めませんでした。お店の更新と重なったのかもしれません。読み込み直すと、続きから遊べることがあります。</p><button role="menuitem" data-t="reload">読み込み直す</button><button role="menuitem" data-t="wipe">記録を消して、はじめから</button>`;
+  else if(confirm)menu=`<p class="tq">いまの記録は消えます。はじめからにしますか？</p><button role="menuitem" data-t="yes">はい</button><button role="menuitem" data-t="no">いいえ</button>`;
   else if(sv)menu=`<button role="menuitem" data-t="cont">つづきから<span class="sinfo">${info}</span></button>${PICK}<button role="menuitem" data-t="new">はじめから</button>`;
   else menu=`<button role="menuitem" data-t="new">はじめる</button>${PICK}`;
   // 横長の画面は左右に並べ、縦長は上下に積む。絵はにじまない倍率（高精細の画面は0.5刻み）で、入る最大に
@@ -2925,6 +2943,8 @@ title.addEventListener('click',e=>{
   }
   else if(t==='new'){if(hasSave())showTitle(true);else{title.hidden=true;reset();}}
   else if(t==='yes'){title.hidden=true;reset();}
+  else if(t==='reload')location.reload();
+  else if(t==='wipe'){try{const raw=localStorage.getItem(KEY);if(raw)localStorage.setItem(KEY+'-broken',raw);}catch(e){}loadFail=false;stale=false;title.hidden=true;reset();}
   else if(t==='no')showTitle(false);
 });
 title.addEventListener('keydown',e=>{
@@ -2959,12 +2979,9 @@ if(S.rev<3){
 if(S.rev<4){if(S.phase==='end'||S.day>18){DAYS[18].solve(S.cfg);S.cleared=Math.max(S.cleared||0,18);}S.rev=4;save();}
 // 自動更新は19日目から出す。前の版で1日目からオンにできたセーブは、19日目の朝まではオフに戻す（19日目の前提が崩れないように）
 if(S.cfg&&(S.day<19||(S.day===19&&S.phase==='incident'))&&S.phase!=='end')S.cfg.autoRenew=false;
-// 記録が壊れていて描けないときは、その記録をよけて（gsi-demo-v2-broken）、まっさらな状態で始める。
-// ここで止まると、タイトルが出ず、前の記録の画面が残ったままになる
-try{render();}catch(e){
-  try{const raw=localStorage.getItem(KEY);if(raw)localStorage.setItem(KEY+'-broken',raw);localStorage.removeItem(KEY);}catch(e2){}
-  S=fresh();render();
-}
+// 記録を描けないとき：記録は消さずに残し（保存も止める）、タイトルで「読み込み直す／記録を消して、はじめから」を選んでもらう。
+//   公開した直後は、新しい index.html と古い days*.js がブラウザで混ざることがある。読み込み直せば続きから遊べることが多い
+try{render();}catch(e){loadFail=true;stale=true;S=fresh();try{render();}catch(e2){}}
 showTitle(false);
 })();
 </script>

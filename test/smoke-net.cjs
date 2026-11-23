@@ -50,7 +50,7 @@ const seed = (day, phase, c, rec, last) => ({ rev: 4, day, phase, step: 'net', t
     const a = await view();
     check(day, '一画面に収まる（攻撃後）', a.fits);
     check(day, '攻撃者が図に出ている', a.atk);
-    check(day, '攻撃者の見出し（「攻撃者の画面」か「もし攻撃者が来たら」）と行がある', /攻撃者の画面|もし攻撃者が来たら/.test(a.head) && a.lines >= 2);
+    check(day, '攻撃の見出し（「攻撃者の画面」「もし攻撃者が来たら」、19日目は「お店に起きていること」）と行がある', /攻撃者の画面|もし攻撃者が来たら|お店に起きていること/.test(a.head) && a.lines >= 2);
     // 一部だけ防げた行（盾）は出てよい。攻撃者が「負けた」姿になっていないこと
     check(day, '未対策なので被害の行がある', a.bad >= 1 && !a.def);
     await page.screenshot({ path: path.join(OUT, 'net-' + String(day).padStart(2, '0') + '-a.png') });
