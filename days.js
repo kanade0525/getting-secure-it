@@ -128,7 +128,7 @@ const DAYS={
       {k:'bad',t:'password=neko1234',p:'open'},
       {k:'bad',t:'また盗めた',m:'-'}]};
     if(c.hstsAge!=='31536000'){const short=c.hstsAge==='300';return {ok:false,pkt:'password=sakura77',trap:short?'HSTSの記憶を5分にした':'HSTSの記憶を1日にした',guest:{id:'tanaka',t:short?'5分後にまた狙われた たなか':'3日ぶりに来て狙われた たなか'},
-      why:short?'max-age が5分だと、5分たてばブラウザは忘れてしまう。もっと長くしよう':'max-age が1日だと、2日ぶりに来たお客さんは守れない。もっと長くしよう',
+      why:short?'max-age が5分だと、5分たてばブラウザは忘れてしまう。もっと長くしよう':'max-age が1日だと、3日ぶりに来たお客さんは守れない。もっと長くしよう',
       lines:[
       {k:'info',t:'HSTSの記憶が切れたお客さんを待つ……',m:'-'},
       {k:'ok',t:short?'さっき来たお客さん：最初からHTTPS（守られた）':'今日来たお客さん：最初からHTTPS（守られた）'},

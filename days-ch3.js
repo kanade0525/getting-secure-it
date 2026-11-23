@@ -239,7 +239,7 @@ const D={
    inf.dbSg＝DBが受け付ける相手（any＝0.0.0.0/0／vpc＝VPCの中すべて／web＝お店のサーバーのグループ sg-web） */
 18:{
   title:'18日目　外から届く金庫',attacker:'portscan',svc:'cloud',sub:'server',
-  start:[{who:SHIRO,t:'注文が増えてきたから、先週データベースを専用のサーバー（shop-db-01）に分けたよね'},{who:SHIRO,t:'そのDBに、知らない相手から接続が来てるんだ'}],
+  start:[{who:YOU,t:'注文が増えてきたから、先週データベースを専用のサーバー（shop-db-01）に分けたんだ'},{who:SHIRO,t:'そのDBに、知らない相手から接続が来てるよ'}],
   voices:[
     {who:'監視',sys:true,t:'shop-db-01：インターネット上の複数のIPアドレスから、データベース（5432番）への接続を検知。ユーザー名 postgres でのログイン失敗が、1時間に2,300回。'},
     {who:'監視',sys:true,t:'shop-db-01 には、パブリックIPアドレス（203.0.113.57）が割り当てられています。'}

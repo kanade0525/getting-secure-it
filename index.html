@@ -1001,7 +1001,7 @@ function reviewDemo(){
   let list=o.reviews.map(x=>rv(x.who,x.stars,esc(x.t))).join(''),n='';
   if(r){
     // 命令入りのレビューは、文字としては何も出ない（開いた人のブラウザが、命令として実行するから）
-    list+=rv('店長（あなた）',5,r.xss?'':esc(r.text||''));
+    list+=rv('店長',5,r.xss?'':esc(r.text||''));
     if(r.plain)n=note('ヒント','<p>ふつうの文字として表示された。シロの言うとおり、画面を動かす記号を書いて試してみよう。</p>');
     else if(r.xss)n=note('解説：いま起きたこと',`<p><b>このレビューを開いた人の画面で、勝手に処理が走った。</b>レビューの文字は表示されず、仕込まれた命令として動きました。</p><p>・知らないサイトへ飛ばされた<br>・ログイン状態（クッキー）が盗まれた</p>
       <div class="acts"><button class="btn" data-act="xssPlay">開いた人の画面で何が起きるか見る</button></div>`,'danger');
@@ -1054,16 +1054,16 @@ function storeDemoHTML(){
   const vals=o.members.map((m,i)=>val(m,i));
   const ew=Math.max(5,...o.members.map(m=>m.mail.length));
   const pw=Math.max(8,...vals.map(v=>v.length));
-  const bar='+'+'-'.repeat(ew+2)+'+'+'-'.repeat(pw+2)+'+';
-  let table=bar+'\n| '+pad('email',ew)+' | '+pad('password',pw)+' |\n'+bar+'\n';
-  o.members.forEach((m,i)=>{table+='| '+pad(m.mail,ew)+' | '+pad(vals[i],pw)+' |\n';});
-  table+=bar;
+  // PostgreSQL の psql の表示（18日目に分ける前の、同じデータベース）
+  let table=' '+pad('email',ew)+' | password\n'+'-'.repeat(ew+2)+'+'+'-'.repeat(pw+2)+'\n';
+  o.members.forEach((m,i)=>{table+=' '+pad(m.mail,ew)+' | '+vals[i]+'\n';});
+  table+=`(${o.members.length} rows)`;
   const SQL='SELECT email, password FROM members;';
-  let body=`<span class="tp">app@shop-server-01:~$</span> mysql -u app -p shop\n<span class="tdim">Welcome to the MySQL monitor.  Server version: 8.0.36</span>\n`;
+  let body=`<span class="tp">app@shop-server-01:~$</span> psql -U app shop\n<span class="tdim">psql (14.11)\nType "help" for help.</span>\n\n`;
   if(ran){
-    body+=`<span class="tp">mysql&gt;</span> ${SQL}\n${table}\n<span class="tdim">${o.members.length} rows in set (0.00 sec)</span>\n<span class="tp">mysql&gt;</span> <span class="cur">▋</span>`;
+    body+=`<span class="tp">shop=&gt;</span> ${SQL}\n${table}\n\n<span class="tp">shop=&gt;</span> <span class="cur">▋</span>`;
   }else{
-    body+=`<span class="tp">mysql&gt;</span> ${SQL}<span class="cur">▋</span>`;
+    body+=`<span class="tp">shop=&gt;</span> ${SQL}<span class="cur">▋</span>`;
   }
   if(ran)cNotes.push(hashed?note('結果','<p>password 列はどれも <code>$2b$…</code> のハッシュ。元のパスワードは取り出せません（総当たりにも現実的でない時間がかかります）。</p>','ok')
     :note('結果','<p><b>全員分のパスワードが、そのまま読めてしまった</b></p><p>他のサイトで使い回していれば、そちらにも次々ログインされます。</p>','danger'));
@@ -2590,7 +2590,7 @@ document.addEventListener('click',e=>{
   else if(a==='xssPlay'){xssNav(S.day);}
   else if(a==='xssBack'){if(S.reviewRes){S.reviewRes.redir=false;save();render();}}
   else if(a==='storeRead'){S.storeRes={read:true};save();render();pcFocus($('p-console'));
-    if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、保存ファイルを開いただけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのCithubで直そう'}]);}}
+    if(S.cfg.code.hash!=='bcrypt'&&!S.seenStore){S.seenStore=true;save();say([{who:SHIRO,t:'ほら、データベースを読んだだけで全員のパスワードがそのまま読めた'},{who:SHIRO,t:'読める形で持っているのが原因。「管理」タブのCithubで直そう'}]);}}
   else if(a==='csrfOpen'){S.csrfRes={open:true};save();render();
     if(S.cfg.code.csrf!=='token'&&!S.seenCsrf){S.seenCsrf=true;save();say([{who:SHIRO,t:'別のページを開いただけなのに、裏でこのお店にお届け先の変更が送られた'},{who:SHIRO,t:'お店が「ログイン中の本人」と信じちゃうんだ。「管理」タブのCithubで直そう'}]);}}
   else if(a==='csrfBack'){if(S.csrfRes)S.csrfRes.open=false;save();render();}

